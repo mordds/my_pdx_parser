@@ -1,0 +1,6 @@
+*.exe
+*.o
+*.txt
+.vscode/
+resultset/
+scripted_effect/

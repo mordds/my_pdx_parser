@@ -1,0 +1,1321 @@
+State 1 conflicts: 1 shift/reduce
+State 3 conflicts: 1 shift/reduce
+State 17 conflicts: 3 shift/reduce
+State 32 conflicts: 1 shift/reduce
+State 37 conflicts: 1 shift/reduce
+State 67 conflicts: 1 shift/reduce
+State 70 conflicts: 1 shift/reduce
+
+
+Grammar
+
+    0 $accept: input $end
+
+    1 input: GT
+    2      | A
+    3      | BLANK A
+    4      | BLANK GT
+    5      | /* empty */
+
+    6 GT: T
+    7   | Ar
+    8   | LBR '}'
+
+    9 T: LBR A '}'
+
+   10 Ar: LBR B '}'
+   11   | LBR C '}'
+
+   12 A: lVal '=' rVal
+   13  | A lVal '=' rVal
+   14  | A BLANK
+   15  | OPT
+   16  | A OPT
+   17  | BLANK_OPT
+   18  | A BLANK_OPT
+   19  | T_PARAMETER BLANK
+   20  | A T_PARAMETER BLANK
+   21  | lVal '>' rVal
+   22  | A lVal '>' rVal
+   23  | lVal '<' rVal
+   24  | A lVal '<' rVal
+
+   25 OPT: '[' '[' T_IDENT ']' A ']'
+   26    | '[' '[' T_IDENT ']' BLANK A ']'
+   27    | '[' '[' T_NUM_CONSTANT ']' A ']'
+   28    | '[' '[' T_NUM_CONSTANT ']' BLANK A ']'
+   29    | '[' '[' T_NUM_CONSTANT ']' T_PARAMETER ']'
+   30    | '[' '[' T_IDENT ']' T_PARAMETER ']'
+
+   31 BLANK_OPT: '[' '[' T_IDENT ']' ']'
+   32          | '[' '[' T_IDENT ']' BLANK ']'
+   33          | '[' '[' T_NUM_CONSTANT ']' ']'
+   34          | '[' '[' T_NUM_CONSTANT ']' BLANK ']'
+
+   35 B: B T_IDENT
+   36  | T_IDENT
+   37  | B BLANK
+
+   38 C: C T_NUM_CONSTANT
+   39  | T_NUM_CONSTANT
+   40  | C BLANK
+
+   41 lVal: T_IDENT
+   42     | T_DATE
+   43     | T_NUM_CONSTANT
+   44     | PC
+
+   45 rVal: GT
+   46     | T_LITERAL
+   47     | lVal
+
+   48 PC: T_SPECIAL T_PARAMETER
+   49   | T_IDENT T_PARAMETER
+   50   | T_PARAMETER
+   51   | T_NUM_CONSTANT T_PARAMETER
+   52   | T_IDENT '[' '[' T_IDENT ']' T_IDENT ']'
+   53   | PC T_NUM_CONSTANT
+   54   | PC T_NUM_CONSTANT T_PARAMETER
+   55   | PC T_IDENT T_PARAMETER
+   56   | PC T_PARAMETER
+   57   | PC T_IDENT
+
+   58 BLANK: ' '
+   59      | BLANK ' '
+
+   60 LBR: '{'
+   61    | '{' BLANK
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+' ' (32) 58 59
+'<' (60) 23 24
+'=' (61) 12 13
+'>' (62) 21 22
+'[' (91) 25 26 27 28 29 30 31 32 33 34 52
+']' (93) 25 26 27 28 29 30 31 32 33 34 52
+'{' (123) 60 61
+'}' (125) 8 9 10 11
+error (256)
+T_IDENT (258) 25 26 30 31 32 35 36 41 49 52 55 57
+T_LITERAL (259) 46
+T_DATE (260) 42
+T_NUM_CONSTANT (261) 27 28 29 33 34 38 39 43 51 53 54
+T_PARAMETER (262) 19 20 29 30 48 49 50 51 54 55 56
+T_SPECIAL (263) 48
+LOWEST (264)
+
+
+Nonterminals, with rules where they appear
+
+$accept (18)
+    on left: 0
+input (19)
+    on left: 1 2 3 4 5, on right: 0
+GT (20)
+    on left: 6 7 8, on right: 1 4 45
+T (21)
+    on left: 9, on right: 6
+Ar (22)
+    on left: 10 11, on right: 7
+A (23)
+    on left: 12 13 14 15 16 17 18 19 20 21 22 23 24, on right: 2 3
+    9 13 14 16 18 20 22 24 25 26 27 28
+OPT (24)
+    on left: 25 26 27 28 29 30, on right: 15 16
+BLANK_OPT (25)
+    on left: 31 32 33 34, on right: 17 18
+B (26)
+    on left: 35 36 37, on right: 10 35 37
+C (27)
+    on left: 38 39 40, on right: 11 38 40
+lVal (28)
+    on left: 41 42 43 44, on right: 12 13 21 22 23 24 47
+rVal (29)
+    on left: 45 46 47, on right: 12 13 21 22 23 24
+PC (30)
+    on left: 48 49 50 51 52 53 54 55 56 57, on right: 44 53 54 55 56
+    57
+BLANK (31)
+    on left: 58 59, on right: 3 4 14 19 20 26 28 32 34 37 40 59 61
+LBR (32)
+    on left: 60 61, on right: 8 9 10 11
+
+
+state 0
+
+    0 $accept: . input $end
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 4
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 6
+    '['             shift, and go to state 7
+    '{'             shift, and go to state 8
+
+    $default  reduce using rule 5 (input)
+
+    input      go to state 9
+    GT         go to state 10
+    T          go to state 11
+    Ar         go to state 12
+    A          go to state 13
+    OPT        go to state 14
+    BLANK_OPT  go to state 15
+    lVal       go to state 16
+    PC         go to state 17
+    BLANK      go to state 18
+    LBR        go to state 19
+
+
+state 1
+
+   41 lVal: T_IDENT .
+   49 PC: T_IDENT . T_PARAMETER
+   52   | T_IDENT . '[' '[' T_IDENT ']' T_IDENT ']'
+
+    T_PARAMETER  shift, and go to state 20
+    '['          shift, and go to state 21
+
+    '['       [reduce using rule 41 (lVal)]
+    $default  reduce using rule 41 (lVal)
+
+
+state 2
+
+   42 lVal: T_DATE .
+
+    $default  reduce using rule 42 (lVal)
+
+
+state 3
+
+   43 lVal: T_NUM_CONSTANT .
+   51 PC: T_NUM_CONSTANT . T_PARAMETER
+
+    T_PARAMETER  shift, and go to state 22
+
+    T_PARAMETER  [reduce using rule 43 (lVal)]
+    $default     reduce using rule 43 (lVal)
+
+
+state 4
+
+   19 A: T_PARAMETER . BLANK
+   50 PC: T_PARAMETER .
+
+    ' '  shift, and go to state 6
+
+    $default  reduce using rule 50 (PC)
+
+    BLANK  go to state 23
+
+
+state 5
+
+   48 PC: T_SPECIAL . T_PARAMETER
+
+    T_PARAMETER  shift, and go to state 24
+
+
+state 6
+
+   58 BLANK: ' ' .
+
+    $default  reduce using rule 58 (BLANK)
+
+
+state 7
+
+   25 OPT: '[' . '[' T_IDENT ']' A ']'
+   26    | '[' . '[' T_IDENT ']' BLANK A ']'
+   27    | '[' . '[' T_NUM_CONSTANT ']' A ']'
+   28    | '[' . '[' T_NUM_CONSTANT ']' BLANK A ']'
+   29    | '[' . '[' T_NUM_CONSTANT ']' T_PARAMETER ']'
+   30    | '[' . '[' T_IDENT ']' T_PARAMETER ']'
+   31 BLANK_OPT: '[' . '[' T_IDENT ']' ']'
+   32          | '[' . '[' T_IDENT ']' BLANK ']'
+   33          | '[' . '[' T_NUM_CONSTANT ']' ']'
+   34          | '[' . '[' T_NUM_CONSTANT ']' BLANK ']'
+
+    '['  shift, and go to state 25
+
+
+state 8
+
+   60 LBR: '{' .
+   61    | '{' . BLANK
+
+    ' '  shift, and go to state 6
+
+    $default  reduce using rule 60 (LBR)
+
+    BLANK  go to state 26
+
+
+state 9
+
+    0 $accept: input . $end
+
+    $end  shift, and go to state 27
+
+
+state 10
+
+    1 input: GT .
+
+    $default  reduce using rule 1 (input)
+
+
+state 11
+
+    6 GT: T .
+
+    $default  reduce using rule 6 (GT)
+
+
+state 12
+
+    7 GT: Ar .
+
+    $default  reduce using rule 7 (GT)
+
+
+state 13
+
+    2 input: A .
+   13 A: A . lVal '=' rVal
+   14  | A . BLANK
+   16  | A . OPT
+   18  | A . BLANK_OPT
+   20  | A . T_PARAMETER BLANK
+   22  | A . lVal '>' rVal
+   24  | A . lVal '<' rVal
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 28
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 6
+    '['             shift, and go to state 7
+
+    $default  reduce using rule 2 (input)
+
+    OPT        go to state 29
+    BLANK_OPT  go to state 30
+    lVal       go to state 31
+    PC         go to state 17
+    BLANK      go to state 32
+
+
+state 14
+
+   15 A: OPT .
+
+    $default  reduce using rule 15 (A)
+
+
+state 15
+
+   17 A: BLANK_OPT .
+
+    $default  reduce using rule 17 (A)
+
+
+state 16
+
+   12 A: lVal . '=' rVal
+   21  | lVal . '>' rVal
+   23  | lVal . '<' rVal
+
+    '='  shift, and go to state 33
+    '>'  shift, and go to state 34
+    '<'  shift, and go to state 35
+
+
+state 17
+
+   44 lVal: PC .
+   53 PC: PC . T_NUM_CONSTANT
+   54   | PC . T_NUM_CONSTANT T_PARAMETER
+   55   | PC . T_IDENT T_PARAMETER
+   56   | PC . T_PARAMETER
+   57   | PC . T_IDENT
+
+    T_IDENT         shift, and go to state 36
+    T_NUM_CONSTANT  shift, and go to state 37
+    T_PARAMETER     shift, and go to state 38
+
+    T_IDENT         [reduce using rule 44 (lVal)]
+    T_NUM_CONSTANT  [reduce using rule 44 (lVal)]
+    T_PARAMETER     [reduce using rule 44 (lVal)]
+    $default        reduce using rule 44 (lVal)
+
+
+state 18
+
+    3 input: BLANK . A
+    4      | BLANK . GT
+   59 BLANK: BLANK . ' '
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 4
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 39
+    '['             shift, and go to state 7
+    '{'             shift, and go to state 8
+
+    GT         go to state 40
+    T          go to state 11
+    Ar         go to state 12
+    A          go to state 41
+    OPT        go to state 14
+    BLANK_OPT  go to state 15
+    lVal       go to state 16
+    PC         go to state 17
+    LBR        go to state 19
+
+
+state 19
+
+    8 GT: LBR . '}'
+    9 T: LBR . A '}'
+   10 Ar: LBR . B '}'
+   11   | LBR . C '}'
+
+    T_IDENT         shift, and go to state 42
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 43
+    T_PARAMETER     shift, and go to state 4
+    T_SPECIAL       shift, and go to state 5
+    '}'             shift, and go to state 44
+    '['             shift, and go to state 7
+
+    A          go to state 45
+    OPT        go to state 14
+    BLANK_OPT  go to state 15
+    B          go to state 46
+    C          go to state 47
+    lVal       go to state 16
+    PC         go to state 17
+
+
+state 20
+
+   49 PC: T_IDENT T_PARAMETER .
+
+    $default  reduce using rule 49 (PC)
+
+
+state 21
+
+   52 PC: T_IDENT '[' . '[' T_IDENT ']' T_IDENT ']'
+
+    '['  shift, and go to state 48
+
+
+state 22
+
+   51 PC: T_NUM_CONSTANT T_PARAMETER .
+
+    $default  reduce using rule 51 (PC)
+
+
+state 23
+
+   19 A: T_PARAMETER BLANK .
+   59 BLANK: BLANK . ' '
+
+    ' '  shift, and go to state 39
+
+    $default  reduce using rule 19 (A)
+
+
+state 24
+
+   48 PC: T_SPECIAL T_PARAMETER .
+
+    $default  reduce using rule 48 (PC)
+
+
+state 25
+
+   25 OPT: '[' '[' . T_IDENT ']' A ']'
+   26    | '[' '[' . T_IDENT ']' BLANK A ']'
+   27    | '[' '[' . T_NUM_CONSTANT ']' A ']'
+   28    | '[' '[' . T_NUM_CONSTANT ']' BLANK A ']'
+   29    | '[' '[' . T_NUM_CONSTANT ']' T_PARAMETER ']'
+   30    | '[' '[' . T_IDENT ']' T_PARAMETER ']'
+   31 BLANK_OPT: '[' '[' . T_IDENT ']' ']'
+   32          | '[' '[' . T_IDENT ']' BLANK ']'
+   33          | '[' '[' . T_NUM_CONSTANT ']' ']'
+   34          | '[' '[' . T_NUM_CONSTANT ']' BLANK ']'
+
+    T_IDENT         shift, and go to state 49
+    T_NUM_CONSTANT  shift, and go to state 50
+
+
+state 26
+
+   59 BLANK: BLANK . ' '
+   61 LBR: '{' BLANK .
+
+    ' '  shift, and go to state 39
+
+    $default  reduce using rule 61 (LBR)
+
+
+state 27
+
+    0 $accept: input $end .
+
+    $default  accept
+
+
+state 28
+
+   20 A: A T_PARAMETER . BLANK
+   50 PC: T_PARAMETER .
+
+    ' '  shift, and go to state 6
+
+    $default  reduce using rule 50 (PC)
+
+    BLANK  go to state 51
+
+
+state 29
+
+   16 A: A OPT .
+
+    $default  reduce using rule 16 (A)
+
+
+state 30
+
+   18 A: A BLANK_OPT .
+
+    $default  reduce using rule 18 (A)
+
+
+state 31
+
+   13 A: A lVal . '=' rVal
+   22  | A lVal . '>' rVal
+   24  | A lVal . '<' rVal
+
+    '='  shift, and go to state 52
+    '>'  shift, and go to state 53
+    '<'  shift, and go to state 54
+
+
+state 32
+
+   14 A: A BLANK .
+   59 BLANK: BLANK . ' '
+
+    ' '  shift, and go to state 39
+
+    ' '       [reduce using rule 14 (A)]
+    $default  reduce using rule 14 (A)
+
+
+state 33
+
+   12 A: lVal '=' . rVal
+
+    T_IDENT         shift, and go to state 1
+    T_LITERAL       shift, and go to state 55
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 56
+    T_SPECIAL       shift, and go to state 5
+    '{'             shift, and go to state 8
+
+    GT    go to state 57
+    T     go to state 11
+    Ar    go to state 12
+    lVal  go to state 58
+    rVal  go to state 59
+    PC    go to state 17
+    LBR   go to state 19
+
+
+state 34
+
+   21 A: lVal '>' . rVal
+
+    T_IDENT         shift, and go to state 1
+    T_LITERAL       shift, and go to state 55
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 56
+    T_SPECIAL       shift, and go to state 5
+    '{'             shift, and go to state 8
+
+    GT    go to state 57
+    T     go to state 11
+    Ar    go to state 12
+    lVal  go to state 58
+    rVal  go to state 60
+    PC    go to state 17
+    LBR   go to state 19
+
+
+state 35
+
+   23 A: lVal '<' . rVal
+
+    T_IDENT         shift, and go to state 1
+    T_LITERAL       shift, and go to state 55
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 56
+    T_SPECIAL       shift, and go to state 5
+    '{'             shift, and go to state 8
+
+    GT    go to state 57
+    T     go to state 11
+    Ar    go to state 12
+    lVal  go to state 58
+    rVal  go to state 61
+    PC    go to state 17
+    LBR   go to state 19
+
+
+state 36
+
+   55 PC: PC T_IDENT . T_PARAMETER
+   57   | PC T_IDENT .
+
+    T_PARAMETER  shift, and go to state 62
+
+    $default  reduce using rule 57 (PC)
+
+
+state 37
+
+   53 PC: PC T_NUM_CONSTANT .
+   54   | PC T_NUM_CONSTANT . T_PARAMETER
+
+    T_PARAMETER  shift, and go to state 63
+
+    T_PARAMETER  [reduce using rule 53 (PC)]
+    $default     reduce using rule 53 (PC)
+
+
+state 38
+
+   56 PC: PC T_PARAMETER .
+
+    $default  reduce using rule 56 (PC)
+
+
+state 39
+
+   59 BLANK: BLANK ' ' .
+
+    $default  reduce using rule 59 (BLANK)
+
+
+state 40
+
+    4 input: BLANK GT .
+
+    $default  reduce using rule 4 (input)
+
+
+state 41
+
+    3 input: BLANK A .
+   13 A: A . lVal '=' rVal
+   14  | A . BLANK
+   16  | A . OPT
+   18  | A . BLANK_OPT
+   20  | A . T_PARAMETER BLANK
+   22  | A . lVal '>' rVal
+   24  | A . lVal '<' rVal
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 28
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 6
+    '['             shift, and go to state 7
+
+    $default  reduce using rule 3 (input)
+
+    OPT        go to state 29
+    BLANK_OPT  go to state 30
+    lVal       go to state 31
+    PC         go to state 17
+    BLANK      go to state 32
+
+
+state 42
+
+   36 B: T_IDENT .
+   41 lVal: T_IDENT .
+   49 PC: T_IDENT . T_PARAMETER
+   52   | T_IDENT . '[' '[' T_IDENT ']' T_IDENT ']'
+
+    T_PARAMETER  shift, and go to state 20
+    '['          shift, and go to state 21
+
+    '='       reduce using rule 41 (lVal)
+    '>'       reduce using rule 41 (lVal)
+    '<'       reduce using rule 41 (lVal)
+    $default  reduce using rule 36 (B)
+
+
+state 43
+
+   39 C: T_NUM_CONSTANT .
+   43 lVal: T_NUM_CONSTANT .
+   51 PC: T_NUM_CONSTANT . T_PARAMETER
+
+    T_PARAMETER  shift, and go to state 22
+
+    '='       reduce using rule 43 (lVal)
+    '>'       reduce using rule 43 (lVal)
+    '<'       reduce using rule 43 (lVal)
+    $default  reduce using rule 39 (C)
+
+
+state 44
+
+    8 GT: LBR '}' .
+
+    $default  reduce using rule 8 (GT)
+
+
+state 45
+
+    9 T: LBR A . '}'
+   13 A: A . lVal '=' rVal
+   14  | A . BLANK
+   16  | A . OPT
+   18  | A . BLANK_OPT
+   20  | A . T_PARAMETER BLANK
+   22  | A . lVal '>' rVal
+   24  | A . lVal '<' rVal
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 28
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 6
+    '}'             shift, and go to state 64
+    '['             shift, and go to state 7
+
+    OPT        go to state 29
+    BLANK_OPT  go to state 30
+    lVal       go to state 31
+    PC         go to state 17
+    BLANK      go to state 32
+
+
+state 46
+
+   10 Ar: LBR B . '}'
+   35 B: B . T_IDENT
+   37  | B . BLANK
+
+    T_IDENT  shift, and go to state 65
+    ' '      shift, and go to state 6
+    '}'      shift, and go to state 66
+
+    BLANK  go to state 67
+
+
+state 47
+
+   11 Ar: LBR C . '}'
+   38 C: C . T_NUM_CONSTANT
+   40  | C . BLANK
+
+    T_NUM_CONSTANT  shift, and go to state 68
+    ' '             shift, and go to state 6
+    '}'             shift, and go to state 69
+
+    BLANK  go to state 70
+
+
+state 48
+
+   52 PC: T_IDENT '[' '[' . T_IDENT ']' T_IDENT ']'
+
+    T_IDENT  shift, and go to state 71
+
+
+state 49
+
+   25 OPT: '[' '[' T_IDENT . ']' A ']'
+   26    | '[' '[' T_IDENT . ']' BLANK A ']'
+   30    | '[' '[' T_IDENT . ']' T_PARAMETER ']'
+   31 BLANK_OPT: '[' '[' T_IDENT . ']' ']'
+   32          | '[' '[' T_IDENT . ']' BLANK ']'
+
+    ']'  shift, and go to state 72
+
+
+state 50
+
+   27 OPT: '[' '[' T_NUM_CONSTANT . ']' A ']'
+   28    | '[' '[' T_NUM_CONSTANT . ']' BLANK A ']'
+   29    | '[' '[' T_NUM_CONSTANT . ']' T_PARAMETER ']'
+   33 BLANK_OPT: '[' '[' T_NUM_CONSTANT . ']' ']'
+   34          | '[' '[' T_NUM_CONSTANT . ']' BLANK ']'
+
+    ']'  shift, and go to state 73
+
+
+state 51
+
+   20 A: A T_PARAMETER BLANK .
+   59 BLANK: BLANK . ' '
+
+    ' '  shift, and go to state 39
+
+    $default  reduce using rule 20 (A)
+
+
+state 52
+
+   13 A: A lVal '=' . rVal
+
+    T_IDENT         shift, and go to state 1
+    T_LITERAL       shift, and go to state 55
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 56
+    T_SPECIAL       shift, and go to state 5
+    '{'             shift, and go to state 8
+
+    GT    go to state 57
+    T     go to state 11
+    Ar    go to state 12
+    lVal  go to state 58
+    rVal  go to state 74
+    PC    go to state 17
+    LBR   go to state 19
+
+
+state 53
+
+   22 A: A lVal '>' . rVal
+
+    T_IDENT         shift, and go to state 1
+    T_LITERAL       shift, and go to state 55
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 56
+    T_SPECIAL       shift, and go to state 5
+    '{'             shift, and go to state 8
+
+    GT    go to state 57
+    T     go to state 11
+    Ar    go to state 12
+    lVal  go to state 58
+    rVal  go to state 75
+    PC    go to state 17
+    LBR   go to state 19
+
+
+state 54
+
+   24 A: A lVal '<' . rVal
+
+    T_IDENT         shift, and go to state 1
+    T_LITERAL       shift, and go to state 55
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 56
+    T_SPECIAL       shift, and go to state 5
+    '{'             shift, and go to state 8
+
+    GT    go to state 57
+    T     go to state 11
+    Ar    go to state 12
+    lVal  go to state 58
+    rVal  go to state 76
+    PC    go to state 17
+    LBR   go to state 19
+
+
+state 55
+
+   46 rVal: T_LITERAL .
+
+    $default  reduce using rule 46 (rVal)
+
+
+state 56
+
+   50 PC: T_PARAMETER .
+
+    $default  reduce using rule 50 (PC)
+
+
+state 57
+
+   45 rVal: GT .
+
+    $default  reduce using rule 45 (rVal)
+
+
+state 58
+
+   47 rVal: lVal .
+
+    $default  reduce using rule 47 (rVal)
+
+
+state 59
+
+   12 A: lVal '=' rVal .
+
+    $default  reduce using rule 12 (A)
+
+
+state 60
+
+   21 A: lVal '>' rVal .
+
+    $default  reduce using rule 21 (A)
+
+
+state 61
+
+   23 A: lVal '<' rVal .
+
+    $default  reduce using rule 23 (A)
+
+
+state 62
+
+   55 PC: PC T_IDENT T_PARAMETER .
+
+    $default  reduce using rule 55 (PC)
+
+
+state 63
+
+   54 PC: PC T_NUM_CONSTANT T_PARAMETER .
+
+    $default  reduce using rule 54 (PC)
+
+
+state 64
+
+    9 T: LBR A '}' .
+
+    $default  reduce using rule 9 (T)
+
+
+state 65
+
+   35 B: B T_IDENT .
+
+    $default  reduce using rule 35 (B)
+
+
+state 66
+
+   10 Ar: LBR B '}' .
+
+    $default  reduce using rule 10 (Ar)
+
+
+state 67
+
+   37 B: B BLANK .
+   59 BLANK: BLANK . ' '
+
+    ' '  shift, and go to state 39
+
+    ' '       [reduce using rule 37 (B)]
+    $default  reduce using rule 37 (B)
+
+
+state 68
+
+   38 C: C T_NUM_CONSTANT .
+
+    $default  reduce using rule 38 (C)
+
+
+state 69
+
+   11 Ar: LBR C '}' .
+
+    $default  reduce using rule 11 (Ar)
+
+
+state 70
+
+   40 C: C BLANK .
+   59 BLANK: BLANK . ' '
+
+    ' '  shift, and go to state 39
+
+    ' '       [reduce using rule 40 (C)]
+    $default  reduce using rule 40 (C)
+
+
+state 71
+
+   52 PC: T_IDENT '[' '[' T_IDENT . ']' T_IDENT ']'
+
+    ']'  shift, and go to state 77
+
+
+state 72
+
+   25 OPT: '[' '[' T_IDENT ']' . A ']'
+   26    | '[' '[' T_IDENT ']' . BLANK A ']'
+   30    | '[' '[' T_IDENT ']' . T_PARAMETER ']'
+   31 BLANK_OPT: '[' '[' T_IDENT ']' . ']'
+   32          | '[' '[' T_IDENT ']' . BLANK ']'
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 78
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 6
+    '['             shift, and go to state 7
+    ']'             shift, and go to state 79
+
+    A          go to state 80
+    OPT        go to state 14
+    BLANK_OPT  go to state 15
+    lVal       go to state 16
+    PC         go to state 17
+    BLANK      go to state 81
+
+
+state 73
+
+   27 OPT: '[' '[' T_NUM_CONSTANT ']' . A ']'
+   28    | '[' '[' T_NUM_CONSTANT ']' . BLANK A ']'
+   29    | '[' '[' T_NUM_CONSTANT ']' . T_PARAMETER ']'
+   33 BLANK_OPT: '[' '[' T_NUM_CONSTANT ']' . ']'
+   34          | '[' '[' T_NUM_CONSTANT ']' . BLANK ']'
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 82
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 6
+    '['             shift, and go to state 7
+    ']'             shift, and go to state 83
+
+    A          go to state 84
+    OPT        go to state 14
+    BLANK_OPT  go to state 15
+    lVal       go to state 16
+    PC         go to state 17
+    BLANK      go to state 85
+
+
+state 74
+
+   13 A: A lVal '=' rVal .
+
+    $default  reduce using rule 13 (A)
+
+
+state 75
+
+   22 A: A lVal '>' rVal .
+
+    $default  reduce using rule 22 (A)
+
+
+state 76
+
+   24 A: A lVal '<' rVal .
+
+    $default  reduce using rule 24 (A)
+
+
+state 77
+
+   52 PC: T_IDENT '[' '[' T_IDENT ']' . T_IDENT ']'
+
+    T_IDENT  shift, and go to state 86
+
+
+state 78
+
+   19 A: T_PARAMETER . BLANK
+   30 OPT: '[' '[' T_IDENT ']' T_PARAMETER . ']'
+   50 PC: T_PARAMETER .
+
+    ' '  shift, and go to state 6
+    ']'  shift, and go to state 87
+
+    $default  reduce using rule 50 (PC)
+
+    BLANK  go to state 23
+
+
+state 79
+
+   31 BLANK_OPT: '[' '[' T_IDENT ']' ']' .
+
+    $default  reduce using rule 31 (BLANK_OPT)
+
+
+state 80
+
+   13 A: A . lVal '=' rVal
+   14  | A . BLANK
+   16  | A . OPT
+   18  | A . BLANK_OPT
+   20  | A . T_PARAMETER BLANK
+   22  | A . lVal '>' rVal
+   24  | A . lVal '<' rVal
+   25 OPT: '[' '[' T_IDENT ']' A . ']'
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 28
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 6
+    '['             shift, and go to state 7
+    ']'             shift, and go to state 88
+
+    OPT        go to state 29
+    BLANK_OPT  go to state 30
+    lVal       go to state 31
+    PC         go to state 17
+    BLANK      go to state 32
+
+
+state 81
+
+   26 OPT: '[' '[' T_IDENT ']' BLANK . A ']'
+   32 BLANK_OPT: '[' '[' T_IDENT ']' BLANK . ']'
+   59 BLANK: BLANK . ' '
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 4
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 39
+    '['             shift, and go to state 7
+    ']'             shift, and go to state 89
+
+    A          go to state 90
+    OPT        go to state 14
+    BLANK_OPT  go to state 15
+    lVal       go to state 16
+    PC         go to state 17
+
+
+state 82
+
+   19 A: T_PARAMETER . BLANK
+   29 OPT: '[' '[' T_NUM_CONSTANT ']' T_PARAMETER . ']'
+   50 PC: T_PARAMETER .
+
+    ' '  shift, and go to state 6
+    ']'  shift, and go to state 91
+
+    $default  reduce using rule 50 (PC)
+
+    BLANK  go to state 23
+
+
+state 83
+
+   33 BLANK_OPT: '[' '[' T_NUM_CONSTANT ']' ']' .
+
+    $default  reduce using rule 33 (BLANK_OPT)
+
+
+state 84
+
+   13 A: A . lVal '=' rVal
+   14  | A . BLANK
+   16  | A . OPT
+   18  | A . BLANK_OPT
+   20  | A . T_PARAMETER BLANK
+   22  | A . lVal '>' rVal
+   24  | A . lVal '<' rVal
+   27 OPT: '[' '[' T_NUM_CONSTANT ']' A . ']'
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 28
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 6
+    '['             shift, and go to state 7
+    ']'             shift, and go to state 92
+
+    OPT        go to state 29
+    BLANK_OPT  go to state 30
+    lVal       go to state 31
+    PC         go to state 17
+    BLANK      go to state 32
+
+
+state 85
+
+   28 OPT: '[' '[' T_NUM_CONSTANT ']' BLANK . A ']'
+   34 BLANK_OPT: '[' '[' T_NUM_CONSTANT ']' BLANK . ']'
+   59 BLANK: BLANK . ' '
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 4
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 39
+    '['             shift, and go to state 7
+    ']'             shift, and go to state 93
+
+    A          go to state 94
+    OPT        go to state 14
+    BLANK_OPT  go to state 15
+    lVal       go to state 16
+    PC         go to state 17
+
+
+state 86
+
+   52 PC: T_IDENT '[' '[' T_IDENT ']' T_IDENT . ']'
+
+    ']'  shift, and go to state 95
+
+
+state 87
+
+   30 OPT: '[' '[' T_IDENT ']' T_PARAMETER ']' .
+
+    $default  reduce using rule 30 (OPT)
+
+
+state 88
+
+   25 OPT: '[' '[' T_IDENT ']' A ']' .
+
+    $default  reduce using rule 25 (OPT)
+
+
+state 89
+
+   32 BLANK_OPT: '[' '[' T_IDENT ']' BLANK ']' .
+
+    $default  reduce using rule 32 (BLANK_OPT)
+
+
+state 90
+
+   13 A: A . lVal '=' rVal
+   14  | A . BLANK
+   16  | A . OPT
+   18  | A . BLANK_OPT
+   20  | A . T_PARAMETER BLANK
+   22  | A . lVal '>' rVal
+   24  | A . lVal '<' rVal
+   26 OPT: '[' '[' T_IDENT ']' BLANK A . ']'
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 28
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 6
+    '['             shift, and go to state 7
+    ']'             shift, and go to state 96
+
+    OPT        go to state 29
+    BLANK_OPT  go to state 30
+    lVal       go to state 31
+    PC         go to state 17
+    BLANK      go to state 32
+
+
+state 91
+
+   29 OPT: '[' '[' T_NUM_CONSTANT ']' T_PARAMETER ']' .
+
+    $default  reduce using rule 29 (OPT)
+
+
+state 92
+
+   27 OPT: '[' '[' T_NUM_CONSTANT ']' A ']' .
+
+    $default  reduce using rule 27 (OPT)
+
+
+state 93
+
+   34 BLANK_OPT: '[' '[' T_NUM_CONSTANT ']' BLANK ']' .
+
+    $default  reduce using rule 34 (BLANK_OPT)
+
+
+state 94
+
+   13 A: A . lVal '=' rVal
+   14  | A . BLANK
+   16  | A . OPT
+   18  | A . BLANK_OPT
+   20  | A . T_PARAMETER BLANK
+   22  | A . lVal '>' rVal
+   24  | A . lVal '<' rVal
+   28 OPT: '[' '[' T_NUM_CONSTANT ']' BLANK A . ']'
+
+    T_IDENT         shift, and go to state 1
+    T_DATE          shift, and go to state 2
+    T_NUM_CONSTANT  shift, and go to state 3
+    T_PARAMETER     shift, and go to state 28
+    T_SPECIAL       shift, and go to state 5
+    ' '             shift, and go to state 6
+    '['             shift, and go to state 7
+    ']'             shift, and go to state 97
+
+    OPT        go to state 29
+    BLANK_OPT  go to state 30
+    lVal       go to state 31
+    PC         go to state 17
+    BLANK      go to state 32
+
+
+state 95
+
+   52 PC: T_IDENT '[' '[' T_IDENT ']' T_IDENT ']' .
+
+    $default  reduce using rule 52 (PC)
+
+
+state 96
+
+   26 OPT: '[' '[' T_IDENT ']' BLANK A ']' .
+
+    $default  reduce using rule 26 (OPT)
+
+
+state 97
+
+   28 OPT: '[' '[' T_NUM_CONSTANT ']' BLANK A ']' .
+
+    $default  reduce using rule 28 (OPT)
