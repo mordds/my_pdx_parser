@@ -281,12 +281,12 @@ void registerItems(){
 		{0,1}
 	));
 	registerSimpleTrigger("army_professionalism","陆军职业度%p%%","陆军职业度少于%p%%",ParadoxType::INTEGER);
-	registerSingleArgTrigger("army_size","军队规模至少为%dK","军队规模少于%dK",ParadoxType::INTEGER);
+	registerSingleArgTrigger("army_size","军队规模至少为%dK","军队规模小于%dK",ParadoxType::INTEGER);
 	registerSingleArgTrigger("army_size","拥有至少和%s规模相同的军队","军队规模小于%s",ParadoxType::SCOPE);
 	registerSimpleTrigger("army_size_percentage","军队规模至少为上限的%p%%","军队规模小于上限的%p%%",ParadoxType::INTEGER);
 	registerSimpleClauseTrigger("army_strength",new TriggerItem(
 		{"陆军实力至少为%s的%p%%","陆军实力少于%s的%p%%"},
-		{"which","who"},
+		{"who","value"},
 		{ParadoxType::SCOPE,ParadoxType::INTEGER},
 		{0,1}
 	));
@@ -296,53 +296,16 @@ void registerItems(){
 	registerSingleArgTrigger("artillery_in_province","有至少%d队炮兵", "炮兵的数量小于%d队",ParadoxType::INTEGER);
 	registerSingleArgTrigger("artillery_in_province","有来自%s的炮兵", "没有来自%s的炮兵",ParadoxType::SCOPE);
 	registerSingleArgTrigger("authority","权威值至少为%d", "权威值小于%d",ParadoxType::INTEGER);
+	registerSingleArgTrigger("authority","拥有至少与%s相同的权威值", "权威值小于%s",ParadoxType::SCOPE);
+	registerSimpleTrigger("average_autonomy","平均自治度至少为%d%%","平均自治度低于%d%%",ParadoxType::INTEGER);
 	
-	TriggerItem* item2 = new TriggerItem();
-	item2->pattern = "创新度至少为%d";
-	item2->reversePattern = "创新度少于%d";
-	item2->parameterType.push_back(ParadoxType::INTEGER);
-	item2->usedParameter.push_back(0);
-	items["innovativeness"] = item2;
-	simpleTriggers.insert("innovativeness"); 
-	registeredTriggers.insert("innovativeness");
+	registerSimpleTrigger("innovativeness","创新度至少为%d","创新度小于%d",ParadoxType::INTEGER);
+	registerSimpleTrigger("treasury","拥有至少%d[[File:crown.png]]","拥有少于%d[[File:crown]]",ParadoxType::INTEGER);
+	registerNumberRequiredTrigger("num_of_owned_provinces_with","value","至少%d个拥有的省份满足下列条件:","少于%d个拥有的省份满足下列条件:");
+	registerSimpleTrigger("base_manpower","基础人力至少为%d","基础人力少于%d",ParadoxType::INTEGER);
+	registerSimpleTrigger("has_country_flag","国家标签'%s'已被设置","国家标签'%s'未被设置",ParadoxType::STRING);
 	
-	TriggerItem* item3 = new TriggerItem();
-	item3->pattern = "拥有至少%d[[File:crown.png]]";
-	item3->reversePattern = "拥有不多于%d[[File:crown.png]]";
-	item3->parameterType.push_back(ParadoxType::INTEGER);
-	item3->usedParameter.push_back(0);
 	
-	items["treasury"] = item3;
-	simpleTriggers.insert("treasury"); 
-	registeredTriggers.insert("treasury");
-	
-	TriggerItem* item4 = new TriggerItem();
-	item4->pattern = "至少%d个拥有的省份满足下列条件:";
-	item4->reversePattern = "少于%d个拥有的省份满足下列条件:";
-	item4->parameterType.push_back(ParadoxType::INTEGER);
-	item4->usedParameter.push_back(0);
-	items["num_of_owned_provinces_with"] = item4;	
-	numberRequiredItems["num_of_owned_provinces_with"] = "value";
-	registeredTriggers.insert("num_of_owned_provinces_with");
-
-	TriggerItem* item5 = new TriggerItem();
-	item5->pattern = "基础人力至少为%d";
-	item5->reversePattern = "基础人力少于%d";
-	item5->parameterType.push_back(ParadoxType::INTEGER);
-	item5->usedParameter.push_back(0);
-	items["base_manpower"] = item5;	
-	simpleTriggers.insert("base_manpower"); 
-	registeredTriggers.insert("base_manpower");
-
-	TriggerItem* item6 = new TriggerItem();
-	item6->pattern = "国家标签'%s'已被设置";
-	item6->reversePattern = "国家标签'%s'未被设置";
-	item6->parameterType.push_back(ParadoxType::STRING);
-	item6->usedParameter.push_back(0);
-	items["has_country_flag"] = item6;	
-	simpleTriggers.insert("has_country_flag"); 
-	registeredTriggers.insert("has_country_flag");	
-
 	std::cout << "REGISTERD TRIGGER COUNT:" <<registeredTriggers.size() << std::endl;
 }
 

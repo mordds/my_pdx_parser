@@ -2,7 +2,23 @@
 #include "paradox_type.h"
 #include <iostream>
 #include <cmath>
+/*
+REPLACE REGEXS...
++%:
+//(.+) (.+) \+%
+registerModifier\("$1",ModifierType::PERCENTAGE,"$2"\);
+//(.+) (.+) -%
+registerModifier\("$1",ModifierType::MINUS_PERCENTAGE,"$2"\);
+//(.+) (.+) \+
+registerModifier\("$1",ModifierType::NORMAL,"$2"\);
+//(.+) (.+) -
+registerModifier\("$1",ModifierType::MINUS,"$2"\);
+//(.+) (.+) =
+registerModifier\("$1",ModifierType::NEUTRAL,"$2"\);
+//(.+) (.+) =%
+registerModifier\("$1",ModifierType::NEUTRAL_PERCENTAGE,"$2"\);
 
+*/
 std::map<std::string,ModifierObject> modifierObjects; 
 
 void registerModifier(std::string modifierName,ModifierType type,std::string localizedName){
@@ -329,10 +345,50 @@ void loadInternalModifier(){
 	registerModifier("reinforce_cost_modifier",ModifierType::MINUS_PERCENTAGE,"军队补员花费");
 	registerModifier("min_autonomy_in_territories",ModifierType::MINUS_PERCENTAGE,"自治领地最低自治度");
 	registerModifier("adm_tech_cost_modifier",ModifierType::MINUS_PERCENTAGE,"行政科技花费");
-	//For Estates Temp.
+	
+	registerModifier("local_ship_cost",ModifierType::MINUS_PERCENTAGE,"本地造船花费");
+	registerModifier("local_ship_repair",ModifierType::PERCENTAGE,"本地船只维修");
+	registerModifier("trade_range_modifier",ModifierType::PERCENTAGE,"贸易范围修正");
+	registerModifier("global_heretic_missionary_strength",ModifierType::PERCENTAGE,"全局异端传教力量");
+	registerModifier("global_heathen_missionary_strength",ModifierType::PERCENTAGE,"全局异教传教力量");
+	registerModifier("enemy_core_creation",ModifierType::PERCENTAGE,"敌方国家建立核心成本");
+	registerModifier("free_leader_pool",ModifierType::NORMAL,"免维护点数将领");
+	registerModifier("heir chance",ModifierType::PERCENTAGE,"新继承人产生几率");
+	registerModifier("embargo_efficiency",ModifierType::PERCENTAGE,"禁运效率");
+	registerModifier("recover_army_morale_speed",ModifierType::PERCENTAGE,"陆军士气恢复速度");
+	registerModifier("recover_navy_morale_speed",ModifierType::PERCENTAGE,"海军士气回复速度");
+	registerModifier("unjustified_demands",ModifierType::PERCENTAGE,"不合理的要求花费");
+	registerModifier("fabricate_claims_cost",ModifierType::MINUS_PERCENTAGE,"伪造宣称花费");
+
+	//For Estates Temp. 
 	//Will be Removed when Estate Preload Reader Complete
 	registerModifier("artificers_loyalty_modifier",ModifierType::PERCENTAGE,"奇械术士忠诚均衡点");
 	registerModifier("church_loyalty_modifier",ModifierType::PERCENTAGE,"教士忠诚均衡点");
+
+	//Anbennar Modifiers...
+	registerModifier("artificers_research_time",ModifierType::MINUS_PERCENTAGE,"奇械发明研究时间"); 	
+	registerModifier("artificers_invention_slots",ModifierType::NORMAL,"奇械发明空槽");
+	registerModifier("artificers_capacity",ModifierType::NORMAL,"奇械术承载力");
+	registerModifier("telescope_investment_efficency",ModifierType::PERCENTAGE,"天文中心投资效率");
+	registerModifier("mages_mana_regen",ModifierType::NORMAL,"法力回复");
+	registerModifier("mages_mana_regen_mult",ModifierType::PERCENTAGE,"法力回复修正");
+	registerModifier("mages_mana_capacity",ModifierType::NORMAL,"法力容量");
+	registerModifier("max_estate_spell_levels",ModifierType::NORMAL,"最大阶层法术等级");
+	registerModifier("mages_monthly_experience",ModifierType::PERCENTAGE,"每月魔法学习经验");
+	registerModifier("mages_ruler_experience_mod",ModifierType::PERCENTAGE,"统治者魔法学习经验加成");
+	registerModifier("mages_estate_experience_mod",ModifierType::PERCENTAGE,"阶层魔法学习经验加成");
+	registerModifier("abjuration_experience_mod",ModifierType::PERCENTAGE,"防护系魔法学习经验加成");
+	registerModifier("conjuration_experience_mod",ModifierType::PERCENTAGE,"咒法系魔法学习经验加成");
+	registerModifier("divination_experience_mod",ModifierType::PERCENTAGE,"预言系魔法学习经验加成");
+	registerModifier("enchantment_experience_mod",ModifierType::PERCENTAGE,"惑控系魔法学习经验加成");
+	registerModifier("evocation_experience_mod",ModifierType::PERCENTAGE,"召唤系魔法学习经验加成");
+	registerModifier("illusion_experience_mod",ModifierType::PERCENTAGE,"幻术系魔法学习经验加成");
+	registerModifier("necromancy_experience_mod",ModifierType::PERCENTAGE,"死灵系魔法学习经验加成");
+	registerModifier("transmutation_experience_mod",ModifierType::PERCENTAGE,"变形系魔法学习经验加成");
+	registerModifier("monarch_spell_levels",ModifierType::NORMAL,"统治者起始法术等级");
+
+
+	
 }
 
 

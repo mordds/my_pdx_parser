@@ -13,8 +13,11 @@ extern int yyparse();
 extern int yylex();
 extern ParadoxTag* ROOT;
 extern std::vector<ParadoxBase*> parsedObject;
+extern std::map<std::string,ModifierObject> modifierObjects; 
+
 int mem = 0;
 int rmem = 0;
+
 
 void getAllFiles(std::string path, std::vector<std::string>& files) 
 {
@@ -152,6 +155,7 @@ int _main(){
 int main(){
 	yyin = fopen("a0.txt","r");
 	loadInternalModifier();
+	std::cout << "Registered Modifier Number:" << modifierObjects.size() << std::endl;
 	yyparse();
 	int token = yylex();
 	if(token != 0){
