@@ -359,7 +359,31 @@ void loadInternalModifier(){
 	registerModifier("recover_navy_morale_speed",ModifierType::PERCENTAGE,"海军士气回复速度");
 	registerModifier("unjustified_demands",ModifierType::PERCENTAGE,"不合理的要求花费");
 	registerModifier("fabricate_claims_cost",ModifierType::MINUS_PERCENTAGE,"伪造宣称花费");
-
+	
+	registerModifier("claim_duration",ModifierType::PERCENTAGE,"宣称期限");
+	registerModifier("regiment_manpower_usage",ModifierType::MINUS_PERCENTAGE,"部队人力使用");
+	registerModifier("all_estate_influence_modifier",ModifierType::NEUTRAL_PERCENTAGE,"所有阶层影响修正");
+	registerModifier("justify_trade_conflict_cost",ModifierType::MINUS_PERCENTAGE,"正当化贸易争端花费");
+	registerModifier("rebel_support_efficiency",ModifierType::PERCENTAGE,"叛军支持效率");
+	registerModifier("discovered_relations_impact",ModifierType::MINUS_PERCENTAGE,"间谍被发现对关系影响");
+ 	registerModifier("annexation_relations_impact",ModifierType::MINUS_PERCENTAGE,"吞并属国对关系影响");
+	registerModifier("vassal_income",ModifierType::PERCENTAGE,"附庸国进贡收入");
+	registerModifier("inflation_action_cost",ModifierType::MINUS_PERCENTAGE,"降低通胀花费");
+	registerModifier("migration_cost",ModifierType::MINUS_PERCENTAGE,"迁徙成本");
+	registerModifier("add_tribal_land_cost",ModifierType::MINUS_PERCENTAGE,"添加部落领地花费");
+	registerModifier("settle_cost",ModifierType::MINUS_PERCENTAGE,"定居花费");
+	registerModifier("monthly_fervor_increase",ModifierType::NORMAL,"月度热情增长");
+	registerModifier("monthly_piety",ModifierType::NORMAL,"每月正法"); 
+	registerModifier("monthly_piety_accelerator",ModifierType::NORMAL,"每月正法增长");
+	registerModifier("monthly_karma",ModifierType::NORMAL,"每月科琳典范值");
+	registerModifier("monthly_karma_accelerator",ModifierType::NORMAL,"每月科琳典范值加速");
+	registerModifier("global_rebel_suppression_efficiency",ModifierType::PERCENTAGE,"全局镇压叛乱花费");
+	registerModifier("caravan_power",ModifierType::PERCENTAGE,"商队力量");
+	registerModifier("privateer_efficiency",ModifierType::PERCENTAGE,"私掠效率");
+	registerModifier("global_trade_goods_size_modifier",ModifierType::PERCENTAGE,"商品产出修正");
+	registerModifier("global_trade_goods_size",ModifierType::NORMAL,"全局商品产出");
+	//
+	
 	//For Estates Temp. 
 	//Will be Removed when Estate Preload Reader Complete
 	registerModifier("artificers_loyalty_modifier",ModifierType::PERCENTAGE,"奇械术士忠诚均衡点");

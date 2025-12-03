@@ -39,6 +39,7 @@ void registerSimpleTrigger(std::string name,std::string pattern,std::string reve
 	item->usedParameter.push_back(0);
 	items[name] = item;
 	registeredTriggers.insert(name);
+	simpleTriggers.insert(name);
 }
 
 void registerSimpleClauseTrigger(std::string name,TriggerItem* triggerItem){
@@ -49,9 +50,9 @@ void registerSimpleClauseTrigger(std::string name,TriggerItem* triggerItem){
 void registerNumberRequiredTrigger(std::string name,std::string amountKey,std::string pattern,std::string reversePattern){
 	TriggerItem* item = new TriggerItem();
 	item->reversePattern = reversePattern;
+	item->pattern = pattern;
 	item->parameterType.push_back(ParadoxType::INTEGER);
 	item->usedParameter.push_back(0);
-	simpleTriggers.insert(name);
 	numberRequiredItems[name] = amountKey;
 	items[name] = item;
 	registeredTriggers.insert(name);
@@ -290,19 +291,25 @@ void registerItems(){
 		{ParadoxType::SCOPE,ParadoxType::INTEGER},
 		{0,1}
 	));
-	registerSingleArgTrigger("army_tradition","陆军传统至少为%d","陆军传统少于%d",ParadoxType::INTEGER);
-	registerSingleArgTrigger("army_tradition","陆军传统不低于%s","陆军传统低于%s",ParadoxType::SCOPE);
-	registerSingleArgTrigger("artillery_fraction","炮兵比例至少为%p%%","炮兵比例小于%p%%",ParadoxType::INTEGER);
-	registerSingleArgTrigger("artillery_in_province","有至少%d队炮兵", "炮兵的数量小于%d队",ParadoxType::INTEGER);
-	registerSingleArgTrigger("artillery_in_province","有来自%s的炮兵", "没有来自%s的炮兵",ParadoxType::SCOPE);
-	registerSingleArgTrigger("authority","权威值至少为%d", "权威值小于%d",ParadoxType::INTEGER);
-	registerSingleArgTrigger("authority","拥有至少与%s相同的权威值", "权威值小于%s",ParadoxType::SCOPE);
-	registerSimpleTrigger("average_autonomy","平均自治度至少为%d%%","平均自治度低于%d%%",ParadoxType::INTEGER);
-	
+	registerSimpleTrigger("army_tradition","陆军传统至少为%d","陆军传统少于%d",ParadoxType::INTEGER);
+	registerSimpleTrigger("army_tradition","陆军传统不低于%s","陆军传统低于%s",ParadoxType::SCOPE);
+	registerSimpleTrigger("artillery_fraction","炮兵比例至少为%p%%","炮兵比例小于%p%%",ParadoxType::INTEGER);
+	registerSimpleTrigger("artillery_in_province","有至少%d队炮兵", "炮兵的数量小于%d队",ParadoxType::INTEGER);
+	registerSimpleTrigger("artillery_in_province","有来自%s的炮兵", "没有来自%s的炮兵",ParadoxType::SCOPE);
+	registerSimpleTrigger("authority","权威值至少为%d", "权威值小于%d",ParadoxType::INTEGER);
+	registerSimpleTrigger("authority","拥有至少与%s相同的权威值", "权威值小于%s",ParadoxType::SCOPE);
+	registerSimpleTrigger("average_autonomy","平均自治度至少为%p%%","平均自治度低于%p%%",ParadoxType::INTEGER);
+	registerSimpleTrigger("average_home_autonomy","直属州核心省份的平均自治度至少于%p%%","直属州核心省份的平均自治度低于%p%%",ParadoxType::INTEGER);
+	registerSimpleTrigger("average_autonomy_above_min","最低限度以上的平均自治度至少为%p%%","最低限度以上的平均自治度低于%p%%",ParadoxType::INTEGER);
+	registerSingleArgTrigger("base_production","基础生产至少为%d","基础生产少于%d",ParadoxType::INTEGER);
+	registerSingleArgTrigger("base_production","基础生产至少为variable:%s","基础生产少于variable:%s",ParadoxType::STRING);
+	registerSingleArgTrigger("base_manpower","基础人力至少为%d","基础人力少于%d",ParadoxType::INTEGER);
+	registerSingleArgTrigger("base_manpower","基础人力至少为variable:%s","基础人力少于variable:%s",ParadoxType::STRING);
+
 	registerSimpleTrigger("innovativeness","创新度至少为%d","创新度小于%d",ParadoxType::INTEGER);
 	registerSimpleTrigger("treasury","拥有至少%d[[File:crown.png]]","拥有少于%d[[File:crown]]",ParadoxType::INTEGER);
 	registerNumberRequiredTrigger("num_of_owned_provinces_with","value","至少%d个拥有的省份满足下列条件:","少于%d个拥有的省份满足下列条件:");
-	registerSimpleTrigger("base_manpower","基础人力至少为%d","基础人力少于%d",ParadoxType::INTEGER);
+	//
 	registerSimpleTrigger("has_country_flag","国家标签'%s'已被设置","国家标签'%s'未被设置",ParadoxType::STRING);
 	
 	
@@ -549,6 +556,7 @@ std::string NumberRequiredTrigger::toString(bool reversed){
 
 std::string ConditionalTrigger::toString(bool reversed){
 	std::string str("");
+	
 	if(this->subTriggers.empty()) return str;
 	preInit(this,str);
 	str.append("当以下条件满足时:\n");
@@ -563,6 +571,7 @@ std::string ConditionalTrigger::toString(bool reversed){
 		if(this->subTriggers[i]->getType() == TriggerType::COMMON) str.append("\n");
 	}
 	//str.append("\n");
+	
 	return str;
 }
 
@@ -656,8 +665,9 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			//then custom_tt
 			if(item == "custom_trigger_tooltip"){
 				CustomTooltipTrigger* ctt = new CustomTooltipTrigger();
-				
+				ctt->show_origin = false;
 				ParadoxString* tt = subTag->get("tooltip",1)->getAsString();
+				
 				if(tt == nullptr) {
 					//error case should be passed.
 					continue;
@@ -676,6 +686,7 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				ht->hidden_current = false;
 				trigger->putTrigger(ht);
 				parseTrigger(subTag,ht);
+				
 				continue;
 			}
 			//then change_scope
@@ -772,12 +783,14 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 
 		//for no overrides..
 		if(simpleTriggers.find(item) != simpleTriggers.end()){
+			
 			TriggerItem* ti = items[item];
 			ParadoxType type = ti->parameterType[0];
 			if(!isCastable(base,type)) continue;
 			CommonTrigger* ct = new CommonTrigger(ti);
 			ct->pushObject(base);
 			trigger->putTrigger(ct); 
+			
 			continue;
 		}
 		//for overrides
