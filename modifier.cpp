@@ -382,8 +382,50 @@ void loadInternalModifier(){
 	registerModifier("privateer_efficiency",ModifierType::PERCENTAGE,"私掠效率");
 	registerModifier("global_trade_goods_size_modifier",ModifierType::PERCENTAGE,"商品产出修正");
 	registerModifier("global_trade_goods_size",ModifierType::NORMAL,"全局商品产出");
-	//
+
+	registerModifier("imperial_authority",ModifierType::PERCENTAGE,"帝国权威修正");
+	registerModifier("imperial_authority_value",ModifierType::NORMAL,"帝国权威");
+	registerModifier("imperial_mandate",ModifierType::PERCENTAGE,"猫命增长修正");
+	registerModifier("national_focus_years",ModifierType::MINUS,"切换国家焦点所需年数");
+	registerModifier("vassal_forcelimit_bonus",ModifierType::PERCENTAGE,"附庸提供的陆军上限");
+	registerModifier("vassal_naval_forcelimit_bonus",ModifierType::PERCENTAGE,"附庸提供的海军上限");
+	registerModifier("vassal_manpower_bonus",ModifierType::PERCENTAGE,"附庸提供的人力");
+	registerModifier("vassal_sailors_bonus",ModifierType::PERCENTAGE,"附庸提供的水手");
+	registerModifier("years_of_nationalism",ModifierType::MINUS,"分离主义年数");
+	registerModifier("local_years_of_nationalism",ModifierType::MINUS,"本地分离主义年数");
+	registerModifier("num_accepted_cultures",ModifierType::NORMAL,"可接受文化数量");
+	registerModifier("chance_to_inherit",ModifierType::PERCENTAGE,"继承联合统治属国概率");
+	registerModifier("ship_durability",ModifierType::NORMAL,"船只耐久度");
+	registerModifier("liberty_desire",ModifierType::PERCENTAGE,"独立倾向");
+	registerModifier("reduce_liberty_desire",ModifierType::MINUS_PERCENTAGE,"属国独立倾向");
+	registerModifier("allowed_num_of_buildings",ModifierType::NORMAL,"可用建筑位");
+	registerModifier("global_allowed_num_of_buildings",ModifierType::NORMAL,"全局可用建筑位");
+	registerModifier("allowed_num_of_manufactories",ModifierType::NORMAL,"可建工场数量");
+	registerModifier("global_allowed_num_of_manufactories",ModifierType::NORMAL,"全局可建工场数量");
+	registerModifier("church_power_modifier",ModifierType::PERCENTAGE,"宗教力量修正");
+	registerModifier("monthly_church_power",ModifierType::NORMAL,"每月宗教力量");
+	registerModifier("garrison_size",ModifierType::PERCENTAGE,"驻军规模");
+	registerModifier("local_garrison_size",ModifierType::PERCENTAGE,"本地驻军规模");
+	registerModifier("native_uprising_chance",ModifierType::MINUS_PERCENTAGE,"原住民暴动几率");
+	registerModifier("native_assimilation",ModifierType::PERCENTAGE,"原住民同化");
+	registerModifier("may_recruit_female_generals",ModifierType::NEUTRAL_MARK,"可以招募女性将领");
+	registerModifier("block_introduce_heir",ModifierType::MINUS_MARK,"阻止引荐新的继承人");
+	registerModifier("can_transfer_vassal_wargoal",ModifierType::MARK,"允许在和平条款中使用\"转移属国\"");
+	registerModifier("can_chain_claim",ModifierType::MARK,"允许宣称已宣称省份相邻省份");
+	registerModifier("free_maintenance_on_expl_conq",ModifierType::MARK,"使用探险家或征服者不需要点数维护");
+	registerModifier("colony_development_boost",ModifierType::NORMAL,"殖民地发展提升");
+	registerModifier("attack_bonus_in_capital_terrain",ModifierType::NORMAL,"在地形与首都相同的省份战斗加成");
+	registerModifier("can_bypass_forts",ModifierType::MARK,"可以无视要塞控制区");
+	registerModifier("ignore_coring_distance",ModifierType::MARK,"无视核心化距离");
+	registerModifier("force_march_free",ModifierType::MARK,"不花费点数强行军");
+	registerModifier("possible_condottieri",ModifierType::NORMAL,"可用的遣外雇佣军团");
+	registerModifier("global_ship_trade_power",ModifierType::PERCENTAGE,"舰船贸易竞争力");
+	registerModifier("local_naval_engagement_modifier",ModifierType::PERCENTAGE,"本地海军接战修正");
+	registerModifier("global_naval_engagement_modifier",ModifierType::PERCENTAGE,"全局海军接战修正");
+	registerModifier("global_naval_engagement",ModifierType::NORMAL,"全局海军接战");
+	registerModifier("cavalry_flanking",ModifierType::PERCENTAGE,"骑兵侧翼攻击能力");
 	
+
 	//For Estates Temp. 
 	//Will be Removed when Estate Preload Reader Complete
 	registerModifier("artificers_loyalty_modifier",ModifierType::PERCENTAGE,"奇械术士忠诚均衡点");

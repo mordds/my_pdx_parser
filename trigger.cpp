@@ -306,6 +306,23 @@ void registerItems(){
 	registerSingleArgTrigger("base_manpower","基础人力至少为%d","基础人力少于%d",ParadoxType::INTEGER);
 	registerSingleArgTrigger("base_manpower","基础人力至少为variable:%s","基础人力少于variable:%s",ParadoxType::STRING);
 
+	registerSingleArgTrigger("base_tax","基础税收至少为%d","基础税收少于%d",ParadoxType::INTEGER);
+	registerSingleArgTrigger("base_tax","基础税收至少为variable:%s","基础税收少于variable:%s",ParadoxType::STRING);
+	registerSimpleTrigger("blockade","被封锁的港口至少为%p%%","被封锁的港口的少于%p%%",ParadoxType::INTEGER);
+	
+	registerSimpleClauseTrigger("border_distance",new TriggerItem(
+		{"与%s的边境距离至少为%d","与%s的边境距离少于%d"},
+		{"who","distance"},
+		{ParadoxType::STRING,ParadoxType::INTEGER},
+		{0,1}
+	));
+	registerNumberRequiredTrigger("calc_true_if","amount","至少%d个","少于%d个");
+	registerSimpleTrigger("can_be_overlord","可以作为%s的宗主国","无法作为%s的宗主国",ParadoxType::STRING);
+	registerSimpleTrigger("can_build","可以修建%s","不能修建%s",ParadoxType::STRING);
+	registerNoArgTrigger("can_create_vassals","可以创建附庸","不能创建附庸");
+	registerSimpleTrigger("can_justify_trade_conflict","可以正当化与%s的贸易争端","无法正当化与%s的贸易争端",ParadoxType::SCOPE);
+	registerSimpleTrigger("can_spawn_rebel","当地有效的叛军类型为%s","当地有效的叛军类型不是%s",ParadoxType::STRING);
+	
 	registerSimpleTrigger("innovativeness","创新度至少为%d","创新度小于%d",ParadoxType::INTEGER);
 	registerSimpleTrigger("treasury","拥有至少%d[[File:crown.png]]","拥有少于%d[[File:crown]]",ParadoxType::INTEGER);
 	registerNumberRequiredTrigger("num_of_owned_provinces_with","value","至少%d个拥有的省份满足下列条件:","少于%d个拥有的省份满足下列条件:");
