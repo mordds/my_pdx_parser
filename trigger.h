@@ -77,6 +77,7 @@ struct ConditionalTrigger : ComplexTrigger{
 	}
 	virtual std::string toString(bool reversed);
 	std::vector<Trigger*> condition;
+	bool isElseTrigger;
 	void putCondition(Trigger* trigger);
 };
 //for calc_true_if

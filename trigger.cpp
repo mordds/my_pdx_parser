@@ -573,16 +573,26 @@ std::string NumberRequiredTrigger::toString(bool reversed){
 
 std::string ConditionalTrigger::toString(bool reversed){
 	std::string str("");
-	
 	if(this->subTriggers.empty()) return str;
+	if(this->condition.empty()) {
+		if(!this->isElseTrigger) return str;
+		
+		str.append("否则需满足:\n");
+		for(int i = 0;i < this->subTriggers.size();i++){
+			str.append(this->subTriggers[i]->toString(reversed));
+			if(this->subTriggers[i]->getType() == TriggerType::COMMON) str.append("\n");
+		}
+		return str;
+	}
 	preInit(this,str);
+	if(this->isElseTrigger) str.append("否则");
 	str.append("当以下条件满足时:\n");
 	for(int i = 0;i < this->condition.size();i++){
 		str.append(this->condition[i]->toString(false));
 		if(this->condition[i]->getType() == TriggerType::COMMON) str.append("\n");
 	}
 	preInit(this,str);
-	str.append("存在下列额外要求:\n");
+	str.append("需满足下列要求:\n");
 	for(int i = 0;i < this->subTriggers.size();i++){
 		str.append(this->subTriggers[i]->toString(reversed));
 		if(this->subTriggers[i]->getType() == TriggerType::COMMON) str.append("\n");
@@ -650,14 +660,39 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 					delete ct;
 					continue;
 				}
-				
-				
 				trigger->putTrigger(ct);
 				bool success = parseConditionalTrigger(subTag,ct);
 				if(!success){
 					delete ct;
 					trigger->subTriggers.pop_back();
 				}
+				continue;
+			}
+			//just forget else_if and else....
+			if(item == "else_if"){
+				ConditionalTrigger* ct = new ConditionalTrigger();
+				ct->isElseTrigger = true;
+				if(subTag->get("limit",1) == nullptr || subTag->get("limit",1)->getAsTag() == nullptr) {
+					delete ct;
+					continue;
+				}
+				trigger->putTrigger(ct);
+				bool success = parseConditionalTrigger(subTag,ct);
+				if(!success){
+					delete ct;
+					trigger->subTriggers.pop_back();
+				}
+				continue;
+			}
+			if(item == "else"){
+				ConditionalTrigger* ct = new ConditionalTrigger();
+				ct->isElseTrigger = true;
+				if(subTag->get("limit",1) != nullptr) {
+					delete ct;
+					continue;
+				}
+				trigger->putTrigger(ct);
+				parseTrigger(subTag,ct);
 				continue;
 			}
 			//then logic
