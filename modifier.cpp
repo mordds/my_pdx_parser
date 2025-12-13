@@ -426,6 +426,109 @@ void loadInternalModifier(){
 	registerModifier("cavalry_flanking",ModifierType::PERCENTAGE,"骑兵侧翼攻击能力");
 	
 
+	registerModifier("sunk_ship_morale_hit_recieved",ModifierType::MINUS_PERCENTAGE,"船只被击沉时的士气打击");
+	registerModifier("naval_tradition_from_battle",ModifierType::PERCENTAGE,"战斗中获得的海军传统");
+	registerModifier("army_tradition_from_battle",ModifierType::PERCENTAGE,"战斗中获得的陆军传统");
+	registerModifier("local_core_creation",ModifierType::MINUS_PERCENTAGE,"本地核心化花费");
+	registerModifier("immortal",ModifierType::MARK,"永生");
+	registerModifier("amount_of_banners",ModifierType::NORMAL,"可招募变形者兵团数量");
+	registerModifier("local_amount_of_banners",ModifierType::NORMAL,"本地可招募变形者兵团数量");
+	registerModifier("has_banners",ModifierType::MARK,"可招募变形者军团");
+	registerModifier("local_has_banners",ModifierType::MARK,"本地可招募变形者军团");
+	registerModifier("has_carolean",ModifierType::MARK,"可招募钨钢步兵");
+	registerModifier("local_has_carolean",ModifierType::MARK,"本地可招募钨钢步兵");
+	registerModifier("has_hussar",ModifierType::MARK,"可招募神话骑兵");
+	registerModifier("local_has_hussar",ModifierType::MARK,"本地可招募神话骑兵");
+	registerModifier("amount_of_hussars",ModifierType::NORMAL,"可招募钨钢步兵数量");
+	registerModifier("local_amount_of_hussars",ModifierType::NORMAL,"本地可招募钨钢步兵数量");
+	registerModifier("amount_of_hussars",ModifierType::NORMAL,"可招募神话骑兵数量");
+	registerModifier("local_amount_of_hussars",ModifierType::NORMAL,"本地可招募神话骑兵数量");
+	registerModifier("hussars_cost_modifier",ModifierType::MINUS_PERCENTAGE,"神话骑兵花费");
+	registerModifier("free_land_leader_pool",ModifierType::NORMAL,"陆军免维护点数将领");
+	registerModifier("free_navy_leader_pool",ModifierType::NORMAL,"海军免维护点数提督");
+	registerModifier("amount_of_cawa",ModifierType::NORMAL,"可招募的巡林客兵团");
+	registerModifier("local_amount_of_cawa",ModifierType::NORMAL,"本地可招募的巡林客兵团");
+	registerModifier("fire_damage_received",ModifierType::MINUS_PERCENTAGE,"所受火力伤害");
+	registerModifier("shock_damage_received",ModifierType::MINUS_PERCENTAGE,"所受冲击伤害");
+	registerModifier("reinforce_cost_modifier",ModifierType::MINUS_PERCENTAGE,"补员花费");
+	registerModifier("garrison_damage",ModifierType::PERCENTAGE,"驻军伤害");
+	registerModifier("local_garrison_damage",ModifierType::PERCENTAGE,"本地驻军伤害");
+	registerModifier("assault_fort_cost_modifier",ModifierType::MINUS_PERCENTAGE,"强攻要塞花费修正");
+	registerModifier("local_assault_fort_cost_modifier",ModifierType::MINUS_PERCENTAGE,"本地强攻要塞花费修正");
+	registerModifier("assault_fort_ability",ModifierType::PERCENTAGE,"强攻要塞能力");
+	registerModifier("local_assault_fort_ability",ModifierType::PERCENTAGE,"本地强攻要塞能力");
+	registerModifier("local_religious_conversion_resistance",ModifierType::PERCENTAGE,"本地对宗教改革的抵抗能力");
+	registerModifier("religious_conversion_resistance",ModifierType::PERCENTAGE,"对宗教改革的抵抗能力");
+	registerModifier("placed_merchant_power",ModifierType::NORMAL,"商人团贸易竞争力");
+	registerModifier("ship_power_propagation",ModifierType::PERCENTAGE,"船只贸易竞争力传递");
+	registerModifier("administrative_efficiency",ModifierType::PERCENTAGE,"行政效率");
+	registerModifier("max_absolutism",ModifierType::NORMAL,"最大专制度");
+	registerModifier("core_decay_on_your_own",ModifierType::MINUS_PERCENTAGE,"外国核心期限");
+	registerModifier("autonomy_change_time",ModifierType::MINUS_PERCENTAGE,"自治度变化冷却");
+	registerModifier("rival_change_cost",ModifierType::MINUS_PERCENTAGE,"变更宿敌花费");
+	registerModifier("rival_border_fort_maintenance",ModifierType::MINUS_PERCENTAGE,"与宿敌接壤的要塞维护费");
+	registerModifier("reduced_liberty_desire_on_same_continent",ModifierType::MINUS_PERCENTAGE,"同大洲属国独立倾向");
+	registerModifier("backrow_artillery_damage",ModifierType::PERCENTAGE,"后排炮兵伤害");
+	registerModifier("enforce_religion_cost",ModifierType::MINUS_PERCENTAGE,"通过战争强制改变宗教的花费");
+	registerModifier("monarch_admin_power",ModifierType::NORMAL,"君主行政能力");
+	registerModifier("monarch_diplomatic_power",ModifierType::NORMAL,"君主外交能力");
+	registerModifier("monarch_military_power",ModifierType::NORMAL,"君主军事能力");
+	registerModifier("local_heir_adm",ModifierType::NORMAL,"本地继承人行政能力");
+	registerModifier("local_heir_dip",ModifierType::NORMAL,"本地继承人外交能力");
+	registerModifier("local_heir_mil",ModifierType::NORMAL,"本地继承人军事能力");
+	registerModifier("meritocracy",ModifierType::NORMAL,"每年愉悦值");
+	
+	registerModifier("yearly_harmony",ModifierType::NORMAL,"年度和谐度");
+	registerModifier("harmonization_speed",ModifierType::NORMAL,"宗教融合速度");
+	registerModifier("cav_to_inf_ratio",ModifierType::PERCENTAGE2,"骑兵比例");
+	registerModifier("monthly_favor_modifier",ModifierType::PERCENTAGE,"月度人情增长修正");
+	registerModifier("monthly_gold_inflation_modifier",ModifierType::MINUS_PERCENTAGE,"金矿引起的月度通货膨胀修正");
+	registerModifier("gold_depletion_chance_modifier",ModifierType::PERCENTAGE2,"金矿枯竭几率修正");
+	registerModifier("local_gold_depletion_chance_modifier",ModifierType::PERCENTAGE2,"本地金矿枯竭几率修正");
+	registerModifier("tolerance_of_heretics_capacity",ModifierType::NORMAL,"最大异端容忍");
+	registerModifier("tolerance_of_heathens_capacity",ModifierType::NORMAL,"最大异教容忍");
+	registerModifier("move_capital_cost_modifier",ModifierType::MINUS_PERCENTAGE,"迁都花费修正");
+	registerModifier("war_taxes_cost_modifier",ModifierType::MINUS_PERCENTAGE,"战争税花费");
+	registerModifier("siege_blockade_progress",ModifierType::NORMAL,"封锁对围城的影响");
+	registerModifier("sailor_maintenance_modifer",ModifierType::MINUS_PERCENTAGE,"海员维护费");
+	registerModifier("yearly_army_professionalism",ModifierType::PERCENTAGE2,"每年陆军职业度");
+	registerModifier("general_cost",ModifierType::MINUS_PERCENTAGE,"陆军将领花费");
+	registerModifier("reserves_organisation",ModifierType::PERCENTAGE,"未参战单位士气损失减少");
+	registerModifier("drill_gain_modifier",ModifierType::PERCENTAGE,"陆军操练度获取修正");
+	registerModifier("drill_decay_modifier",ModifierType::PERCENTAGE,"部队操练度损失");
+	registerModifier("same_culture_advisor_cost",ModifierType::MINUS_PERCENTAGE,"同文化顾问花费");
+	registerModifier("same_religion_advisor_cost",ModifierType::MINUS_PERCENTAGE,"同宗教顾问花费");
+	registerModifier("can_revoke_parliament_seats",ModifierType::MARK,"可以撤销议会席位");
+	registerModifier("parliament_backing_chance",ModifierType::PERCENTAGE,"议会辩论支持机会");
+	registerModifier("parliament_effect_duration",ModifierType::PERCENTAGE,"议会效果期限");
+	registerModifier("parliament_debate_duration",ModifierType::PERCENTAGE,"议会辩论期限");
+	registerModifier("parliament_chance_of_decision",ModifierType::PERCENTAGE,"议会决策机会");
+	registerModifier("num_of_parliament_issues",ModifierType::NORMAL,"可用议会议案数量");
+	registerModifier("max_possible_parliament_seats",ModifierType::NORMAL,"最大可用议会席位");
+	registerModifier("institution_growth",ModifierType::PERCENTAGE2,"当地思潮增长");
+	registerModifier("innovativeness_gain",ModifierType::PERCENTAGE,"创新度获取");
+	registerModifier("possible_policy",ModifierType::NORMAL,"可用政策");
+	registerModifier("possible_adm_policy",ModifierType::NORMAL,"可用行政政策");
+	registerModifier("possible_dip_policy",ModifierType::NORMAL,"可用外交政策");
+	registerModifier("possible_mil_policy",ModifierType::NORMAL,"可用军事政策");
+	registerModifier("adm_advisor_cost",ModifierType::NORMAL,"行政顾问花费");
+	registerModifier("dip_advisor_cost",ModifierType::NORMAL,"外交顾问花费");
+	registerModifier("mil_advisor_cost",ModifierType::NORMAL,"军事顾问花费");
+	registerModifier("reform_progress_growth_building",ModifierType::PERCENTAGE,"来自建筑的改革进度增长");
+	registerModifier("monthly_reform_progress",ModifierType::NORMAL,"月度改革进度");
+	registerModifier("monthly_reform_progress_building",ModifierType::NORMAL,"来自建筑的月度改革进度");
+	registerModifier("min_autonomy_in_territories",ModifierType::PERCENTAGE2,"自治领地最低自治度");
+	registerModifier("reelection_cost",ModifierType::MINUS_PERCENTAGE,"连任花费");
+	registerModifier("leader_cost",ModifierType::MINUS_PERCENTAGE,"将领花费");
+	registerModifier("candidate_random_bonus",ModifierType::NORMAL,"随机候选人奖励");
+	registerModifier("election_cycle",ModifierType::NORMAL,"选举任期");
+	registerModifier("monthly_support_heir_gain",ModifierType::NORMAL,"每月获得继承人支持度");
+	registerModifier("power_projection_from_insults",ModifierType::PERCENTAGE,"从侮辱得到的力量投射");
+	registerModifier("local_religious_unity_contribution",ModifierType::NEUTRAL_PERCENTAGE,"本地宗教统一度贡献");
+	registerModifier("trade_company_investment_cost",ModifierType::MINUS_PERCENTAGE,"贸易公司投资花费");
+	registerModifier("cawa_cost_modifier",ModifierType::MINUS_PERCENTAGE,"巡林客军团花费");
+	registerModifier("janissary_cost_modifier",ModifierType::MINUS_PERCENTAGE,"阿哈提军团花费");
+
 	//For Estates Temp. 
 	//Will be Removed when Estate Preload Reader Complete
 	registerModifier("artificers_loyalty_modifier",ModifierType::PERCENTAGE,"奇械术士忠诚均衡点");
@@ -452,7 +555,7 @@ void loadInternalModifier(){
 	registerModifier("necromancy_experience_mod",ModifierType::PERCENTAGE,"死灵系魔法学习经验加成");
 	registerModifier("transmutation_experience_mod",ModifierType::PERCENTAGE,"变形系魔法学习经验加成");
 	registerModifier("monarch_spell_levels",ModifierType::NORMAL,"统治者起始法术等级");
-
+	
 
 	
 }
