@@ -1,3 +1,4 @@
+
 a.exe: lexer.o test.cpp paradox_type.o modifier.o parser.o
 	g++ lexer.o parser.o test.cpp modifier.o paradox_type.o -O2 -std=c++17 -lstdc++fs -Werror 
 

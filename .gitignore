@@ -4,3 +4,5 @@
 .vscode/
 resultset/
 scripted_effect/
+lex.yy.c
+lex2.yy.c
