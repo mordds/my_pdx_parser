@@ -1,5 +1,15 @@
 #include "paradox_type.h"
 #include <algorithm>
+
+
+namespace pdx{
+	std::vector<ParadoxBase*> tempObjects;
+	ParadoxString* createString(std::string str){
+		ParadoxString* pstr = new ParadoxString(str);
+		pdx::tempObjects.push_back(pstr);
+		return pstr;
+	}
+}
 ParadoxString* ParadoxBase::getAsString(){
 	if(getType() != ParadoxType::STRING) return nullptr;
 	return dynamic_cast<ParadoxString*>(this); 
@@ -212,3 +222,4 @@ bool isCastable(ParadoxBase* base,ParadoxType type){
 bool castToBool(ParadoxString* string){
 	return string->getStringContent() == "yes";
 }
+

@@ -1,5 +1,6 @@
 #include<string>
 #include "scope.h"
+#include "paradox_type.h"
 #include<sstream>
 #include<string.h>
 std::map<std::string,std::string> CustomScope::localizeMap = std::map<std::string,std::string>();
@@ -10,19 +11,19 @@ std::set<std::string> registeredCustomScopes;
 
 ProvinceScope* Scope::getAsProvinceScope(){
 	if(this->getType() == ScopeType::PROVINCE){
-		return dynamic_cast<ProvinceScope*>(this);
+		return static_cast<ProvinceScope*>(this);
 	}
 	return nullptr;
 }
 CountryScope* Scope::getAsCountryScope(){
-	if(this->getType() == ScopeType::PROVINCE){
-		return dynamic_cast<CountryScope*>(this);
+	if(this->getType() == ScopeType::COUNTRY){
+		return static_cast<CountryScope*>(this);
 	}
 	return nullptr;
 }
 CustomScope* Scope::getAsCustomScope(){
-	if(this->getType() == ScopeType::PROVINCE){
-		return dynamic_cast<CustomScope*>(this);
+	if(this->getType() == ScopeType::SPECIAL){
+		return static_cast<CustomScope*>(this);
 	}
 	return nullptr;
 }
@@ -105,6 +106,13 @@ Scope* createScopeFromString(std::string str){
 				return cachedScopes[str];
 			}
 		}
+	}
+	else if(startWith(str,"event_target:") && str.length() >= 13){
+		if(cachedScopes.find(str) != cachedScopes.end()) return cachedScopes[str];
+		CustomScope* scope = new CustomScope(str);
+		CustomScope::registerLocalizeText(str,str);
+		cachedScopes[str] = scope;
+		return scope;
 	}
 	else{
 		if(registeredCustomScopes.find(str) == registeredCustomScopes.end()) return nullptr;

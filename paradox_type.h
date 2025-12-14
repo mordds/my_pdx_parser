@@ -209,4 +209,8 @@ bool startWith(std::string from,std::string to);
 bool isCastable(ParadoxBase* base,ParadoxType type);
 bool castToBool(ParadoxString* base);
 bool Xor(bool a,bool b);
+namespace pdx{
+	ParadoxString* createString(std::string str);
+}
+
 #endif

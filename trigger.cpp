@@ -291,11 +291,11 @@ void registerItems(){
 		{ParadoxType::SCOPE,ParadoxType::INTEGER},
 		{0,1}
 	));
-	registerSimpleTrigger("army_tradition","陆军传统至少为%d","陆军传统少于%d",ParadoxType::INTEGER);
-	registerSimpleTrigger("army_tradition","陆军传统不低于%s","陆军传统低于%s",ParadoxType::SCOPE);
+	registerSingleArgTrigger("army_tradition","陆军传统至少为%d","陆军传统少于%d",ParadoxType::INTEGER);
+	registerSingleArgTrigger("army_tradition","陆军传统不低于%s","陆军传统低于%s",ParadoxType::SCOPE);
 	registerSimpleTrigger("artillery_fraction","炮兵比例至少为%p%%","炮兵比例小于%p%%",ParadoxType::INTEGER);
-	registerSimpleTrigger("artillery_in_province","有至少%d队炮兵", "炮兵的数量小于%d队",ParadoxType::INTEGER);
-	registerSimpleTrigger("artillery_in_province","有来自%s的炮兵", "没有来自%s的炮兵",ParadoxType::SCOPE);
+	registerSingleArgTrigger("artillery_in_province","有至少%d队炮兵", "炮兵的数量小于%d队",ParadoxType::INTEGER);
+	registerSingleArgTrigger("artillery_in_province","有来自%s的炮兵", "没有来自%s的炮兵",ParadoxType::SCOPE);
 	registerSimpleTrigger("authority","权威值至少为%d", "权威值小于%d",ParadoxType::INTEGER);
 	registerSimpleTrigger("authority","拥有至少与%s相同的权威值", "权威值小于%s",ParadoxType::SCOPE);
 	registerSimpleTrigger("average_autonomy","平均自治度至少为%p%%","平均自治度低于%p%%",ParadoxType::INTEGER);
@@ -313,7 +313,7 @@ void registerItems(){
 	registerSimpleClauseTrigger("border_distance",new TriggerItem(
 		{"与%s的边境距离至少为%d","与%s的边境距离少于%d"},
 		{"who","distance"},
-		{ParadoxType::STRING,ParadoxType::INTEGER},
+		{ParadoxType::SCOPE,ParadoxType::INTEGER},
 		{0,1}
 	));
 	registerNumberRequiredTrigger("calc_true_if","amount","至少%d个","少于%d个");
@@ -323,6 +323,69 @@ void registerItems(){
 	registerSimpleTrigger("can_justify_trade_conflict","可以正当化与%s的贸易争端","无法正当化与%s的贸易争端",ParadoxType::SCOPE);
 	registerSimpleTrigger("can_spawn_rebel","当地有效的叛军类型为%s","当地有效的叛军类型不是%s",ParadoxType::STRING);
 	
+	registerSimpleClauseTrigger("can_use_peace_treaty",new TriggerItem(
+		{"%s可以使用%s条款","%s不可以使用%s条款"},
+		{"who","treaty"},
+		{ParadoxType::SCOPE,ParadoxType::STRING},
+		{0,1}
+	));
+	registerSimpleTrigger("capital","首都位于%s","首都不位于%s",ParadoxType::SCOPE);
+	registerSimpleClauseTrigger("",new TriggerItem(
+		{"与%s首都之间的距离至少为%d","与%s首都之间的距离小于%d"},
+		{"who","distance"},
+		{ParadoxType::SCOPE,ParadoxType::INTEGER},
+		{0,1}
+	));
+	registerSimpleTrigger("cavalry_fraction","骑兵占军队比例至少为%p%%","骑兵占军队比例少于%p%%",ParadoxType::STRING);
+	registerSingleArgTrigger("cavalry_in_province","有至少%d队骑兵", "骑兵的数量小于%d队",ParadoxType::INTEGER);
+	registerSingleArgTrigger("cavalry_in_province","有来自%s的骑兵", "没有来自%s的骑兵",ParadoxType::SCOPE);
+	registerSimpleTrigger("province_has_center_of_trade_of_level","省份至少有%d级的贸易中心","省份没有至少%d级的贸易中心",ParadoxType::INTEGER);
+	registerClausedTrigger("check_variable", new TriggerItem(
+		{"%s的值大于或等于%s","%s的值小于%s"},
+		{"src","tar"},
+		{ParadoxType::STRING,ParadoxType::STRING},
+		{0,1}
+	),
+	[](std::map<std::string,ParadoxBase*>& map)-> bool {
+		std::string src_string = map["which"]->getAsString()->getStringContent();
+		std::string tar_string = "";
+		if(map.find("value") != map.end()){
+			tar_string = std::to_string(map["value"]->getAsInteger()->getIntegerContent() / 1000);
+		}
+		else if(map.find("which@2") != map.end()){
+			if(isCastable(map["which@2"],ParadoxType::SCOPE)){
+				std::string tar1 = "";
+				if(map["which@2"]->getType() == ParadoxType::INTEGER) {
+					tar1 = std::to_string(map["which@2"]->getAsInteger()->getIntegerContent() / 1000);
+				}
+				else tar1 = map["which@2"]->getAsString()->getStringContent();
+				Scope* scope = createScopeFromString(tar1);
+				if(scope == nullptr) return false;
+				else tar_string = scope->toString();
+			}
+			else tar_string = map["which@2"]->getAsString()->getStringContent();
+		}
+		else return false;
+		map.clear();
+		map["src"] = pdx::createString(src_string);
+		map["tar"] = pdx::createString(tar_string);
+		return true;
+	}
+	);
+	registerSingleArgTrigger("church_power","教会力量至少为%d","教会力量小于%d",ParadoxType::INTEGER);
+	registerSingleArgTrigger("church_power","教会力量不低于%s","教会力量少于%s",ParadoxType::SCOPE);
+	registerSimpleTrigger("coalition_target","%s是包围网的目标","%s不是包围网的目标",ParadoxType::SCOPE);
+	registerSimpleTrigger("colonial_region","省份位于%s殖民地区","省份不位于%s殖民地区",ParadoxType::STRING);
+	registerSimpleTrigger("colony","拥有至少%d个殖民领","拥有少于%d个殖民领",ParadoxType::INTEGER);
+	registerSimpleTrigger("colony_claim","%s拥有殖民领宣称","%s没有殖民地宣称",ParadoxType::SCOPE);
+	registerSimpleTrigger("colonysize","殖民地规模至少为%d","殖民地规模小于%d",ParadoxType::SCOPE);
+	registerSimpleTrigger("consort_adm","有一个行政能力至少为%d的配偶","没有一个行政能力至少为%d的配偶",ParadoxType::INTEGER);
+	registerSimpleTrigger("consort_age","有一个至少%d岁的的配偶","没有一个至少%d岁的的配偶",ParadoxType::INTEGER);
+	registerSimpleTrigger("consort_dip","有一个外交能力至少为%d的配偶","没有一个外交能力至少为%d的配偶",ParadoxType::INTEGER);
+	registerSimpleTrigger("consort_mil","有一个军事能力至少为%d的配偶","没有一个军事能力至少为%d的配偶",ParadoxType::INTEGER);
+	registerSimpleTrigger("consort_culture","有一个文化为%s的配偶","没有一个文化为%s的配偶",ParadoxType::STRING);
+
+
 	registerSimpleTrigger("innovativeness","创新度至少为%d","创新度小于%d",ParadoxType::INTEGER);
 	registerSimpleTrigger("treasury","拥有至少%d[[File:crown.png]]","拥有少于%d[[File:crown]]",ParadoxType::INTEGER);
 	registerNumberRequiredTrigger("num_of_owned_provinces_with","value","至少%d个拥有的省份满足下列条件:","少于%d个拥有的省份满足下列条件:");
@@ -576,7 +639,7 @@ std::string ConditionalTrigger::toString(bool reversed){
 	if(this->subTriggers.empty()) return str;
 	if(this->condition.empty()) {
 		if(!this->isElseTrigger) return str;
-		
+		preInit(this,str);
 		str.append("否则需满足:\n");
 		for(int i = 0;i < this->subTriggers.size();i++){
 			str.append(this->subTriggers[i]->toString(reversed));
@@ -813,7 +876,8 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			TriggerItem* ti = items[item];
 			CommonTrigger* ct = new CommonTrigger(ti);
 			OverrideHandler handler = overrideHandlers[item];
-			ct->base.reserve(ti->parameterType.size());
+			
+			ct->base.resize(ti->parameterType.size());
 			//the original tag will never be used again so we just move directly~
 			//besides the pointer it contains is well managed by another file
 			//so we can modify it freely~ 
