@@ -80,14 +80,16 @@ bool Pattern::setNextInteger(long long value){
 			int q = value % 1000;
 			int p = value / 1000;
 			while(q % 10 == 0 && q != 0) q /= 10;
-			if(q < 0) q *= -1;
+			bool qminus = q < 0;
+			if(qminus) q *= -1;
 			if(q == 0){
 				this->output.append(std::to_string(p));
 			}
 			else{
 				char buffer[32];
 				memset(buffer,0,32);
-				sprintf(buffer,"%d.%d",p,q);
+				if(p != 0 || !qminus)sprintf(buffer,"%d.%d",p,q);
+				else sprintf(buffer,"-%d.%d",p,q);
 				this->output.append(buffer);
 			}
 			pre = pos + 2;
@@ -110,8 +112,10 @@ bool Pattern::setNextInteger(long long value){
 			return true;
 		}
 		else if(this->patternString[pos+1] == 'p') {
+			
 			int q = value % 10;
-			if(q < 0) q *= -1;		
+			bool qminus = q < 0;
+			if(qminus) q *= -1;		
 			int p = value / 10;
 			if(q == 0){
 				this->output.append(std::to_string(p));
@@ -119,7 +123,8 @@ bool Pattern::setNextInteger(long long value){
 			else{
 				char buffer[32];
 				memset(buffer,0,32);
-				sprintf(buffer,"%d.%d",p,q);
+				if(p != 0 || !qminus)sprintf(buffer,"%d.%d",p,q);
+				else sprintf(buffer,"-%d.%d",p,q);
 				this->output.append(buffer);
 			}
 			pre = pos + 2;

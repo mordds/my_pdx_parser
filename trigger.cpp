@@ -389,7 +389,6 @@ void registerItems(){
 	registerSimpleTrigger("innovativeness","创新度至少为%d","创新度小于%d",ParadoxType::INTEGER);
 	registerSimpleTrigger("treasury","拥有至少%d[[File:crown.png]]","拥有少于%d[[File:crown]]",ParadoxType::INTEGER);
 	registerNumberRequiredTrigger("num_of_owned_provinces_with","value","至少%d个拥有的省份满足下列条件:","少于%d个拥有的省份满足下列条件:");
-	//
 	registerSimpleTrigger("has_country_flag","国家标签'%s'已被设置","国家标签'%s'未被设置",ParadoxType::STRING);
 	
 	

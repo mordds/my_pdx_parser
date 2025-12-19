@@ -30,19 +30,19 @@ void registerModifier(std::string modifierName,ModifierType type,std::string loc
 
 void generatePercentage(int value,char* str){
 	int pValue = value / 10;
-	int qValue = std::abs(value % 10);
+	int qValue = value % 10;
 	if(qValue == 0){
 		if(pValue >= 0) sprintf(str,"+%d%% ",pValue);
 		else sprintf(str,"%d%% ",pValue);
 	}
 	else {
 		if(pValue > 0 || (pValue == 0 && qValue >= 0)) sprintf(str,"+%d.%d%% ",pValue,qValue);
-		else sprintf(str,"%d.%d%% ",pValue,qValue);
+		else sprintf(str,"-%d.%d%% ",pValue,-1 * qValue);
 	}
 } 
 void generateValue(int value,char* str){
 	int pValue = value / 1000;
-	int qValue = std::abs(value % 1000);
+	int qValue = value % 1000;
 	if(qValue == 0){
 		if(pValue >= 0) sprintf(str,"+%d ",pValue);
 		else sprintf(str,"%d ",pValue);
@@ -50,7 +50,7 @@ void generateValue(int value,char* str){
 	else {
 		while(qValue % 10 == 0) qValue /= 10;
 		if(pValue > 0 || (pValue == 0 && qValue >= 0)) sprintf(str,"+%d.%d ",pValue,qValue);
-		else sprintf(str,"%d.%d ",pValue,qValue);
+		else sprintf(str,"-%d.%d ",pValue,-1 * qValue);
 	}
 } 
 void generatePercentage2(int value,char* str){
@@ -100,7 +100,7 @@ void loadInternalModifier(){
 	registerModifier("expand_infrastructure_cost_modifier",ModifierType::MINUS_PERCENTAGE,"扩建基础设施花费修正");
 	registerModifier("max_absolutism_effect",ModifierType::MINUS_PERCENTAGE,"最大专制度效果");	
 	registerModifier("centralize_state_cost",ModifierType::MINUS_PERCENTAGE,"州权力集中化花费");
-	registerModifier("local_centralize_state_cost",ModifierType::MINUS_PERCENTAGE,"本地州权力集中化");
+	registerModifier("local_centralize_state_cost",ModifierType::MINUS_PERCENTAGE,"本地州权力集中化花费");
 	registerModifier("land_morale_constant",ModifierType::NORMAL,"陆军士气");
 	registerModifier("naval_morale_constant",ModifierType::NORMAL,"海军士气");
 	registerModifier("max_general_shock",ModifierType::NORMAL,"最大将领冲击");
@@ -307,8 +307,8 @@ void loadInternalModifier(){
     registerModifier("local_culture_conversion_cost",ModifierType::MINUS,"本地转变文化花费");
     registerModifier("culture_conversion_time",ModifierType::MINUS_PERCENTAGE,"文化转换时间");
     registerModifier("local_culture_conversion_time",ModifierType::MINUS_PERCENTAGE,"本地文化转换时间");
-	registerModifier("local_friendly_movement_speed",ModifierType::PERCENTAGE,"友方军队移动速度");
-	registerModifier("local_hostile_movement_speed",ModifierType::MINUS_PERCENTAGE,"敌方军队移动速度");
+	registerModifier("local_friendly_movement_speed",ModifierType::PERCENTAGE,"本地友方军队移动速度");
+	registerModifier("local_hostile_movement_speed",ModifierType::MINUS_PERCENTAGE,"本地敌方军队移动速度");
 	registerModifier("local_regiment_cost",ModifierType::MINUS_PERCENTAGE,"本地部队花费");
 	registerModifier("block_slave_raid",ModifierType::MARK,"无法劫掠海岸");
     registerModifier("may_perform_slave_raid",ModifierType::MARK,"可以劫掠海岸");
@@ -529,6 +529,87 @@ void loadInternalModifier(){
 	registerModifier("cawa_cost_modifier",ModifierType::MINUS_PERCENTAGE,"巡林客军团花费");
 	registerModifier("janissary_cost_modifier",ModifierType::MINUS_PERCENTAGE,"阿哈提军团花费");
 
+	registerModifier("blockade_force_required",ModifierType::NORMAL,"封锁力量需求");
+	registerModifier("hostile_disembark_speed",ModifierType::PERCENTAGE,"敌方登陆时间");
+	registerModifier("hostile_fleet_attrition",ModifierType::PERCENTAGE,"敌方舰队损耗");
+	registerModifier("regiment_disembark_speed",ModifierType::MINUS_PERCENTAGE,"部队登陆时间");
+	registerModifier("allowed_tercio_fraction",ModifierType::PERCENTAGE,"大方阵数量上限");
+	registerModifier("amount_of_tercio",ModifierType::NORMAL,"大方阵数量上限");
+	registerModifier("local_has_tercio",ModifierType::MARK,"本地可以招募大方阵");
+	registerModifier("allowed_musketeer_fraction",ModifierType::PERCENTAGE,"火枪手兵团数量上限");
+	registerModifier("amount_of_musketeers",ModifierType::NORMAL,"火枪手兵团数量上限");
+	registerModifier("local_has_muskteers",ModifierType::MARK,"本地可以招募火枪手兵团");
+	registerModifier("allowed_samurai_fraction",ModifierType::PERCENTAGE,"武侠兵团数量上限");
+	registerModifier("amount_of_samurai",ModifierType::NORMAL,"武侠兵团数量上限");
+	registerModifier("local_has_samurai",ModifierType::MARK,"本地可以招募武侠兵团");
+	registerModifier("allowed_qizilbash_fraction",ModifierType::PERCENTAGE,"奇兹尔巴什数量上限");
+	registerModifier("amount_of_qizilbash",ModifierType::NORMAL,"奇兹尔巴什数量上限");
+	registerModifier("local_has_qizilbash",ModifierType::MARK,"本地可以招募奇兹尔巴什");
+	registerModifier("allowed_mamluks_fraction",ModifierType::PERCENTAGE,"暗影战士数量上限");
+	registerModifier("amount_of_mamluks",ModifierType::NORMAL,"暗影战士数量上限");
+	registerModifier("local_has_mamluks",ModifierType::MARK,"本地可以招募暗影战士");
+	registerModifier("allowed_geobukseon_fraction",ModifierType::PERCENTAGE,"万桨宝舰数量上限");
+	registerModifier("amount_of_geobukseon",ModifierType::NORMAL,"万桨宝舰数量上限");
+	registerModifier("local_has_geobukseon",ModifierType::MARK,"本地可以建造万桨宝舰");
+	registerModifier("allowed_man_of_war_fraction",ModifierType::PERCENTAGE,"巨兽舰数量上限");
+	registerModifier("amount_of_man_of_war",ModifierType::NORMAL,"巨兽舰数量上限");
+	registerModifier("local_has_man_of_war",ModifierType::MARK,"本地可以建造巨兽舰");
+	registerModifier("allowed_galleon_fraction",ModifierType::PERCENTAGE,"海兽数量上限");
+	registerModifier("amount_of_galleon",ModifierType::NORMAL,"海兽数量上限");
+	registerModifier("local_has_galleon",ModifierType::MARK,"本地可以建造海兽");
+	registerModifier("allowed_galleass_fraction",ModifierType::PERCENTAGE,"加莱塞战船数量上限");
+	registerModifier("amount_of_galleass",ModifierType::NORMAL,"加莱塞战船数量上限");
+	registerModifier("local_has_galleass",ModifierType::MARK,"本地可以建造加莱塞战船");
+	registerModifier("allowed_caravel_fraction",ModifierType::PERCENTAGE,"卡拉维尔帆船数量上限");
+	registerModifier("amount_of_caravel",ModifierType::NORMAL,"卡拉维尔帆船数量上限");
+	registerModifier("local_has_caravel",ModifierType::MARK,"本地可以建造卡拉维尔帆船");
+	registerModifier("allowed_voc_indiamen_fraction",ModifierType::PERCENTAGE,"逐日者商船数量上限");
+	registerModifier("amount_of_voc_indiamen",ModifierType::NORMAL,"逐日者商船数量上限");
+	registerModifier("local_has_voc_indiamen",ModifierType::MARK,"本地可以建造逐日者商船");
+	registerModifier("allowed_allowed_marine_fraction",ModifierType::PERCENTAGE,"海军陆战队数量上限");
+	registerModifier("can_recruit_janissaries",ModifierType::MARK,"允许招募阿哈提");
+	registerModifier("can_recruit_cawa",ModifierType::MARK,"可以招募巡林客");
+	registerModifier("can_recruit_cossacks",ModifierType::MARK,"允许招募奥拉恰夫");
+	registerModifier("can_recruit_rajputs",ModifierType::MARK,"允许招募奇械术士兵团");
+	registerModifier("can_recruit_revolutionary_guards",ModifierType::MARK,"允许招募革命卫队");
+	registerModifier("allow_janissaries_from_own_faith",ModifierType::MARK,"允许在正统信仰省份招募阿哈提");
+	registerModifier("allow_mercenary_drill",ModifierType::MARK,"允许雇佣兵单位进行操练");
+	registerModifier("merc_leader_army_tradition",ModifierType::NORMAL,"雇佣兵将领传统修正	");
+	registerModifier("merc_independent_from_trade_range",ModifierType::MARK,"可以在任何地方招募雇佣兵");
+	registerModifier("allow_mercenaries_to_split",ModifierType::MARK,"可以拆分或合并雇佣兵单位");
+	registerModifier("may_explore",ModifierType::MARK,"允许招募探险家和征服者");
+	registerModifier("sea_repair",ModifierType::MARK,"当船只航行在沿岸海域时可以自动进行修复");
+	registerModifier("cb_on_government_enemies",ModifierType::MARK,"对其它政体拥有永久性宣战理由");
+	registerModifier("cb_on_primitives",ModifierType::MARK,"可以在海外殖民地区域内伪造宣称");
+	registerModifier("no_religion_penalty",ModifierType::MARK,"异端与异教省份不会带来任何惩罚");
+	registerModifier("auto_explore_adjacent_to_colony",ModifierType::MARK,"当殖民地建成时会自动探索邻近的土地");
+	registerModifier("reduced_stab_impacts",ModifierType::MARK,"降低外交行动对稳定度的影响");
+	registerModifier("extra_manpower_at_religious_war",ModifierType::MARK,"在宗教战争中获得三倍人力恢复速度");
+	registerModifier("idea_claim_colonies",ModifierType::MARK,"可以伪造其他国家任意海外省或殖民国的宣称");
+	registerModifier("may_establish_frontier",ModifierType::MARK,"可以建立怪物拓荒区");
+	registerModifier("can_fabricate_for_vassals",ModifierType::MARK,"可以为属国伪造宣称");
+	registerModifier("cb_on_overseas",ModifierType::MARK,"可以在海外贸易公司地区内伪造宣称");
+	registerModifier("may_not_reduce_inflation",ModifierType::MINUS_MARK,"不允许降低通货膨胀");
+	registerModifier("no_cost_for_reinforcing",ModifierType::MARK,"补员无需花费");
+	registerModifier("may_build_supply_depot",ModifierType::MARK,"可以建造补给站");
+	registerModifier("may_refill_garrison",ModifierType::MARK,"可以补充驻军");
+	registerModifier("may_return_manpower_on_disband",ModifierType::MARK,"解散时可以获得人力");
+	registerModifier("may_not_convert_territories",ModifierType::MINUS_MARK,"不允许在区域内传教");
+	registerModifier("allow_client_states",ModifierType::MARK,"可以建立仆从国");
+	registerModifier("enable_forced_march",ModifierType::MARK,"启用强行军");
+	registerModifier("number_of_cannons_modifier",ModifierType::PERCENTAGE,"舰炮数量");
+	registerModifier("heavy_ship_number_of_cannons_modifier",ModifierType::PERCENTAGE,"重型战舰舰炮数量");
+	registerModifier("light_ship_number_of_cannons_modifier",ModifierType::PERCENTAGE,"轻型战舰舰炮数量");
+	registerModifier("galley_number_of_cannons_modifier",ModifierType::PERCENTAGE,"桨帆战舰舰炮数量");
+	registerModifier("transport_number_of_cannons_modifier",ModifierType::PERCENTAGE,"运输船舰炮数量");
+	registerModifier("hull_size",ModifierType::NORMAL,"船体尺寸"); 
+	registerModifier("hull_size_modifier",ModifierType::PERCENTAGE,"船体尺寸修正");
+	registerModifier("heavy_ship_hull_size_modifier",ModifierType::PERCENTAGE,"重型战舰船体尺寸修正");
+	registerModifier("light_ship_hull_size_modifier",ModifierType::PERCENTAGE,"轻型战舰船体尺寸修正");
+	registerModifier("galley_hull_size_modifier",ModifierType::PERCENTAGE,"桨帆战舰船体尺寸修正");
+	registerModifier("transport_hull_size_modifier",ModifierType::PERCENTAGE,"运输船船体尺寸修正");
+	registerModifier("engagement_cost",ModifierType::NORMAL,"舰船接战宽度");
+
 	//For Estates Temp. 
 	//Will be Removed when Estate Preload Reader Complete
 	registerModifier("artificers_loyalty_modifier",ModifierType::PERCENTAGE,"奇械术士忠诚均衡点");
@@ -555,7 +636,6 @@ void loadInternalModifier(){
 	registerModifier("necromancy_experience_mod",ModifierType::PERCENTAGE,"死灵系魔法学习经验加成");
 	registerModifier("transmutation_experience_mod",ModifierType::PERCENTAGE,"变形系魔法学习经验加成");
 	registerModifier("monarch_spell_levels",ModifierType::NORMAL,"统治者起始法术等级");
-	
 
 	
 }
