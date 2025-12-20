@@ -1,4 +1,5 @@
 #include "paradox_type.h"
+#include "utils/string_util.h"
 #include <algorithm>
 
 
@@ -186,13 +187,7 @@ std::string stripTag(std::string original){
 bool Xor(bool a,bool b){
 	return (a || b) && !(a && b);
 } 
-bool startWith(std::string from,std::string to){
-	if(from.length() < to.length()) return false;
-	for(int i = 0;i < to.length();i++){
-		if(from[i] != to[i]) return false;
-	}
-	return true;
-}
+
 bool isCastable(ParadoxBase* base,ParadoxType type){
 	if((int)type < 127){
 		return base->getType() == type;

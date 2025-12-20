@@ -15,13 +15,7 @@ extern ParadoxTag* ROOT;
 extern std::vector<ParadoxBase*> parsedObject;
 extern std::map<std::string,ModifierObject> modifierObjects; 
 
-void getAllFiles(std::string path, std::vector<std::string>& files) 
-{
-	std::filesystem::path dir(path);
-	for (const auto& entry : std::filesystem::directory_iterator(dir)) {
-		files.push_back(entry.path().string());
-	}
-}
+
 
 int main(){
 	yyin = fopen("a0.txt","r");

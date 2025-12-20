@@ -1,0 +1,4 @@
+# line start with # is a comment which will be ignored..
+# please write localization like below
+#GOOD_WHEAT:wheat
+#DO NOT ADD ANY SPACES AT THE BEGINNING OF LINE!

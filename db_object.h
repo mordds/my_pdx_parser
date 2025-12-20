@@ -1,6 +1,8 @@
 #ifndef PDX_DB_OBJ
 #define PDX_DB_OBJ
 #include<string>
+#include<memory>
+#include "modifier.h"
 enum DataBaseObjType{
     GOOD,
     INSTITUTION,
@@ -20,6 +22,8 @@ struct Good : ParadoxDataBaseObj{
         return DataBaseObjType::GOOD;
     }
     int defaultPrice;
+    std::shared_ptr<Modifier> provinceModifier;
+    std::shared_ptr<Modifier> globalModifier;
 };
 struct Religion : ParadoxDataBaseObj{
     virtual DataBaseObjType getType() {
@@ -51,4 +55,6 @@ struct Institution : ParadoxDataBaseObj{
         return DataBaseObjType::INSTITUTION;
     }
 };
+void registerGood();
+Good* getGood(std::string str);
 #endif

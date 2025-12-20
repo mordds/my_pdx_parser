@@ -17,6 +17,9 @@ std::map<std::string,TriggerItem*> items;
 
 bool parseConditionalTrigger(ParadoxTag*,ConditionalTrigger*);
 
+extern ParadoxString* createString(std::string str);
+
+
 //No arg means only yes/no or even only allowing yes.
 //those trigger will be registered as 1 BOOL type args.
 //and no args will be used in localization text
@@ -91,7 +94,7 @@ void registerClausedTrigger(std::string name,TriggerItem* item,OverrideHandler h
 	registeredTriggers.insert(name);
 }
 
-void registerItems(){
+void registerTriggerItems(){
 	registerNoArgTrigger("ai","是AI","不是AI");
 	registerNoArgTrigger("allows_female_emperor","允许女性皇帝","不允许女性皇帝");
 	registerNoArgTrigger("always","总是为真","总是为假");
@@ -367,8 +370,8 @@ void registerItems(){
 		}
 		else return false;
 		map.clear();
-		map["src"] = pdx::createString(src_string);
-		map["tar"] = pdx::createString(tar_string);
+		map["src"] = createString(src_string);
+		map["tar"] = createString(tar_string);
 		return true;
 	}
 	);

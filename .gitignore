@@ -1,6 +1,6 @@
 *.exe
 *.o
-*.txt
+/*.txt
 .vscode/
 resultset/
 scripted_effect/

@@ -1,9 +1,25 @@
 
-a.exe: lexer.o test.cpp paradox_type.o modifier.o parser.o
-	g++ lexer.o parser.o test.cpp modifier.o paradox_type.o -O2 -std=c++17 -lstdc++fs -Werror 
+CXX = g++
+CXXFLAGS = -O2 -std=c++17 -Werror
 
-b.exe: lexer.o b.cpp paradox_type.o modifier.o parser.o trigger.o scope.o pattern.o
-	g++ lexer.o parser.o b.cpp modifier.o paradox_type.o trigger.o scope.o pattern.o -o b.exe -O2 -std=c++17 -lstdc++fs -Werror 
+SRCS = utils/string_util.cpp utils/parser_util.cpp pattern.cpp trigger.cpp scope.cpp modifier.cpp paradox_type.cpp localization.cpp db_object.cpp
+SRCHEADERS = $(SRCS:.cpp=.h)
+OBJS = $(SRCS:.cpp=.o)
+TARGET = console.exe
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS) parser.o lexer.o console.cpp
+	$(CXX) $(OBJS) parser.o lexer.o console.cpp -o $@ $(CXXFLAGS) -lstdc++fs
+	
+$(OBJS): %.o: %.cpp %.h
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+
+a.exe: lexer.o test.cpp paradox_type.o modifier.o parser.o utils/string_util.o 
+	g++ lexer.o parser.o test.cpp modifier.o paradox_type.o utils/string_util.o -O2 -std=c++17 -lstdc++fs -Werror 
+
+b.exe: lexer.o b.cpp paradox_type.o modifier.o parser.o trigger.o scope.o pattern.o utils/string_util.o
+	g++ lexer.o parser.o b.cpp modifier.o paradox_type.o trigger.o scope.o pattern.o utils/string_util.o -o b.exe -O2 -std=c++17 -lstdc++fs -Werror 
 
 lex2.yy.c: pdx.l
 	flex++ pdx.l
@@ -18,17 +34,3 @@ parser.o:
 y.tab.c: test.y
 	bison -vdty test.y
 	
-paradox_type.o: paradox_type.h paradox_type.cpp
-	g++ -c paradox_type.cpp -o paradox_type.o -O2 -std=c++17 -lstdc++fs -Werror
-	
-modifier.o: modifier.h modifier.cpp
-	g++ -c modifier.cpp -o modifier.o -O2 -std=c++17 -lstdc++fs -Werror
-	
-scope.o: scope.h scope.cpp
-	g++ -c scope.cpp -o scope.o -O2 -std=c++17 -lstdc++fs -Werror
-	
-trigger.o: trigger.h trigger.cpp
-	g++ -c trigger.cpp -o trigger.o -O2 -std=c++17 -lstdc++fs -Werror
-
-pattern.o: pattern.h pattern.cpp
-	g++ -c pattern.cpp -o pattern.o -O2 -std=c++17 -lstdc++fs -Werror

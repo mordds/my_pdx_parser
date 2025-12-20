@@ -16,17 +16,6 @@ extern int yylex();
 extern ParadoxTag* ROOT;
 extern std::vector<ParadoxBase*> parsedObject;
 
-int _main(){
-	Pattern p("a:%d%%,b:%s%%abc%%def");
-	p.setNextInteger(2120);
-	std::cout << p.getOutput() << std::endl;
-	p.setNextInteger(2000);
-	std::cout << p.getOutput() << std::endl;
-	p.setNextString("你好!");
-	 std::cout << p.getOutput() << std::endl;
-	return 0;
-}
-
 int main(int argc,char** argv){
 	yyin = fopen("b0.txt","r");
 	registerItems();

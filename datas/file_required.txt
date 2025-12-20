@@ -1,0 +1,3 @@
+#those are files need to be copied from vanila / mod files
+#/common/prices/*.txt -> price.txt
+#/common/tradegoods/*.txt -> trade_good.txt

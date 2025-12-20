@@ -649,11 +649,12 @@ void ParseModifier(ParadoxTag* tag,std::vector<Modifier>& modifiers){
 		std::string item = stripTag(tag->seq[i]);
 				
 		modifier.name = item;
-		ParserModifier(modifierTag,modifier);
+		ParseModifier(modifierTag,modifier);
 		modifiers.push_back(modifier);
 	}
 }
-void ParserModifier(ParadoxTag* tag,Modifier& modifier){
+void ParseModifier(ParadoxTag* tag,Modifier& modifier){
+	if(tag == nullptr) return;
 	for(int i = 0;i < tag->seq.size();i++){
 		ModifierItem mod_item;
 		std::string item = stripTag(tag->seq[i]);
@@ -675,6 +676,7 @@ void ParserModifier(ParadoxTag* tag,Modifier& modifier){
 }
 std::string Modifier::localize(){
 	std::string localized = "";
+	
 	localized.append(this->name);
 	localized.append(":\r\n");
 	for(int i = 0;i < items.size();i++){

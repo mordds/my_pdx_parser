@@ -205,7 +205,6 @@ struct ParadoxComplicateTag : public ParadoxBase{
 };
 
 std::string stripTag(std::string original);
-bool startWith(std::string from,std::string to);
 bool isCastable(ParadoxBase* base,ParadoxType type);
 bool castToBool(ParadoxString* base);
 bool Xor(bool a,bool b);

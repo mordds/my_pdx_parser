@@ -43,7 +43,7 @@ void registerModifier(std::string modifierName,ModifierType type,std::string loc
 
 void ParseModifier(ParadoxTag* tag,std::vector<Modifier>& modifiers);
 
-void ParserModifier(ParadoxTag* tag,Modifier& modifier);
+void ParseModifier(ParadoxTag* tag,Modifier& modifier);
 
 void loadInternalModifier();
 

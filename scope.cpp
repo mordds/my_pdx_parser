@@ -1,6 +1,7 @@
 #include<string>
 #include "scope.h"
 #include "paradox_type.h"
+#include "utils/string_util.h"
 #include<sstream>
 #include<string.h>
 std::map<std::string,std::string> CustomScope::localizeMap = std::map<std::string,std::string>();
@@ -68,12 +69,7 @@ void initScope(){
 	for(int i = 0;i < 2600;i++) basicScopes[i] = nullptr;
 	for(int i = 0;i < 8000;i++) provinceScopes[i] = nullptr;
 }
-bool isNumber(std::string str){
-	for(int i = 0;i < str.length();i++){
-		if(str[i] > '9' || str[i] < '0') return false;
-	}
-	return true;
-}
+
 
 Scope* createScopeFromString(std::string str){
 	//Check Number First

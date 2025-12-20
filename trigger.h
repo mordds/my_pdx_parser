@@ -38,6 +38,11 @@ struct ComplexTrigger : Trigger{
 	std::vector<Trigger*> subTriggers;
 	bool ignored;
 	bool omitted;
+	~ComplexTrigger(){
+		for(Trigger* trigger : subTriggers){
+			delete trigger;
+		}
+	}
 	void putTrigger(Trigger* trigger);
 };
 struct CommonTrigger : Trigger{
@@ -107,7 +112,7 @@ struct HiddenTrigger : ComplexTrigger{
 };
 
 std::vector<Trigger*> parseTriggerList(ParadoxTag*,int root_depth);
-void registerItems();
+void registerTriggerItems();
 ComplexTrigger* createBaseTrigger(); 
 void parseTrigger(ParadoxTag*,ComplexTrigger* trigger);
 
