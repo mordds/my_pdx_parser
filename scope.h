@@ -14,12 +14,16 @@ struct CustomScope;
 struct Scope{
 	virtual std::string toString() = 0;
 	virtual ScopeType getType() = 0;
+	virtual std::string toHtml(){
+		return toString();
+	}
 	ProvinceScope* getAsProvinceScope();
 	CountryScope* getAsCountryScope();
 	CustomScope* getAsCustomScope();
 };
 struct ProvinceScope : Scope{
 	virtual std::string toString();
+	virtual std::string toHtml();
 	virtual ScopeType getType(){
 		return ScopeType::PROVINCE;
 	}
@@ -29,6 +33,7 @@ struct ProvinceScope : Scope{
 };
 struct CountryScope : Scope{
 	virtual std::string toString();
+	virtual std::string toHtml();
 	virtual ScopeType getType(){
 		return ScopeType::COUNTRY;
 	}

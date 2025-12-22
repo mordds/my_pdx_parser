@@ -1,3 +1,6 @@
 #those are files need to be copied from vanila / mod files
 #/common/prices/*.txt -> price.txt
 #/common/tradegoods/*.txt -> trade_good.txt
+#/common/ideas/country_ideas.txt -> country_ideas.txt
+#/common/ideas/group_ideas.txt -> country_ideas.txt
+#/common/ideas/default_ideas.txt -> country_ideas.txt

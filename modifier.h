@@ -17,7 +17,9 @@ enum ModifierType{
 	//special percentage
 	PERCENTAGE2 = 9,
 	NEUTRAL_PERCENTAGE2 = 10,
-	MINUS_PERCENTAGE2 = 11  
+	MINUS_PERCENTAGE2 = 11,
+
+	REVERSED_PERCENTAGE2 = 12
 	
 };
 struct ModifierItem;

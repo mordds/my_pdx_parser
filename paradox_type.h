@@ -8,18 +8,16 @@
 #include<stdio.h>
 #include<cstdint>
 
-enum ParadoxType : uint8_t{
+enum class ParadoxType : uint8_t{
 	BASE = 255,
 	STRING = 0,
 	INTEGER = 1,
 	TAG = 2,
 	ARRAY = 3,
 	DATE = 4,
-	OPT_TAG = 5,
-	PARAMETER = 6,
-	COMP_TAG = 7,
 	SCOPE = 129,
-	BOOLEAN = 130
+	BOOLEAN = 130,
+	GOOD = 131
 };
 
 struct Date{
@@ -35,9 +33,7 @@ struct ParadoxInteger;
 struct ParadoxTag;
 struct ParadoxArray;
 struct ParadoxDate;
-struct ParadoxParameter;
-struct ParadoxOptionalTag;
-struct ParadoxComplicateTag;
+
 
 struct ParadoxBase{
 	virtual void* getContent() = 0;
@@ -47,9 +43,6 @@ struct ParadoxBase{
 	ParadoxTag* getAsTag();
 	ParadoxArray* getAsArray();
 	ParadoxDate* getAsDate();
-	ParadoxParameter* getAsParameter();
-	ParadoxOptionalTag* getAsOptional();
-	ParadoxComplicateTag* getAsComplicate();
 };
 
 struct ParadoxString : public ParadoxBase{
@@ -111,8 +104,10 @@ struct ParadoxTag : public ParadoxBase{
 		virtual ParadoxType getType(){
 			return ParadoxType::TAG;
 		}
+		ParadoxBase* get(std::string name);
 		ParadoxBase* get(std::string name,int index);
 		ParadoxBase* get(int index);
+		ParadoxTag* getAsTag(std::string name);
 		ParadoxTag* getAsTag(std::string name,int index);
 		ParadoxTag* getAsTag(int index);
 		
@@ -145,21 +140,6 @@ struct ParadoxArray : public ParadoxBase{
 	}
 };
 
-struct ParadoxOptionalTag : public ParadoxBase{
-	std::string condition;
-	ParadoxTag* content;
-	virtual ParadoxType getType(){
-		return ParadoxType::OPT_TAG;
-	}
-	virtual void* getContent(){
-		return (void*)content;
-	}
-	ParadoxTag* getTag(){
-		return content;
-	}
-};
-
-
 struct ParadoxDate : public ParadoxBase{
 	Date date;
 	
@@ -179,37 +159,10 @@ struct ParadoxDate : public ParadoxBase{
 		return date;
 	}
 };
-struct ParadoxParameter : public ParadoxBase{
-	std::vector<std::string> parameterTemplate;
-	std::map<int,std::string> parameterIndex;
-	virtual void* getContent(){
-		return nullptr;
-	}
-	virtual ParadoxType getType(){
-		return ParadoxType::PARAMETER;
-	}
-	void appendParameter(std::string parameter);
-	void appendString(std::string str);
-	std::string assemble(std::map<std::string,std::string> parameters);
-}; 
-struct ParadoxComplicateTag : public ParadoxBase{
-	ParadoxBase* lVal;
-	ParadoxBase* rVal;
-	char op;
-	virtual void* getContent(){
-		return nullptr;
-	}
-	virtual ParadoxType getType(){
-		return ParadoxType::COMP_TAG;
-	}
-};
 
 std::string stripTag(std::string original);
 bool isCastable(ParadoxBase* base,ParadoxType type);
 bool castToBool(ParadoxString* base);
 bool Xor(bool a,bool b);
-namespace pdx{
-	ParadoxString* createString(std::string str);
-}
-
+ParadoxBase* deep_copy(ParadoxBase*);
 #endif

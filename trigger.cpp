@@ -40,6 +40,7 @@ void registerSimpleTrigger(std::string name,std::string pattern,std::string reve
 	item->reversePattern = reversePattern;
 	item->parameterType.push_back(type);
 	item->usedParameter.push_back(0);
+	item->name = name;
 	items[name] = item;
 	registeredTriggers.insert(name);
 	simpleTriggers.insert(name);
@@ -47,11 +48,13 @@ void registerSimpleTrigger(std::string name,std::string pattern,std::string reve
 
 void registerSimpleClauseTrigger(std::string name,TriggerItem* triggerItem){
 	simpleTriggers.insert(name);
+	triggerItem->name = name;
 	items[name] = triggerItem;
 	registeredTriggers.insert(name);
 }
 void registerNumberRequiredTrigger(std::string name,std::string amountKey,std::string pattern,std::string reversePattern){
 	TriggerItem* item = new TriggerItem();
+	item->name = name;
 	item->reversePattern = reversePattern;
 	item->pattern = pattern;
 	item->parameterType.push_back(ParadoxType::INTEGER);
@@ -65,6 +68,7 @@ void registerBooleanTrigger(std::string name,std::string pattern,std::string rev
 	actual_name.append("@");
 	actual_name.append(std::to_string(static_cast<int>(ParadoxType::BOOLEAN)));
 	TriggerItem* item = new TriggerItem();
+	item->name = name;
 	item->pattern = pattern;
 	item->reversePattern = reversePattern;
 	item->parameterType.push_back(ParadoxType::BOOLEAN);
@@ -77,10 +81,13 @@ void registerSingleArgTrigger(std::string name,std::string pattern,std::string r
 		registerBooleanTrigger(name,pattern,reversePattern);
 		return;
 	}
+	
 	std::string actual_name(name);
 	actual_name.append("@");
 	actual_name.append(std::to_string(static_cast<int>(type)));
+	
 	TriggerItem* item = new TriggerItem();
+	item->name = name;
 	item->pattern = pattern;
 	item->reversePattern = reversePattern;
 	item->parameterType.push_back(type);
@@ -89,6 +96,7 @@ void registerSingleArgTrigger(std::string name,std::string pattern,std::string r
 	registeredTriggers.insert(name);
 }
 void registerClausedTrigger(std::string name,TriggerItem* item,OverrideHandler handler){
+	item->name = name;
 	items[name] = item;
 	overrideHandlers[name] = handler;
 	registeredTriggers.insert(name);
@@ -395,7 +403,7 @@ void registerTriggerItems(){
 	registerSimpleTrigger("has_country_flag","国家标签'%s'已被设置","国家标签'%s'未被设置",ParadoxType::STRING);
 	
 	
-	std::cout << "REGISTERD TRIGGER COUNT:" <<registeredTriggers.size() << std::endl;
+	
 }
 
 
@@ -454,12 +462,16 @@ void preInit(Trigger* trigger,std::string& str){
 }
 ComplexTrigger* Trigger::getAsComplexTrigger(){
 	if(this->getType() == TriggerType::COMMON) return nullptr;
-	return dynamic_cast<ComplexTrigger*>(this);
+	return static_cast<ComplexTrigger*>(this);
 }
 
 LogicTrigger* Trigger::getAsLogicTrigger(){
 	if(this->getType() != TriggerType::LOGIC) return nullptr;
-	return dynamic_cast<LogicTrigger*>(this);
+	return static_cast<LogicTrigger*>(this);
+}
+CommonTrigger* Trigger::getAsCommonTrigger(){
+	if(this->getType() != TriggerType::COMMON) return nullptr;
+	return static_cast<CommonTrigger*>(this);
 }
 
 void ignoreCurrentDepth(ComplexTrigger* trigger){
@@ -474,7 +486,13 @@ void ComplexTrigger::putTrigger(Trigger* trigger){
 	trigger->depth = this->depth + 1;
 	this->subTriggers.push_back(trigger);
 }
-
+void ComplexTrigger::takeOverLifeCycle(){
+	if(this->copied) return;
+	this->copied = true;
+	for(Trigger* trigger : this->subTriggers){
+		trigger->takeOverLifeCycle();
+	}
+}
 ChangeScopeTrigger::ChangeScopeTrigger(Scope* scope){
 	this->changedScope = scope;
 	this->depth = 0;
@@ -496,12 +514,26 @@ LogicTrigger::LogicTrigger(LogicType logic){
 	this->omitted = false;
 }
 
+std::string CommonTrigger::toHtml(bool reversed){
+	std::string str("");
+	preInit(this,str);
+	str.append(this->item->toString(this->base,Xor(reversed,this->reversed)));
+	this->depth = 0;
+	return str;
+}
 std::string CommonTrigger::toString(bool reversed){
 	std::string str("");
 	preInit(this,str);
 	str.append(this->item->toString(this->base,Xor(reversed,this->reversed)));
 	this->depth = 0;
 	return str;
+}
+void CommonTrigger::takeOverLifeCycle(){
+	if(this->copied) return;
+	this->copied = true;
+	for(int i = 0;i < this->base.size();i++){
+		this->base[i] = deep_copy(this->base[i]);
+	}
 }
 
 std::string ChangeScopeTrigger::toString(bool reversed){

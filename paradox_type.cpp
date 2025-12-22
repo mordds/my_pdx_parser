@@ -2,47 +2,38 @@
 #include "utils/string_util.h"
 #include <algorithm>
 
+extern ParadoxTag* createTag();
+extern ParadoxArray* createArray();
+extern ParadoxString* createString(std::string);
+extern ParadoxInteger* createInteger(long long);
+extern ParadoxDate* createDate(Date);
 
-namespace pdx{
-	std::vector<ParadoxBase*> tempObjects;
-	ParadoxString* createString(std::string str){
-		ParadoxString* pstr = new ParadoxString(str);
-		pdx::tempObjects.push_back(pstr);
-		return pstr;
-	}
-}
 ParadoxString* ParadoxBase::getAsString(){
 	if(getType() != ParadoxType::STRING) return nullptr;
-	return dynamic_cast<ParadoxString*>(this); 
+	return static_cast<ParadoxString*>(this); 
 }
 ParadoxInteger* ParadoxBase::getAsInteger(){
 	if(getType() != ParadoxType::INTEGER) return nullptr;
-	return dynamic_cast<ParadoxInteger*>(this); 
+	return static_cast<ParadoxInteger*>(this); 
 }
 ParadoxTag* ParadoxBase::getAsTag(){
 	if(getType() != ParadoxType::TAG) return nullptr;
-	return dynamic_cast<ParadoxTag*>(this); 
+	return static_cast<ParadoxTag*>(this); 
 }
 ParadoxArray* ParadoxBase::getAsArray(){
 	if(getType() != ParadoxType::ARRAY) return nullptr;
-	return dynamic_cast<ParadoxArray*>(this); 
+	return static_cast<ParadoxArray*>(this); 
 }
 ParadoxDate* ParadoxBase::getAsDate(){
 	if(getType() != ParadoxType::DATE) return nullptr;
-	return dynamic_cast<ParadoxDate*>(this); 
+	return static_cast<ParadoxDate*>(this); 
 }
-ParadoxParameter* ParadoxBase::getAsParameter(){
-	if(getType() != ParadoxType::PARAMETER) return nullptr;
-	return dynamic_cast<ParadoxParameter*>(this); 
+
+ParadoxBase* ParadoxTag::get(std::string name){
+	if(tags.find(name) == tags.end()) return nullptr;
+	return tags[name];
 }
-ParadoxOptionalTag* ParadoxBase::getAsOptional(){
-	if(getType() != ParadoxType::OPT_TAG) return nullptr;
-	return dynamic_cast<ParadoxOptionalTag*>(this);
-}
-ParadoxComplicateTag* ParadoxBase::getAsComplicate(){
-	if(getType() != ParadoxType::COMP_TAG) return nullptr;
-	return dynamic_cast<ParadoxComplicateTag*>(this);
-}
+
 ParadoxBase* ParadoxTag::get(std::string name,int index){
 	std::string aName = assembleTagName(name,index);
 	if(tags.find(aName) == tags.end()) return nullptr;
@@ -59,6 +50,10 @@ ParadoxTag* ParadoxTag::getAsTag(std::string name,int index){
 }
 ParadoxTag* ParadoxTag::getAsTag(int index){
 	ParadoxBase* tag = get(index);
+	return tag == nullptr ? nullptr : tag->getAsTag();
+}
+ParadoxTag* ParadoxTag::getAsTag(std::string name){
+	ParadoxBase* tag = get(name);
 	return tag == nullptr ? nullptr : tag->getAsTag();
 }
 void ParadoxTag::add(std::string name,ParadoxBase* base){
@@ -145,38 +140,6 @@ std::string Date::toString(){
 	return str;
 }
 
-void ParadoxParameter::appendParameter(std::string parameter){
-	int index = parameterTemplate.size();
-	parameterTemplate.push_back(parameter);
-	parameterIndex[index] = parameter;
-} 
-
-void ParadoxParameter::appendString(std::string str){
-	parameterTemplate.push_back(str);
-}
-
-std::string ParadoxParameter::assemble(std::map<std::string,std::string> parameters){
-	int pEnd = parameterIndex.size();
-	int* index3 = new int [pEnd + 1];
-	index3[pEnd] = parameterTemplate.size() + 1;
-	int pos = 0;
-	for(auto &p : parameterIndex) {
-		index3[pos] = p.first;
-		pos++;
-	}
-	pos = 0;
-	std::string ret = "";
-	for(int i = 0;i < parameterTemplate.size();i++){
-		if(i == index3[pos]){
-			ret.append(parameters[parameterIndex[pos]]);
-			pos++;
-		}
-		else {
-			ret.append(parameterTemplate[i]);
-		}
-	}
-	return ret;
-}
 std::string stripTag(std::string original){
 	size_t pos = original.find_last_of('@');
 	if(pos != std::string::npos){
@@ -218,3 +181,72 @@ bool castToBool(ParadoxString* string){
 	return string->getStringContent() == "yes";
 }
 
+//!WARNING!
+//the returned pointer is created by 'new' operator and the caller has the responsibility to manage memory
+//this function is used to create a ParadoxBase Object which do not managed by global manager.
+ParadoxBase* deep_copy(ParadoxBase* base){
+	if(base->getType() == ParadoxType::INTEGER){
+		ParadoxInteger* pInt = base->getAsInteger();
+		return new ParadoxInteger(pInt->getIntegerContent());
+	}
+	if(base->getType() == ParadoxType::STRING){
+		ParadoxString* pStr = base->getAsString();
+		return new ParadoxString(pStr->getStringContent());
+	}
+	if(base->getType() == ParadoxType::DATE){
+		ParadoxDate* pDate = base->getAsDate();
+		return new ParadoxDate(pDate->getDateContent());
+	}
+	if(base->getType() == ParadoxType::ARRAY){
+		ParadoxArray* pArray = base->getAsArray();
+		ParadoxArray* nArray = new ParadoxArray();
+		for(ParadoxBase* base:pArray->contents){
+			ParadoxBase* base_copy = deep_copy(base);
+			nArray->append(base_copy);
+		}
+		return nArray;
+	}
+	else {
+		ParadoxTag* pTag = base->getAsTag();
+		ParadoxTag* nTag = new ParadoxTag();
+		for(std::string entry : pTag->seq){
+			ParadoxBase* base_copy = deep_copy(pTag->get(entry));
+			nTag->add(entry,base);
+		}
+		return nTag;
+	}
+}
+//this function is used to deep copy a ParadoxBase Object safely.
+
+ParadoxBase* deep_copy_safe(ParadoxBase* base){
+	if(base->getType() == ParadoxType::INTEGER){
+		ParadoxInteger* pInt = base->getAsInteger();
+		return createInteger(pInt->getIntegerContent());
+	}
+	if(base->getType() == ParadoxType::STRING){
+		ParadoxString* pStr = base->getAsString();
+		return createString(pStr->getStringContent());
+	}
+	if(base->getType() == ParadoxType::DATE){
+		ParadoxDate* pDate = base->getAsDate();
+		return createDate(pDate->getDateContent());
+	}
+	if(base->getType() == ParadoxType::ARRAY){
+		ParadoxArray* pArray = base->getAsArray();
+		ParadoxArray* nArray = createArray();
+		for(ParadoxBase* base:pArray->contents){
+			ParadoxBase* base_copy = deep_copy_safe(base);
+			nArray->append(base_copy);
+		}
+		return nArray;
+	}
+	else {
+		ParadoxTag* pTag = base->getAsTag();
+		ParadoxTag* nTag = new ParadoxTag();
+		for(std::string entry : pTag->seq){
+			ParadoxBase* base_copy = deep_copy(pTag->get(entry));
+			nTag->add(entry,base);
+		}
+		return nTag;
+	}
+}

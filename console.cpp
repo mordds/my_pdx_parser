@@ -2,8 +2,8 @@
 #include "trigger.h"
 #include "db_object.h"
 #include "localization.h"
-#include "db_object.h"
 #include "utils/parser_util.h"
+#include "national_idea.h"
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -73,21 +73,52 @@ int main(){
     registerGood();
 
     registerTriggerItems();
+	
+	loadNationalIdea();
+
     std::cout << "#Load Completed!" << std::endl;
-    handlers["help"] = [](std::vector<std::string> vec){
-        std::cout << "help -------- 查看帮助" << std::endl; 
-    };
     handlers["print_modifier"] = printModifier;
     handlers["print_trigger"] = printTrigger;
     handlers["trade_good"] = [](std::vector<std::string> vec){
+        if(vec.empty()){
+            std::cout << "用法:trade_good <good_id>" << std::endl;
+            return;
+        }
         Good* good = getGood(vec[0]);
-        if(good == nullptr) return;
+        if(good == nullptr){
+            std::cout << "没有名为" << vec[0] << "的商品" << std::endl;
+            return;
+        }
         std::cout << good->localizedName << std::endl;
         good->provinceModifier->localize();
         std::cout << "基础价格:" << good->defaultPrice / 1000.0 << std::endl;
         std::cout << good->globalModifier->localize(); 
         std::cout << good->provinceModifier->localize();
     };
+	handlers["tag_idea"] = [](std::vector<std::string> vec){
+		if(vec.empty()){
+			std::cout << "用法:tag_idea <tag>" << std::endl;
+            return;
+		}
+		NationalIdea* idea = getTagIdea(vec[0]);
+		if(idea == nullptr){
+			std::cout << "没有找到" << vec[0] << "的国家理念" << std::endl;
+			return;
+		}
+		std::cout << idea->toString() << std::endl;
+	};
+	handlers["ideas"] = [](std::vector<std::string> vec){
+		if(vec.empty()){
+			std::cout << "用法:tag_idea <tag>" << std::endl;
+            return;
+		}
+		NationalIdea* idea = getFromName(vec[0]);
+		if(idea == nullptr){
+			std::cout << "没有找到" << vec[0] << "的国家理念" << std::endl;
+			return;
+		}
+		std::cout << idea->toString() << std::endl;
+	};
     string command,command1;
 	vector<string> args;
 	while(true){
@@ -101,6 +132,7 @@ int main(){
 		ss >> command >> command1;
 		bool shouldMerge = command1[0] == '\"';
 		bool broke = false;
+		if(command1 == "\x0f\x03\x17") break;
 		while(command1.length() != 0){
 			if(!shouldMerge){
 				args.push_back(command1);

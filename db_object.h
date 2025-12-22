@@ -3,7 +3,7 @@
 #include<string>
 #include<memory>
 #include "modifier.h"
-enum DataBaseObjType{
+enum class DataBaseObjType{
     GOOD,
     INSTITUTION,
     ADVISOR_TYPE,

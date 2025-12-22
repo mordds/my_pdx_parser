@@ -15,38 +15,14 @@ extern int yyparse();
 extern int yylex();
 extern ParadoxTag* ROOT;
 extern std::vector<ParadoxBase*> parsedObject;
+extern std::map<std::string,TriggerItem*> registeredTriggers;
 
 int main(int argc,char** argv){
+	std::cout << sizeof(Trigger) << std::endl;
 	yyin = fopen("b0.txt","r");
-	registerItems();
+	registerTriggerItems();
 	yyparse();
-	int token = yylex();
-	if(token != 0){
-		for(int i=0;i <parsedObject.size();i++){
-			delete parsedObject[i];
-		} 
-		parsedObject.clear();
-		while(token != 0){
-			std::cout << token << ' ';
-			if(token == T_IDENT || token == T_SPECIAL){
-				std::cout << yylval.name << std::endl;
-			}
-			else if(token == T_LITERAL){
-				std::cout << *(yylval.str) << std::endl;
-			}
-			else if(token == T_NUM_CONSTANT){
-				std::cout << yylval.num << std::endl;
-			}
-			else if(token == T_PARAMETER){
-				std::cout << '$' << yylval.name << '$' << std::endl;
-			}
-			else{
-				std::cout << (char)token << std::endl;
-			}
-			token = yylex();
-		}
-	}
-	else{
+		std::cout << "REGISTERD TRIGGER COUNT:" <<registeredTriggers.size() << std::endl;
 		bool multiTriggers = true; 
 		// declared mode directly
 		if(argc >= 2){
@@ -83,7 +59,5 @@ int main(int argc,char** argv){
 			std::cout << ct->toString(false) << std::endl;
 			delete ct;
 		}
-		
-	}
 	return 0;
 } 

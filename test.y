@@ -16,11 +16,6 @@ void yyerror(const char* s);
 std::vector<ParadoxBase*> parsedObject;
 std::vector<ParadoxBase*> tempObject;
 ParadoxTag* ROOT = nullptr;
-ParadoxParameter* createParameter(){
-	ParadoxParameter* parameter = new ParadoxParameter();
-	parsedObject.push_back(parameter);
-	return parameter;
-}
 ParadoxString* createString(std::string str){
 	ParadoxString* string = new ParadoxString(str);
 	parsedObject.push_back(string);
@@ -71,16 +66,6 @@ ParadoxTag* createTag(){
 	parsedObject.push_back(tag);
 	return tag;
 }
-ParadoxOptionalTag* createOptionalTag(){
-	ParadoxOptionalTag* tag = new ParadoxOptionalTag();
-	parsedObject.push_back(tag);
-	return tag;
-}
-ParadoxComplicateTag* createComplicateTag(){
-	ParadoxComplicateTag* tag = new ParadoxComplicateTag();
-	parsedObject.push_back(tag);
-	return tag;
-}
 %}
 
 
@@ -96,7 +81,6 @@ ParadoxComplicateTag* createComplicateTag(){
 %token<name> T_DATE
 %token<num> T_NUM_CONSTANT
 %token<name> T_PARAMETER
-%token<name> T_SPECIAL
 
 %type<base> GT
 %type<base> T
@@ -106,11 +90,8 @@ ParadoxComplicateTag* createComplicateTag(){
 %type<base> C
 %type<base> lVal
 %type<base> rVal
-%type<base> PC
 %type<num> BLANK
 %type<num> LBR
-%type<base> OPT
-%type<num> BLANK_OPT
 %error-verbose
 
 %nonassoc LOWEST
@@ -146,13 +127,6 @@ A: lVal '=' rVal {
 	else if(type == ParadoxType::INTEGER){
 		tag->add(std::to_string($1->getAsInteger()->getIntegerContent() / 1000),$3);
 	}
-	else{
-		ParadoxComplicateTag* tag2 = createComplicateTag();
-		tag2->op = '=';
-		tag2->lVal = $1;
-		tag2->rVal = $3;
-		tag->add("#PARAMETER_TEMPLATE",tag2);
-	}
 	$$ = tag;
 }
   | A lVal '=' rVal {
@@ -167,205 +141,10 @@ A: lVal '=' rVal {
 	else if(type == ParadoxType::INTEGER){
 		tag->add(std::to_string($2->getAsInteger()->getIntegerContent() / 1000),$4);
 	}
-	else{
-		ParadoxComplicateTag* tag2 = createComplicateTag();
-		tag2->op = '=';
-		tag2->lVal = $2;
-		tag2->rVal = $4;
-		tag->add("#PARAMETER_TEMPLATE",tag2);
-	} 
 	$$ = tag;
   }
   | A BLANK
-  | OPT {
-	std::string name = "#OPTIONAL_TAG";
-	ParadoxTag* tag = createTag();
-	tag->add(name,$1);
-	$$=tag;
-  }
-  | A OPT {
-	std::string name = "#OPTIONAL_TAG";
-	ParadoxTag* tag = $1->getAsTag();
-	tag->add(name,$2);
-	$$=tag;
-  }
-  
-  | BLANK_OPT {$$ = createTag();}
-  | A BLANK_OPT
-  | T_PARAMETER BLANK %prec LOWEST {
-	std::string name = "#PARAMETER_BLOCK";
-	ParadoxTag* tag = createTag();
-	ParadoxParameter* par = createParameter();
-	par->appendParameter($1);
-	tag->add(name,par);
-	$$=tag;
-  }
-  | A T_PARAMETER BLANK %prec LOWEST{
-  	std::string name = "#PARAMETER_BLOCK";
-	ParadoxTag* tag = $1->getAsTag();
-	ParadoxParameter* par = createParameter();
-	par->appendParameter($2);
-	tag->add(name,par);
-	$$=tag;
-  }
-  | lVal '>' rVal{
-	ParadoxTag* tag = createTag();
-	ParadoxType type = $1->getType();
-	ParadoxComplicateTag* tag2 = createComplicateTag();
-	tag2->op = '>';
-	if(type == ParadoxType::STRING){
-		tag2->lVal = nullptr;
-		tag2->rVal = $3;
-		tag->add($1->getAsString()->getStringContent(),tag2);
-	}
-	else if(type == ParadoxType::DATE){
-		tag2->lVal = nullptr;
-		tag2->rVal = $3;
-		tag->add($1->getAsDate()->getDateContent().toString(),tag2);
-	}
-	else if(type == ParadoxType::INTEGER){
-		tag2->lVal = nullptr;
-		tag2->rVal = $3;
-		tag->add(std::to_string($1->getAsInteger()->getIntegerContent() / 1000),tag2);
-	}
-	else{
 
-		tag2->lVal = $1;
-		tag2->rVal = $3;
-		tag->add("#PARAMETER_TEMPLATE",tag2);
-	} 
-  }
-  | A lVal '>' rVal {
-	ParadoxType type = $2->getType();
-	ParadoxTag* tag = $1->getAsTag();
-	ParadoxComplicateTag* tag2 = createComplicateTag();
-	tag2->op = '>';
-	if(type == ParadoxType::STRING){
-		tag2->lVal = nullptr;
-		tag2->rVal = $4;
-		tag->add($2->getAsString()->getStringContent(),tag2);
-	}
-	else if(type == ParadoxType::DATE){
-		tag2->lVal = nullptr;
-		tag2->rVal = $4;
-		tag->add($2->getAsDate()->getDateContent().toString(),tag2);
-	}
-	else if(type == ParadoxType::INTEGER){
-		tag2->lVal = nullptr;
-		tag2->rVal = $4;
-		tag->add(std::to_string($2->getAsInteger()->getIntegerContent() / 1000),tag2);
-	}
-	else{
-
-		tag2->lVal = $2;
-		tag2->rVal = $4;
-		tag->add("#PARAMETER_TEMPLATE",tag2);
-	} 
-  }
-  | lVal '<' rVal{
-	ParadoxTag* tag = createTag();
-	ParadoxType type = $1->getType();
-	ParadoxComplicateTag* tag2 = createComplicateTag();
-	tag2->op = '<';
-	if(type == ParadoxType::STRING){
-		tag2->lVal = nullptr;
-		tag2->rVal = $3;
-		tag->add($1->getAsString()->getStringContent(),tag2);
-	}
-	else if(type == ParadoxType::DATE){
-		tag2->lVal = nullptr;
-		tag2->rVal = $3;
-		tag->add($1->getAsDate()->getDateContent().toString(),tag2);
-	}
-	else if(type == ParadoxType::INTEGER){
-		tag2->lVal = nullptr;
-		tag2->rVal = $3;
-		tag->add(std::to_string($1->getAsInteger()->getIntegerContent() / 1000),tag2);
-	}
-	else{
-
-		tag2->lVal = $1;
-		tag2->rVal = $3;
-		tag->add("#PARAMETER_TEMPLATE",tag2);
-	} 
-  }
-  | A lVal '<' rVal{
-	ParadoxType type = $2->getType();
-	ParadoxTag* tag = $1->getAsTag();
-	ParadoxComplicateTag* tag2 = createComplicateTag();
-	tag2->op = '<';
-	if(type == ParadoxType::STRING){
-		tag2->lVal = nullptr;
-		tag2->rVal = $4;
-		tag->add($2->getAsString()->getStringContent(),tag2);
-	}
-	else if(type == ParadoxType::DATE){
-		tag2->lVal = nullptr;
-		tag2->rVal = $4;
-		tag->add($2->getAsDate()->getDateContent().toString(),tag2);
-	}
-	else if(type == ParadoxType::INTEGER){
-		tag2->lVal = nullptr;
-		tag2->rVal = $4;
-		tag->add(std::to_string($2->getAsInteger()->getIntegerContent() / 1000),tag2);
-	}
-	else{
-		tag2->lVal = $2;
-		tag2->rVal = $4;
-		tag->add("#PARAMETER_TEMPLATE",tag2);
-	} 
-  }
-OPT: '[' '[' T_IDENT ']' A ']' {
-	ParadoxOptionalTag* tag = createOptionalTag();
-	tag->condition = $3;
-	tag->content = $5->getAsTag();
-	$$ = tag;
-}
-	| '[' '[' T_IDENT ']' BLANK A ']' {
-	ParadoxOptionalTag* tag = createOptionalTag();
-	tag->condition = $3;
-	tag->content = $6->getAsTag();
-	$$ = tag;
-}
-	|'[' '[' T_NUM_CONSTANT ']' A ']' {
-	ParadoxOptionalTag* tag = createOptionalTag();
-	tag->condition = std::to_string($3 / 1000);
-	tag->content = $5->getAsTag();
-	$$ = tag;
-}
-	| '[' '[' T_NUM_CONSTANT ']' BLANK A ']' {
-	ParadoxOptionalTag* tag = createOptionalTag();
-	tag->condition = std::to_string($3 / 1000);
-	tag->content = $6->getAsTag();
-	$$ = tag;
-}
-	| '[' '[' T_NUM_CONSTANT ']' T_PARAMETER ']' {
-		ParadoxOptionalTag* tag = createOptionalTag();
-		tag->condition = std::to_string($3 / 1000);
-		ParadoxTag* tag2 = createTag();
-		std::string name = "#PARAMETER_BLOCK";
-		ParadoxParameter* par = createParameter();
-		par->appendParameter($5);
-		tag2->add(name,par);
-		tag->content = tag2;
-		$$ = tag;
-	
-}
-	| '[' '[' T_IDENT ']' T_PARAMETER ']' {
-		ParadoxOptionalTag* tag = createOptionalTag();
-		tag->condition = $3;
-		ParadoxTag* tag2 = createTag();
-		std::string name = "#PARAMETER_BLOCK";
-		ParadoxParameter* par = createParameter();
-		par->appendParameter($5);
-		tag2->add(name,par);
-		tag->content = tag2;
-		$$ = tag;
-}
-BLANK_OPT: '[' '[' T_IDENT ']' ']' {$$ = 1;}
-		 | '[' '[' T_IDENT ']' BLANK ']' {$$ = 1;}
-		 | '[' '[' T_NUM_CONSTANT ']' ']' {$$ = 1;}
-		 | '[' '[' T_NUM_CONSTANT ']' BLANK ']' {$$ = 1;}
 B: B T_IDENT{
 	$1->getAsArray()->append(createString($2));
   } 
@@ -388,7 +167,6 @@ C: C T_NUM_CONSTANT {
 lVal: T_IDENT {$$ = createTempString($1);}
   | T_DATE {$$ = createTempDate($1);}
   | T_NUM_CONSTANT {$$ = createTempInteger($1);}
-  | PC {$$ = $1;}
   
 rVal: GT {$$ = $1;}
   | T_LITERAL {
@@ -411,59 +189,6 @@ rVal: GT {$$ = $1;}
 		tempObject.pop_back();
 		delete $1;
 	}
-	else $$ = $1;
-  }
-PC: T_SPECIAL T_PARAMETER {
-	ParadoxParameter* parameter = createParameter();
-	parameter->appendString($1);
-	parameter->appendParameter($2);
-	$$ = parameter;
-  }
-  | T_IDENT T_PARAMETER{
-	ParadoxParameter* parameter = createParameter();
-	parameter->appendString($1);
-	parameter->appendParameter($2);
-	$$ = parameter;
-  }
-  | T_PARAMETER {
-	ParadoxParameter* parameter = createParameter();
-	parameter->appendParameter($1);
-	$$ = parameter;
-  }
-  | T_NUM_CONSTANT T_PARAMETER {
-	ParadoxParameter* parameter = createParameter();
-	parameter->appendString(std::to_string($1));
-	parameter->appendParameter($2);
-	$$ = parameter;
-
-  }
-  | T_IDENT '[' '[' T_IDENT ']' T_IDENT ']' {
-	ParadoxParameter* parameter = createParameter();
-	parameter->appendString($1);
-	std::string opt_literal = "OPT_LITERAL^";
-	opt_literal.append($4);
-	opt_literal.append("^");
-	opt_literal.append($6);
-	parameter->appendString(opt_literal);
-	$$ = parameter;
-  } 
-  | PC T_NUM_CONSTANT {
-	$$->getAsParameter()->appendString(std::to_string($2));
-  
-  }
-  | PC T_NUM_CONSTANT T_PARAMETER {
-	$$->getAsParameter()->appendString(std::to_string($2));
-	$$->getAsParameter()->appendParameter($3);
-  }
-  | PC T_IDENT T_PARAMETER {
-	$$->getAsParameter()->appendString($2);
-	$$->getAsParameter()->appendParameter($3);
-  }
-  | PC T_PARAMETER {
-	$$->getAsParameter()->appendParameter($2);
-  }
-  | PC T_IDENT {
-	$$->getAsParameter()->appendString($2);
   }
 BLANK: ' ' { $$ = 1;}
 	 | BLANK ' '{ $$ = 1;}

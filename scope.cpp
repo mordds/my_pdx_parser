@@ -43,13 +43,22 @@ CustomScope::CustomScope(std::string str){
 }
 std::string ProvinceScope::toString(){
  	std::string ret = "";
+ 	ret.append(std::to_string(this->id));
+	return ret;
+} 
+std::string ProvinceScope::toHtml(){
+ 	std::string ret = "";
  	ret.append("{{province_name|");
  	ret.append(std::to_string(this->id));
 	ret.append("}}");
 	return ret;
 } 
-
 std::string CountryScope::toString(){
+	std::string ret = "";
+	ret.append(this->tag);
+	return ret;
+}
+std::string CountryScope::toHtml(){
 	std::string ret = "";
 	ret.append("{{tag_name_with_flag|");
 	ret.append(this->tag);

@@ -30,7 +30,7 @@ std::pair<std::string,std::string> splitWith(std::string source,std::string spli
 std::string toUpperCase(std::string str){
     std::string ret = str;
     for(int i = 0;i < str.length();i++){
-        if(str[i] >= 'a' && str[i] <= 'z') str[i] -= 0x20;
+        if(ret[i] >= 'a' && ret[i] <= 'z') ret[i] -= 0x20;
     }
     return ret;
 }
@@ -38,7 +38,7 @@ std::string toUpperCase(std::string str){
 std::string toLowerCase(std::string str){
     std::string ret = str;
     for(int i = 0;i < str.length();i++){
-        if(str[i] >= 'a' && str[i] <= 'z') str[i] += 0x20;
+        if(ret[i] >= 'a' && ret[i] <= 'z') ret[i] += 0x20;
     }
     return ret;
 }

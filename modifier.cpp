@@ -113,12 +113,12 @@ void loadInternalModifier(){
 	registerModifier("max_admiral_siege",ModifierType::NORMAL,"最大海军将领围城");
 	registerModifier("coast_raid_range",ModifierType::NORMAL,"劫掠海岸范围");
 	registerModifier("development_cost_in_primary_culture",ModifierType::MINUS_PERCENTAGE,"主流文化发展成本");
-	registerModifier("reduced_trade_penalty_on_non_main_tradenode",ModifierType::MINUS_PERCENTAGE,"非贸易本埠节点贸易惩罚");
+	registerModifier("reduced_trade_penalty_on_non_main_tradenode",ModifierType::REVERSED_PERCENTAGE2,"非贸易本埠节点贸易惩罚");
 	registerModifier("colony_cost_modifier",ModifierType::MINUS_PERCENTAGE,"殖民花费修正");
 	registerModifier("local_colony_cost_modifier",ModifierType::MINUS_PERCENTAGE,"本地殖民花费修正");
 	registerModifier("spy_action_cost_modifier",ModifierType::MINUS_PERCENTAGE,"间谍行动花费修正");
 	registerModifier("placed_merchant_power_modifier",ModifierType::PERCENTAGE,"已配置商人团竞争力修正");
-	registerModifier("reduced_liberty_desire_on_other_continent",ModifierType::MINUS_PERCENTAGE,"降低其他大洲属国独立倾向");
+	registerModifier("reduced_liberty_desire_on_other_continent",ModifierType::REVERSED_PERCENTAGE2,"降低其他大洲属国独立倾向");
 	registerModifier("overextension_impact_modifier",ModifierType::MINUS_PERCENTAGE,"过度扩张影响修正");
 	registerModifier("artillery_level_modifier",ModifierType::NORMAL,"炮兵等级对围城的贡献");
 	registerModifier("local_tolerance_of_heretics",ModifierType::NORMAL,"本地异端容忍度");
@@ -467,7 +467,7 @@ void loadInternalModifier(){
 	registerModifier("autonomy_change_time",ModifierType::MINUS_PERCENTAGE,"自治度变化冷却");
 	registerModifier("rival_change_cost",ModifierType::MINUS_PERCENTAGE,"变更宿敌花费");
 	registerModifier("rival_border_fort_maintenance",ModifierType::MINUS_PERCENTAGE,"与宿敌接壤的要塞维护费");
-	registerModifier("reduced_liberty_desire_on_same_continent",ModifierType::MINUS_PERCENTAGE,"同大洲属国独立倾向");
+	registerModifier("reduced_liberty_desire_on_same_continent",ModifierType::REVERSED_PERCENTAGE2,"同大洲属国独立倾向");
 	registerModifier("backrow_artillery_damage",ModifierType::PERCENTAGE,"后排炮兵伤害");
 	registerModifier("enforce_religion_cost",ModifierType::MINUS_PERCENTAGE,"通过战争强制改变宗教的花费");
 	registerModifier("monarch_admin_power",ModifierType::NORMAL,"君主行政能力");
@@ -701,6 +701,13 @@ std::string Modifier::localize(){
 			localized.append(buffer);
 			localized.append(obj.localizedName);
 		}
+		else if(type_id == 12){
+			char buffer[16];
+			generatePercentage2(-1 * items[i].value,buffer);
+			
+			localized.append(buffer);
+			localized.append(obj.localizedName);
+		}
 		else{
 			char buffer[16];
 			generatePercentage2(items[i].value,buffer);
@@ -755,6 +762,18 @@ std::string Modifier::localizeHtml(){
 			localized.append(class_span);
 			localized.append("\">");
 			generateValue(items[i].value,buffer);
+			
+			localized.append(buffer);
+			localized.append("</span>");
+			localized.append(obj.localizedName);
+		}
+		else if(type_id == 12){
+			std::string class_span = items[i].value < 0 ? "modifier_negative" : "modifier_positive";
+			char buffer[16];
+			localized.append("<span class=\"");
+			localized.append(class_span);
+			localized.append("\">");
+			generatePercentage2(-1 * items[i].value,buffer);
 			
 			localized.append(buffer);
 			localized.append("</span>");

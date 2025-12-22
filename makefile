@@ -2,7 +2,7 @@
 CXX = g++
 CXXFLAGS = -O2 -std=c++17 -Werror
 
-SRCS = utils/string_util.cpp utils/parser_util.cpp pattern.cpp trigger.cpp scope.cpp modifier.cpp paradox_type.cpp localization.cpp db_object.cpp
+SRCS = utils/string_util.cpp utils/parser_util.cpp pattern.cpp trigger.cpp scope.cpp modifier.cpp paradox_type.cpp localization.cpp db_object.cpp national_idea.cpp
 SRCHEADERS = $(SRCS:.cpp=.h)
 OBJS = $(SRCS:.cpp=.o)
 TARGET = console.exe
@@ -28,9 +28,12 @@ lex2.yy.c: pdx.l
 lexer.o: lex2.yy.c 
 	g++ -c lex2.yy.c -o lexer.o -O2 -std=c++17 -lstdc++fs -Werror
 	
-parser.o:
+parser.o: y.tab.c
 	g++ -c y.tab.c -o parser.o -O2 -std=c++17 -lstdc++fs -Werror
-
+	
 y.tab.c: test.y
 	bison -vdty test.y
-	
+	sed -i 's/define YYSIZE_T size_t/define YYSIZE_T long long/g' y.tab.c
+	sed -i 's/# ifdef __SIZE_TYPE__//g' y.tab.c
+	sed -i 's/#  define YYSIZE_T __SIZE_TYPE__//g' y.tab.c
+	sed -i 's/# elif defined size_t/# ifdef size_t/g' y.tab.c

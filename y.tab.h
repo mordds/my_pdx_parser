@@ -44,8 +44,7 @@
      T_DATE = 260,
      T_NUM_CONSTANT = 261,
      T_PARAMETER = 262,
-     T_SPECIAL = 263,
-     LOWEST = 264
+     LOWEST = 263
    };
 #endif
 /* Tokens.  */
@@ -54,8 +53,7 @@
 #define T_DATE 260
 #define T_NUM_CONSTANT 261
 #define T_PARAMETER 262
-#define T_SPECIAL 263
-#define LOWEST 264
+#define LOWEST 263
 
 
 
@@ -65,7 +63,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 87 "test.y"
+#line 72 "test.y"
 
 	char name[64];
 	int num;
@@ -75,7 +73,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 79 "y.tab.h"
+#line 77 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

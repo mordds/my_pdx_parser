@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include "y.tab.h"
 #include "utils/parser_util.h"
+#include "utils/string_util.h"
 #include "modifier.h"
 #include "localization.h"
-#include <ratio>
-#include <iostream>
+
 std::map<std::string,Good> goodRegistry;
 
 
@@ -22,10 +22,12 @@ void registerGood(){
         Good good;
         
         ParadoxTag* tag = root->tags[str]->getAsTag();
-        good.defaultPrice = tag->get("base_price",1)->getAsInteger()->getIntegerContent();
+        ParadoxBase* base = tag->get("base_price",1);
+        if(base == nullptr) continue;
+        good.defaultPrice = base->getAsInteger()->getIntegerContent();
         std::string localizeKey = "good_";
         localizeKey.append(str);
-        good.localizedName = getLocalization(localizeKey); 
+        good.localizedName = getLocalization(toUpperCase(localizeKey)); 
         goodRegistry[str] = good;
     }
     clearParserDatas();
@@ -37,7 +39,7 @@ void registerGood(){
         ParseModifier(root->tags[str]->getAsTag()->getAsTag("modifier",1), *(goodRegistry[str].globalModifier.get()));
         goodRegistry[str].globalModifier->name = "贸易优势奖励";
         ParseModifier(root->tags[str]->getAsTag()->getAsTag("province",1), *(goodRegistry[str].provinceModifier.get()));
-         goodRegistry[str].provinceModifier->name = "生产该商品的省份效果";
+        goodRegistry[str].provinceModifier->name = "生产该商品的省份效果";
     }
     clearParserDatas();
 }

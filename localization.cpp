@@ -23,8 +23,8 @@ void readFromFiles(std::string path){
     while(!fin.eof()){
         std::string line;
         std::getline(fin,line);
+        if(line.length() == 0) continue; 
         if(line[0] == '#') continue;
-        std::cout << line <<std::endl;
         std::pair<std::string,std::string> pair = splitWith(line,":");
         localizations[pair.first] = pair.second;
     }
