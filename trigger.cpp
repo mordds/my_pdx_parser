@@ -445,6 +445,45 @@ std::string TriggerItem::toString(std::vector<ParadoxBase*> base,bool reversed){
 	return p.getOutput();
 }
 
+std::string TriggerItem::toHtml(std::vector<ParadoxBase*> base,bool reversed){
+	
+	std::string usePattern = reversed ? this->reversePattern : this->pattern;
+	if(this->usedParameter.size() == 0) return usePattern;
+	Pattern p(usePattern);
+	for(int i = 0;i < usedParameter.size();i++){
+		int index = usedParameter[i];
+		if(index == -1){
+			return "<ERROR>";
+		}
+		else{
+			ParadoxBase* base1 = base[index];
+			if(isCastable(base1,parameterType[index])){
+				bool success = false;
+				if(parameterType[index] == ParadoxType::INTEGER){
+					success = p.setNextInteger(base1->getAsInteger()->getIntegerContent());
+				}
+				else if(parameterType[index] == ParadoxType::STRING){
+					success = p.setNextString(base1->getAsString()->getStringContent());
+				}
+				else if(parameterType[index] == ParadoxType::DATE){
+					success = p.setNextString(base1->getAsDate()->getDateContent().toString());			
+				}
+				else if(parameterType[index] == ParadoxType::SCOPE){
+					std::string str = base1->getAsString()->getStringContent();
+					Scope* scope = createScopeFromString(str);
+					if(scope == nullptr) return "<ERROR>";
+					success = p.setNextString(scope->toHtml());
+						
+				}
+				if(!success) return "<ERROR>";
+			} 
+			else return "<ERROR>";
+		}
+	}
+	return p.getOutput();
+}
+
+
 TriggerItem::TriggerItem(std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter){
 	this->pattern = patterns.first;
 	this->reversePattern = patterns.second;

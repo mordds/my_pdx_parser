@@ -37,6 +37,7 @@ void generatePercentage(int value,char* str){
 	}
 	else {
 		if(pValue > 0 || (pValue == 0 && qValue >= 0)) sprintf(str,"+%d.%d%% ",pValue,qValue);
+		else if(pValue < 0)  sprintf(str,"%d.%d%%",pValue,-1 * qValue);
 		else sprintf(str,"-%d.%d%% ",pValue,-1 * qValue);
 	}
 } 
@@ -50,6 +51,7 @@ void generateValue(int value,char* str){
 	else {
 		while(qValue % 10 == 0) qValue /= 10;
 		if(pValue > 0 || (pValue == 0 && qValue >= 0)) sprintf(str,"+%d.%d ",pValue,qValue);
+		else if(pValue < 0) sprintf(str,"%d.%d ",pValue,-1 * qValue);
 		else sprintf(str,"-%d.%d ",pValue,-1 * qValue);
 	}
 } 
@@ -63,7 +65,8 @@ void generatePercentage2(int value,char* str){
 	else {
 		while(qValue % 10 == 0) qValue /= 10;
 		if(pValue > 0 || (pValue == 0 && qValue >= 0)) sprintf(str,"+%d.%d%% ",pValue,qValue);
-		else sprintf(str,"%d.%d%% ",pValue,qValue);
+		else if(pValue < 0)  sprintf(str,"%d.%d%% ",pValue,qValue);
+		else sprintf(str,"-%d.%d%% ",pValue,qValue);
 	}
 } 
 
@@ -610,6 +613,126 @@ void loadInternalModifier(){
 	registerModifier("transport_hull_size_modifier",ModifierType::PERCENTAGE,"运输船船体尺寸修正");
 	registerModifier("engagement_cost",ModifierType::NORMAL,"舰船接战宽度");
 
+	registerModifier("engagement_cost_modifier",ModifierType::PERCENTAGE,"舰船接战宽度修正");
+	registerModifier("special_unit_cost_modifier",ModifierType::MINUS_PERCENTAGE,"特殊单位花费修正");
+	registerModifier("special_unit_manpower_cost_modifier",ModifierType::MINUS_PERCENTAGE,"特殊单位人力花费修正");
+	registerModifier("number_of_cannons_flagship_modifier",ModifierType::PERCENTAGE,"旗舰舰炮数量");
+	registerModifier("number_of_cannons_flagship",ModifierType::NORMAL,"旗舰舰炮数量");
+	registerModifier("number_of_cannons",ModifierType::PERCENTAGE,"舰炮数量");
+	registerModifier("max_flagships",ModifierType::NORMAL,"旗舰上限");
+	registerModifier("flagship_morale",ModifierType::PERCENTAGE,"旗舰士气");
+	registerModifier("naval_maintenance_flagship_modifier",ModifierType::MINUS_PERCENTAGE,"旗舰维护费");
+	registerModifier("trade_power_in_fleet_modifier",ModifierType::PERCENTAGE,"舰队中每艘船的贸易竞争力");
+	registerModifier("ship_trade_power",ModifierType::NORMAL,"船只贸易竞争力");
+	registerModifier("ship_trade_power_modifier",ModifierType::PERCENTAGE,"船只贸易竞争力修正");
+	registerModifier("can_transport_units",ModifierType::MARK,"可以运输单位");
+	registerModifier("flagship_naval_engagement_modifier",ModifierType::NORMAL,"舰队接战宽度");
+	registerModifier("blockade_impact_on_siege_in_fleet_modifier",ModifierType::NORMAL,"舰队封锁对围城的影响");
+	registerModifier("movement_speed_in_fleet_modifier",ModifierType::PERCENTAGE,"舰队移动速度");
+	registerModifier("flagship_durability",ModifierType::PERCENTAGE,"旗舰耐久度");
+	registerModifier("morale_in_fleet_modifier",ModifierType::PERCENTAGE,"舰队士气");
+	registerModifier("exploration_mission_range_in_fleet_modifier",ModifierType::PERCENTAGE,"舰队探索距离");
+	registerModifier("barrage_cost_in_fleet",ModifierType::MINUS_PERCENTAGE,"舰队海上炮击花费");
+	registerModifier("naval_attrition_in_fleet",ModifierType::MINUS_PERCENTAGE,"舰队损耗");
+	registerModifier("cannons_for_hunting_pirates_in_fleet",ModifierType::PERCENTAGE,"舰队缉捕海盗效率");
+	registerModifier("movement_speed_onto_off_boat_modifier",ModifierType::PERCENTAGE,"上船与登陆速度");
+	registerModifier("admiral_skill_gain_modifier",ModifierType::PERCENTAGE,"海军将领技能获得修正");
+	registerModifier("privateering_efficiency_in_fleet_modifier",ModifierType::PERCENTAGE,"舰队私掠效率");
+	registerModifier("prestige_from_battles_in_fleet_modifier",ModifierType::PERCENTAGE,"舰队在战斗中获得的威望");
+	registerModifier("naval_tradition_in_fleet_modifier",ModifierType::PERCENTAGE,"战斗获得的海军传统");
+	registerModifier("landing_penalty",ModifierType::MINUS_PERCENTAGE,"登陆作战惩罚");
+	registerModifier("establish_order_cost",ModifierType::MINUS_PERCENTAGE,"设立地方组织花费");
+	registerModifier("treasure_fleet_income",ModifierType::PERCENTAGE,"珍宝船队收入");
+	registerModifier("global_naval_barrage_cost",ModifierType::MINUS_PERCENTAGE,"全局海上炮击花费");
+	registerModifier("center_of_trade_upgrade_cost",ModifierType::MINUS_PERCENTAGE,"贸易中心升级花费");
+	registerModifier("local_center_of_trade_upgrade_cost",ModifierType::MINUS_PERCENTAGE,"本地贸易中心升级花费");
+	registerModifier("local_missionary_maintenance_cost",ModifierType::MINUS_PERCENTAGE,"本地传教维护费");
+	registerModifier("naval_tradition_from_trade",ModifierType::PERCENTAGE,"贸易获得的海军传统");
+	registerModifier("admiral_cost",ModifierType::MINUS_PERCENTAGE,"海军提督花费");
+	registerModifier("expel_minorities_cost",ModifierType::MINUS_PERCENTAGE,"驱逐少数族群花费");
+	registerModifier("infantry_fire",ModifierType::NORMAL,"步兵火力");
+	registerModifier("cavalry_fire",ModifierType::NORMAL,"骑兵火力");
+	registerModifier("artillery_fire",ModifierType::NORMAL,"炮兵火力");
+	registerModifier("infantry_shock",ModifierType::NORMAL,"步兵冲击");
+	registerModifier("cavalry_shock",ModifierType::NORMAL,"骑兵冲击");
+	registerModifier("artillery_shock",ModifierType::NORMAL,"炮兵冲击");
+	registerModifier("cb_on_religious_enemies",ModifierType::MARK,"对相邻的异端异教国家拥有永久性宣战理由");
+	registerModifier("yearly_patriarch_authority",ModifierType::NORMAL,"年度恶魔力量");
+	registerModifier("yearly_authority",ModifierType::NORMAL,"每年权威");
+	registerModifier("yearly_karma_decay",ModifierType::MINUS,"年度科琳典范值衰减");
+	registerModifier("available_province_loot",ModifierType::PERCENTAGE,"可用的战利品");
+	registerModifier("relation_with_heathens",ModifierType::NORMAL,"对异教国家好感度");
+	registerModifier("relation_with_same_religion",ModifierType::NORMAL,"对同一宗教国家好感度");
+	registerModifier("reverse_relation_with_same_religion",ModifierType::NORMAL,"同一宗教国家的好感度");
+	registerModifier("relation_with_same_culture",ModifierType::NORMAL,"相同文化好感度");
+	registerModifier("relation_with_same_culture_group",ModifierType::NORMAL,"相同文化组好感度");
+	registerModifier("max_free_cities",ModifierType::NORMAL,"自由市数量上限");
+	registerModifier("max_electors",ModifierType::NORMAL,"选帝侯数量上限");
+	registerModifier("manpower_against_imperial_enemies",ModifierType::PERCENTAGE,"与帝国敌人交战时的人力");
+	registerModifier("max_revolutionary_zeal",ModifierType::NORMAL,"最大革命热情");
+	registerModifier("yearly_revolutionary_zeal",ModifierType::NORMAL,"年度革命热情");
+	registerModifier("flagship_cost",ModifierType::MINUS_PERCENTAGE,"旗舰花费");
+	registerModifier("governing_capacity",ModifierType::NORMAL,"行政容量");
+	registerModifier("governing_capacity_modifier",ModifierType::PERCENTAGE,"行政容量修正");
+	registerModifier("relation_with_accepted_culture",ModifierType::NORMAL,"相容文化好感度");
+	registerModifier("relation_with_other_culture",ModifierType::NORMAL,"不接受文化好感度");
+	registerModifier("stability_cost_to_declare_war",ModifierType::MINUS,"宣战的稳定度惩罚");
+	registerModifier("special_unit_forcelimit",ModifierType::PERCENTAGE,"特殊单位数量上限");
+	registerModifier("curia_powers_cost",ModifierType::MINUS_PERCENTAGE,"教廷影响力花费");
+	registerModifier("appoint_cardinal_cost",ModifierType::MINUS_PERCENTAGE,"任命真知者花费");
+	registerModifier("papal_influence_from_cardinals",ModifierType::PERCENTAGE,"真知者提供的教廷影响力");
+	registerModifier("imperial_reform_catholic_approval",ModifierType::NORMAL,"揭秘教诸侯帝国改革支持度");
+	registerModifier("disengagement_chance",ModifierType::PERCENTAGE,"舰船脱离接战机率");
+	registerModifier("manpower_in_culture_group_provinces",ModifierType::PERCENTAGE,"同文化组省份的人力");
+	registerModifier("free_city_imperial_authority",ModifierType::PERCENTAGE,"自由市给予的帝国权威");
+	registerModifier("imperial_mercenary_cost",ModifierType::MINUS_PERCENTAGE,"安本纳尔帝国雇佣兵征募花费");
+	registerModifier("reasons_to_elect",ModifierType::NORMAL,"票选原因");
+	registerModifier("years_to_integrate_personal_union",ModifierType::MINUS,"整合被联统国等待年数");
+	registerModifier("legitimate_subject_elector",ModifierType::NORMAL,"合法的附属选帝侯");
+	registerModifier("transfer_trade_power_reasons",ModifierType::NORMAL,"转移贸易接受度");
+	registerModifier("local_warscore_cost_modifier",ModifierType::MINUS_PERCENTAGE,"本地战争分数花费");
+	registerModifier("mercantilism_cost",ModifierType::MINUS_PERCENTAGE,"提升重商主义花费");
+	registerModifier("tribal_development_growth",ModifierType::NORMAL,"部落发展度增长");
+	registerModifier("monthly_federation_favor_growth",ModifierType::NORMAL,"月度联盟人情增长");
+	registerModifier("monthly_heir_claim_increase",ModifierType::NORMAL,"每月继承人正统性增长");
+	registerModifier("monthly_heir_claim_increase_modifier",ModifierType::PERCENTAGE,"每月继承人正统性增长修正");
+	registerModifier("great_project_upgrade_cost",ModifierType::MINUS_PERCENTAGE,"伟大工程升级花费");
+	registerModifier("local_great_project_upgrade_cost",ModifierType::MINUS_PERCENTAGE,"本地伟大工程升级花费");
+	registerModifier("great_project_upgrade_time",ModifierType::MINUS_PERCENTAGE,"伟大工程升级时间");
+	registerModifier("local_great_project_upgrade_time",ModifierType::MINUS_PERCENTAGE,"本地伟大工程升级时间");
+	registerModifier("colonial_type_change_cost_modifier",ModifierType::MINUS_PERCENTAGE,"殖民领类型变更花费修正");
+	registerModifier("colonial_subject_type_upgrade_cost_modifier",ModifierType::MINUS_PERCENTAGE,"殖民领属国类型升级花费修正");
+	registerModifier("yearly_doom_reduction",ModifierType::MINUS,"每年饥渴值减少");
+	registerModifier("all_estate_loyalty_equilibrium",ModifierType::PERCENTAGE,"所有阶层忠诚均衡点");
+	registerModifier("loyalty_change_on_revoked",ModifierType::PERCENTAGE,"撤销特权时阶层的忠诚度变化");
+	registerModifier("estate_interaction_cooldown_modifier",ModifierType::MINUS_PERCENTAGE,"阶层互动冷却修正");
+	registerModifier("all_estate_possible_privileges",ModifierType::NORMAL,"阶层的特权上限");
+	registerModifier("no_stability_loss_on_monarch_death",ModifierType::MARK,"君主死亡时不会损失稳定度");
+	registerModifier("allow_free_estate_privilege_revocation",ModifierType::MARK,"允许无视阶层忠诚度和影响取消阶级特权");
+	registerModifier("no_claim_cost_increasement",ModifierType::MARK,"没有额外的宣称花费");
+	registerModifier("has_tercio",ModifierType::MARK,"可招募西班牙方阵步兵");
+	registerModifier("has_musketeer",ModifierType::MARK,"可招募滑膛枪兵");
+	registerModifier("has_samurai",ModifierType::MARK,"可招募武侠");
+	registerModifier("has_qizilbash",ModifierType::MARK,"可招募奇兹尔巴什");
+	registerModifier("has_mamluks",ModifierType::MARK,"可招募暗影战士");
+	registerModifier("has_geobukseon",ModifierType::MARK,"可建造万桨宝舰");
+	registerModifier("has_man_of_war",ModifierType::MARK,"可建造巨兽舰");
+	registerModifier("has_galleon",ModifierType::MARK,"可训练海兽");
+	registerModifier("has_galleass",ModifierType::MARK,"可建造加莱赛战船");
+	registerModifier("has_caravel",ModifierType::MARK,"可建造卡拉维尔帆船");
+	registerModifier("has_voc_indiamen",ModifierType::MARK,"可建造逐日者商船");
+	registerModifier("has_streltsy",ModifierType::MARK,"可招募射击军");
+	registerModifier("local_has_streltsy",ModifierType::MARK,"本地可招募射击军");
+	registerModifier("naval_morale_damage",ModifierType::PERCENTAGE,"海军士气打击");
+	registerModifier("naval_morale_damage_received",ModifierType::MINUS_PERCENTAGE,"所受海军士气打击");
+	registerModifier("yearly_government_power",ModifierType::NORMAL,"每年政府点数");
+	registerModifier("yearly_innovativeness",ModifierType::NORMAL,"年度创新度");
+	registerModifier("warscore_from_battles_modifier",ModifierType::PERCENTAGE,"来自战斗的战争分数修正");
+	registerModifier("reverse_relation_with_heathen_religion",ModifierType::NORMAL,"异教国家对我国的好感度");
+	registerModifier("reverse_relation_with_heretic_religion",ModifierType::NORMAL,"异端国家对我国的好感度");
+	registerModifier("amount_of_streltsy",ModifierType::NORMAL,"射击军上限");
+	registerModifier("allowed_streltsy_fraction",ModifierType::PERCENTAGE,"射击军上限占比");
+	
 	//For Estates Temp. 
 	//Will be Removed when Estate Preload Reader Complete
 	registerModifier("artificers_loyalty_modifier",ModifierType::PERCENTAGE,"奇械术士忠诚均衡点");

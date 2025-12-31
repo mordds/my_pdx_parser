@@ -18,7 +18,6 @@ extern std::vector<ParadoxBase*> parsedObject;
 extern std::map<std::string,TriggerItem*> registeredTriggers;
 
 int main(int argc,char** argv){
-	std::cout << sizeof(Trigger) << std::endl;
 	yyin = fopen("b0.txt","r");
 	registerTriggerItems();
 	yyparse();
