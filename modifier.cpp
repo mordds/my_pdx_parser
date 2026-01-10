@@ -284,7 +284,8 @@ void loadInternalModifier(){
 	registerModifier("free_adm_policy",ModifierType::NORMAL,"免费行政政策");
     registerModifier("free_dip_policy",ModifierType::NORMAL,"免费外交政策");
     registerModifier("free_mil_policy",ModifierType::NORMAL,"免费军事政策");
-	registerModifier("province_warscore_cost",ModifierType::MINUS_PERCENTAGE,"省份战争分数花费");	registerModifier("yearly_corruption",ModifierType::MINUS,"每年腐败度");
+	registerModifier("province_warscore_cost",ModifierType::MINUS_PERCENTAGE,"省份战争分数花费");
+	registerModifier("yearly_corruption",ModifierType::MINUS,"每年腐败度");
 	registerModifier("artillery_levels_available_vs_fort",ModifierType::NORMAL,"炮兵围攻加成上限");
 	registerModifier("reform_progress_growth",ModifierType::PERCENTAGE,"改革进度增长");
 	registerModifier("warscore_cost_vs_other_religion",ModifierType::MINUS_PERCENTAGE,"对其他宗教的战争分数花费");
@@ -465,7 +466,6 @@ void loadInternalModifier(){
 	registerModifier("placed_merchant_power",ModifierType::NORMAL,"商人团贸易竞争力");
 	registerModifier("ship_power_propagation",ModifierType::PERCENTAGE,"船只贸易竞争力传递");
 	registerModifier("administrative_efficiency",ModifierType::PERCENTAGE,"行政效率");
-	registerModifier("max_absolutism",ModifierType::NORMAL,"最大专制度");
 	registerModifier("core_decay_on_your_own",ModifierType::MINUS_PERCENTAGE,"外国核心期限");
 	registerModifier("autonomy_change_time",ModifierType::MINUS_PERCENTAGE,"自治度变化冷却");
 	registerModifier("rival_change_cost",ModifierType::MINUS_PERCENTAGE,"变更宿敌花费");
@@ -786,7 +786,7 @@ void ParseModifier(ParadoxTag* tag,Modifier& modifier){
 		ModifierObject obj = it->second;
 		bool isMark = obj.type == ModifierType::MARK || obj.type == ModifierType::MINUS_MARK;
 		ParadoxBase* base = tag->get(i);
-		mod_item.modifierName = item;
+		mod_item.modifierObject = &modifierObjects[item];
 		if(base->getType() == ParadoxType::INTEGER && !isMark){
 			mod_item.value = base->getAsInteger()->getIntegerContent();
 			modifier.items.push_back(mod_item);
@@ -803,7 +803,7 @@ std::string Modifier::localize(){
 	localized.append(this->name);
 	localized.append(":\r\n");
 	for(int i = 0;i < items.size();i++){
-		ModifierObject obj = modifierObjects[items[i].modifierName];
+		ModifierObject obj = *items[i].modifierObject;
 		int type_id = (int)obj.type; 
 		if(type_id >= 6 && type_id <= 8){
 			localized.append(obj.localizedName);
@@ -847,7 +847,7 @@ std::string Modifier::localizeHtml(){
 	localized.append(this->name);
 	localized.append(":</div>\r\n");
 	for(int i = 0;i < items.size();i++){
-		ModifierObject obj = modifierObjects[items[i].modifierName];
+		ModifierObject obj = *items[i].modifierObject;
 		localized.append("<div>");
 		int type_id = (int)obj.type; 
 		if(type_id >= 6 && type_id <= 8){

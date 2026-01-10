@@ -5,8 +5,8 @@
 #include <map>
 
 
-std::map<std::string,NationalIdea*> nationalIdeas;
-std::map<std::string,NationalIdea*> tagIdeas;
+std::map<std::string,const NationalIdea*> nationalIdeas;
+std::map<std::string,const NationalIdea*> tagIdeas;
 
 
 void loadNationalIdea(){
@@ -38,6 +38,7 @@ void loadNationalIdea(){
                 idea->trigger->takeOverLifeCycle();
             }
             else{
+                idea->localize_key[slot] = getLocalizationKeyPtr(entry);
                 idea->modifiers[slot]->name = getLocalization(entry);
                 ParseModifier(ideaTag->getAsTag(entry),*(idea->modifiers[slot]));
                 slot++;
@@ -56,7 +57,7 @@ void loadNationalIdea(){
     clearParserDatas();
 }
 
-std::string NationalIdea::toString(){
+std::string NationalIdea::toString() const{
     std::string ret("");
     if(this->trigger != nullptr){
         ret.append("启用条件:\n");
@@ -69,7 +70,7 @@ std::string NationalIdea::toString(){
     ret.append(this->bonus->localize());
     return ret;
 }
-std::string NationalIdea::toHtml(){
+std::string NationalIdea::toHtml() const{
     std::string ret("");
     if(this->trigger != nullptr){
         ret.append("启用条件:\n");
@@ -82,11 +83,11 @@ std::string NationalIdea::toHtml(){
     ret.append(this->bonus->localizeHtml());
     return ret;
 }
-NationalIdea* getFromName(std::string str){
+const NationalIdea* getFromName(std::string str){
     if(nationalIdeas.find(str) == nationalIdeas.end()) return nullptr;
     return nationalIdeas[str];
 }
-NationalIdea* getTagIdea(std::string name){
+const NationalIdea* getTagIdea(std::string name){
     if(tagIdeas.find(name) == tagIdeas.end()) return nullptr;
     return tagIdeas[name];
 }

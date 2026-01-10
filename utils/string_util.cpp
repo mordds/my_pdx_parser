@@ -42,3 +42,11 @@ std::string toLowerCase(std::string str){
     }
     return ret;
 }
+
+void replaceWith(std::string& source,std::string target,std::string placer){
+    size_t index = source.find(target);
+    while(index != std::string::npos){
+        source.replace(index,target.length(),placer);
+        index = source.find(target);
+    }
+}

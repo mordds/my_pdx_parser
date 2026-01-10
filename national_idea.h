@@ -11,18 +11,19 @@ struct NationalIdea{
     std::shared_ptr<Trigger> trigger;
     std::shared_ptr<Modifier> start;
     std::shared_ptr<Modifier> bonus;
-    std::shared_ptr<Modifier> modifiers[7];    
-    std::string toString();
-    std::string toHtml();
+    std::shared_ptr<Modifier> modifiers[7];  
+    const std::string* localize_key[7];  
+    std::string toString() const;
+    std::string toHtml() const;
 
     
 };
 
 void loadNationalIdea();
 
-NationalIdea* getTagIdea(std::string tag);
+const NationalIdea* getTagIdea(std::string tag);
 
-NationalIdea* getFromName(std::string name);
+const NationalIdea* getFromName(std::string name);
 
 
 #endif 

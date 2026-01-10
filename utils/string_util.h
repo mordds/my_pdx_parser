@@ -7,6 +7,6 @@ bool startWith(std::string from,std::string to);
 std::pair<std::string,std::string> splitWith(std::string source,std::string split);
 std::string toUpperCase(std::string src);
 std::string toLowerCase(std::string src);
-
+void replaceWith(std::string& source,std::string target,std::string placer);
 
 #endif

@@ -8,4 +8,5 @@ void readLocalizations();
 
 std::string getLocalization(std::string key);
 
+const std::string* getLocalizationKeyPtr(std::string key);
 #endif

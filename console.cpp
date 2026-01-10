@@ -100,7 +100,7 @@ int main(){
 			std::cout << "用法:tag_idea <tag>" << std::endl;
             return;
 		}
-		NationalIdea* idea = getTagIdea(vec[0]);
+		const NationalIdea* idea = getTagIdea(vec[0]);
 		if(idea == nullptr){
 			std::cout << "没有找到" << vec[0] << "的国家理念" << std::endl;
 			return;
@@ -112,12 +112,28 @@ int main(){
 			std::cout << "用法:tag_idea <tag>" << std::endl;
             return;
 		}
-		NationalIdea* idea = getFromName(vec[0]);
+		const NationalIdea* idea = getFromName(vec[0]);
 		if(idea == nullptr){
 			std::cout << "没有找到" << vec[0] << "的国家理念" << std::endl;
 			return;
 		}
 		std::cout << idea->toString() << std::endl;
+	};
+	handlers["tag_idea_text"] = [](std::vector<std::string> vec){
+				if(vec.empty()){
+			std::cout << "用法:tag_idea_text <tag>" << std::endl;
+            return;
+		}
+		const NationalIdea* idea = getTagIdea(vec[0]);
+		if(idea == nullptr){
+			std::cout << "没有找到" << vec[0] << "的国家理念" << std::endl;
+			return;
+		}
+		for(int i = 0;i < 7;i++){
+			std::cout << getLocalization(*idea->localize_key[i]) << std::endl;
+			std::cout << getLocalization(*idea->localize_key[i] + "_desc") << std::endl;		
+			if(i != 6) std::cout << "=========" << std::endl;	
+		}
 	};
     string command,command1;
 	vector<string> args;

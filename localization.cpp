@@ -26,6 +26,7 @@ void readFromFiles(std::string path){
         if(line.length() == 0) continue; 
         if(line[0] == '#') continue;
         std::pair<std::string,std::string> pair = splitWith(line,":");
+        replaceWith(pair.second,"\\n","\n");
         localizations[pair.first] = pair.second;
     }
     fin.close();
@@ -37,7 +38,11 @@ std::string getLocalization(std::string key){
     else ret = localizations[key];
     return ret;
 }
-
+const std::string* getLocalizationKeyPtr(std::string key){
+    auto it = localizations.find(key);
+    if(it != localizations.end()) return &(it->first);
+    return nullptr;
+}
 void readLocalizations(){
     std::vector<std::string> files;
     getAllFiles("./localization",files);

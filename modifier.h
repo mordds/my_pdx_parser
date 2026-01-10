@@ -23,6 +23,7 @@ enum ModifierType{
 	
 };
 struct ModifierItem;
+struct ModifierObject;
 struct Modifier{
 	
 	std::vector<ModifierItem> items;
@@ -32,7 +33,7 @@ struct Modifier{
 	std::string localizeHtml();
 };
 struct ModifierItem{
-	std::string modifierName;
+	ModifierObject* modifierObject;
 	int value;	
 };
 
