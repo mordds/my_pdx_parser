@@ -5,8 +5,9 @@
 #include<fstream>
 #include<map>
 #include<iostream>
+#include<set>
 std::map<std::string,std::string> localizations;
-
+std::set<std::string> tempRef;
 
 
 void getAllFiles(std::string path, std::vector<std::string>& files) 
@@ -41,7 +42,7 @@ std::string getLocalization(std::string key){
 const std::string* getLocalizationKeyPtr(std::string key){
     auto it = localizations.find(key);
     if(it != localizations.end()) return &(it->first);
-    return nullptr;
+    return &(*tempRef.insert(key).first);
 }
 void readLocalizations(){
     std::vector<std::string> files;
