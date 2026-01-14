@@ -24,11 +24,11 @@ void loadNationalIdea(){
         int slot = 0;
         for(std::string entry : ideaTag->seq){
             if(entry == "start"){
-                idea->start->name = "传统";
+                idea->start->name = getLocalizationKeyPtr("传统");
                 ParseModifier(ideaTag->getAsTag(entry),*(idea->start.get()));
             }
             else if(entry == "bonus"){
-                idea->bonus->name = "野心";
+                idea->bonus->name = getLocalizationKeyPtr("野心");
                 ParseModifier(ideaTag->getAsTag(entry),*(idea->bonus.get()));
             }
             else if(entry == "free") continue;
@@ -38,8 +38,8 @@ void loadNationalIdea(){
                 idea->trigger->takeOverLifeCycle();
             }
             else{
-                idea->localize_key[slot] = getLocalizationKeyPtr(entry);
-                idea->modifiers[slot]->name = getLocalization(entry);
+                
+                idea->modifiers[slot]->name = getLocalizationKeyPtr(entry);
                 ParseModifier(ideaTag->getAsTag(entry),*(idea->modifiers[slot]));
                 slot++;
             }

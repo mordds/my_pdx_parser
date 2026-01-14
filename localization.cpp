@@ -19,6 +19,7 @@ void getAllFiles(std::string path, std::vector<std::string>& files)
 }
 
 void readFromFiles(std::string path){
+  
     std::ifstream fin;
     fin.open(path);
     while(!fin.eof()){
@@ -27,11 +28,14 @@ void readFromFiles(std::string path){
         if(line.length() == 0) continue; 
         if(line[0] == '#') continue;
         std::pair<std::string,std::string> pair = splitWith(line,":");
+        if(pair.first == "V14_dragon_of_north_valley") std::cout << pair.second << std::endl;
         replaceWith(pair.second,"\\n","\n");
         localizations[pair.first] = pair.second;
     }
     fin.close();
 }
+
+
 
 std::string getLocalization(std::string key){
     std::string ret;
@@ -42,13 +46,16 @@ std::string getLocalization(std::string key){
 const std::string* getLocalizationKeyPtr(std::string key){
     auto it = localizations.find(key);
     if(it != localizations.end()) return &(it->first);
-    return &(*tempRef.insert(key).first);
+    auto it2 = tempRef.insert(key).first;
+    if(it2 == tempRef.end())  return &(*tempRef.insert(key).first);
+    return &(*it2);
 }
 void readLocalizations(){
+    std::cout << "#loading locs..." << std::endl;
     std::vector<std::string> files;
     getAllFiles("./localization",files);
     for(std::string str : files){
-        
         readFromFiles(str);
     }
+    std::cout << "#locs loaded!" << std::endl;
 }

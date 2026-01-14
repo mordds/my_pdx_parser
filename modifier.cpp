@@ -1,7 +1,9 @@
 #include "modifier.h"
 #include "paradox_type.h"
+#include "localization.h"
 #include <iostream>
 #include <cmath>
+
 /*
 REPLACE REGEXS...
 +%:
@@ -771,7 +773,7 @@ void ParseModifier(ParadoxTag* tag,std::vector<Modifier>& modifiers){
  		Modifier modifier;
 		std::string item = stripTag(tag->seq[i]);
 				
-		modifier.name = item;
+		modifier.name = getLocalizationKeyPtr(item);
 		ParseModifier(modifierTag,modifier);
 		modifiers.push_back(modifier);
 	}
@@ -800,7 +802,7 @@ void ParseModifier(ParadoxTag* tag,Modifier& modifier){
 std::string Modifier::localize(){
 	std::string localized = "";
 	
-	localized.append(this->name);
+	localized.append(getLocalization(*this->name));
 	localized.append(":\r\n");
 	for(int i = 0;i < items.size();i++){
 		ModifierObject obj = *items[i].modifierObject;
@@ -844,7 +846,7 @@ std::string Modifier::localize(){
 
 std::string Modifier::localizeHtml(){
 	std::string localized = "<div class=\"effect_title\">";
-	localized.append(this->name);
+	localized.append(getLocalization(*this->name));
 	localized.append(":</div>\r\n");
 	for(int i = 0;i < items.size();i++){
 		ModifierObject obj = *items[i].modifierObject;

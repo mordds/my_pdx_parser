@@ -130,10 +130,13 @@ int main(){
 			return;
 		}
 		for(int i = 0;i < 7;i++){
-			std::cout << getLocalization(*idea->localize_key[i]) << std::endl;
-			std::cout << getLocalization(*idea->localize_key[i] + "_desc") << std::endl;		
+			std::cout << getLocalization(*idea->modifiers[i]->name) << std::endl;
+			std::cout << getLocalization(*idea->modifiers[i]->name + "_desc") << std::endl;		
 			if(i != 6) std::cout << "=========" << std::endl;	
 		}
+	};
+	handlers["reload_loc"] = [](std::vector<std::string> vec){
+		readLocalizations();
 	};
     string command,command1;
 	vector<string> args;

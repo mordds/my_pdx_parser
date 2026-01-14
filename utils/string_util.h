@@ -8,5 +8,6 @@ std::pair<std::string,std::string> splitWith(std::string source,std::string spli
 std::string toUpperCase(std::string src);
 std::string toLowerCase(std::string src);
 void replaceWith(std::string& source,std::string target,std::string placer);
-
+void eraseFrom(std::string& source,std::string target);
+void trim(std::string& source);
 #endif

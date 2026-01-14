@@ -27,7 +27,7 @@ struct ModifierObject;
 struct Modifier{
 	
 	std::vector<ModifierItem> items;
-	std::string name;
+	const std::string* name;
 	
 	std::string localize();
 	std::string localizeHtml();

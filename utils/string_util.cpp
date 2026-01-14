@@ -45,8 +45,29 @@ std::string toLowerCase(std::string str){
 
 void replaceWith(std::string& source,std::string target,std::string placer){
     size_t index = source.find(target);
+    size_t size = placer.length();
     while(index != std::string::npos){
         source.replace(index,target.length(),placer);
-        index = source.find(target);
+        index = source.find(target,index + size);
     }
+}
+
+void eraseFrom(std::string& source,std::string target){
+    size_t index = source.find(target);
+    size_t size = target.length();
+    while(index != std::string::npos){
+        source.erase(index,size);
+        index = source.find(target,index);
+    }
+}
+void trim(std::string& source){
+    size_t pos;
+    for(pos = 0;pos < source.length();pos++){
+        if(source[pos] != ' ') break;
+    }
+    source.erase(0,pos);
+    for(pos = source.length() - 1;pos > 0;pos--){
+        if(source[pos] != ' ') break; 
+    }
+    source.erase(pos + 1);
 }
