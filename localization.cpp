@@ -28,7 +28,6 @@ void readFromFiles(std::string path){
         if(line.length() == 0) continue; 
         if(line[0] == '#') continue;
         std::pair<std::string,std::string> pair = splitWith(line,":");
-        if(pair.first == "V14_dragon_of_north_valley") std::cout << pair.second << std::endl;
         replaceWith(pair.second,"\\n","\n");
         localizations[pair.first] = pair.second;
     }
