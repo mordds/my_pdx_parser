@@ -36,6 +36,6 @@ void clearParserDatas(){
         delete ptr;
     }
     parsedObject.clear();
-    parsedObject.swap(std::vector<ParadoxBase*>());
+    parsedObject.shrink_to_fit();
 }
 
