@@ -96,9 +96,9 @@ Scope* createScopeFromString(std::string str){
 	else if(str.length() == 3){
 		if(str[0] >= 'A' && str[0] <= 'Z'){
 			if(str[1] >= '0' && str[1] <= '9' && str[2] >= '0' && str[2] <= '9'){
-				int index = str[0] - 'A' * 100;
-				index += str[1] - '0' * 10;
-				index += str[2] - '0';
+				int index = (str[0] - 'A') * 100;
+				index += (str[1] - '0') * 10;
+				index += (str[2] - '0');
 				if(basicScopes[index] == nullptr){
 					basicScopes[index] = new CountryScope(str);
 				}

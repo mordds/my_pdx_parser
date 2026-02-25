@@ -6,6 +6,7 @@
 #include "national_idea.h"
 #include <iostream>
 #include <map>
+#include <bitset>
 #include <sstream>
 
 typedef void(*CommandHandler)(std::vector<std::string>);
@@ -95,6 +96,13 @@ int main(){
         std::cout << good->globalModifier->localize(); 
         std::cout << good->provinceModifier->localize();
     };
+	handlers["goods_list"] = [](std::vector<std::string> vec){
+		std::map<std::string,std::string> map1;
+		listGoods(map1);
+		for(auto it : map1){
+			std::cout << it.first << " " << it.second << std::endl;
+		}
+	};
 	handlers["tag_idea"] = [](std::vector<std::string> vec){
 		if(vec.empty()){
 			std::cout << "用法:tag_idea <tag>" << std::endl;
@@ -138,6 +146,86 @@ int main(){
 	handlers["reload_loc"] = [](std::vector<std::string> vec){
 		readLocalizations();
 	};
+	/*
+	handlers["extract_mission"] = [](std::vector<std::string> vec){
+		if(vec.empty()){
+			std::cout << "usage: extract_mission <mission_file_name>";
+			return;
+		}
+		ParadoxTag* root = parseFile(vec[0]);
+		for(std::string str : root->seq){
+			ParadoxTag* tag = root->getAsTag(str);
+			if(tag == nullptr) continue;
+			for(std::string str1: tag->seq){
+				if(tag->get(str1)->getType() != ParadoxType::TAG) continue;
+				std::cout << str1 << std::endl;
+			}
+		}
+	};
+	
+	handlers["read_head"] = [](std::vector<std::string> vec){
+		if(vec.empty()){
+			std::cout << "usage: extract_mission <mission_file_name>";
+			return;
+		}
+		ParadoxTag* root = parseFile(vec[0]);
+		for(std::string str : root->seq){
+			std::cout << str << std::endl;
+		}
+	};
+	*/
+	/*
+	handlers["freespace"] = [](std::vector<std::string> vec){
+		std::bitset<2600> tag1;
+		for(int i = 0;i < 2600;i++) tag1.set(i,true);
+		ParadoxTag* tag = parseFile("./datas/tags.txt")->getAsTag("tags");
+		for(std::string str :tag->seq){
+			
+			if(str[1] >= '0' && str[1] <= '9' && str[2] >= '0' && str[2] <= '9'){
+				int index = (str[0] - 'A') * 100;
+				index += (str[1] - '0') * 10;
+				index += (str[2] - '0');
+
+				tag1.set(index,false);
+			}
+		}
+		for(int i = 200;i <= 275;i++) tag1.set(i,false);
+		for(int i = 300;i <= 375;i++) tag1.set(i,false);
+		for(int i = 400;i <= 450;i++) tag1.set(i,false);
+		for(int i = 500;i <= 520;i++) tag1.set(i,false);
+		for(int i = 1000;i <= 1099;i++) tag1.set(i,false);
+		for(int i = 1400;i <= 1410;i++) tag1.set(i,false);
+		for(int i = 1800;i <= 1810;i++) tag1.set(i,false);
+		for(int i = 1900;i <= 1975;i++) tag1.set(i,false);
+		int start = -1;
+		for(int i = 0;i < 26;i++){
+			char t = ('A'+ i);
+			for(int j = 0;j < 100;j++){
+				if(tag1[i * 100 + j] && start == -1){
+					start = j;
+				}
+				else if(start != -1 && !tag1[i * 100 + j]){
+					if(start == j - 1) std::cout << t << start << std::endl;
+					else {
+						std::cout << t << start << "-" << t << j - 1 << std::endl; 
+					}
+					start = -1;
+				}
+
+			}
+			if(start != -1){
+				if(start == 99) std::cout << t << start << std::endl;
+				else {
+					std::cout << t << start << "-" << t << 99 << std::endl; 
+				}
+				start = -1;
+			}
+
+		}
+	};
+
+	*/
+	
     string command,command1;
 	vector<string> args;
 	while(true){

@@ -44,7 +44,9 @@
      T_DATE = 260,
      T_NUM_CONSTANT = 261,
      T_PARAMETER = 262,
-     LOWEST = 263
+     T_BOOLEAN = 263,
+     T_EVENT_IDENTIFIER = 264,
+     LOWEST = 265
    };
 #endif
 /* Tokens.  */
@@ -53,7 +55,9 @@
 #define T_DATE 260
 #define T_NUM_CONSTANT 261
 #define T_PARAMETER 262
-#define LOWEST 263
+#define T_BOOLEAN 263
+#define T_EVENT_IDENTIFIER 264
+#define LOWEST 265
 
 
 
@@ -73,7 +77,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 77 "y.tab.h"
+#line 81 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

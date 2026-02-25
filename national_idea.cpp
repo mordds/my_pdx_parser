@@ -57,6 +57,14 @@ void loadNationalIdea(){
     clearParserDatas();
 }
 
+void reloadNationalIdeas(){
+    for(std::pair<std::string, const NationalIdea*> p : nationalIdeas){
+        delete p.second;
+    }
+    nationalIdeas.clear();
+    loadNationalIdea();
+}
+
 std::string NationalIdea::toString() const{
     std::string ret("");
     if(this->trigger != nullptr){

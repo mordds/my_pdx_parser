@@ -14,6 +14,16 @@
 
 #.*\n {}
 #.* {}
+yes {
+	yylval.num = 1;
+	return T_BOOLEAN;
+}
+
+no {
+	yylval.num = 0;
+	return T_BOOLEAN;
+}
+
 \"(\\.|[^\"])*\" {
 		int f = strlen(yytext);
 		yylval.str = new std::string(yytext);
@@ -22,9 +32,10 @@
 		return T_LITERAL;
 }
 
-0[0-9]+ {
+[A-Za-z]([A-za-z0-9_]+)?\.[0-9]{1,4} {
 	strncpy(yylval.name,yytext,64);	
-	return T_IDENT;
+	return T_EVENT_IDENTIFIER;
+
 }
 
 (\-)?[0-9]+ {

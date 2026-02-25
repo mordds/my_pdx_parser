@@ -961,7 +961,7 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				continue; 
 			} 
 			for(auto it = parameters.begin();it != parameters.end();it++){
-				
+
 				int index = ti->parameterName[it->first];
 				ct->base[index] = it->second;
 			} 
@@ -983,11 +983,8 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			continue;
 		}
 		//for overrides
-		
+		//TODO: Needs Rewrite to a list implementation.
 		int value = static_cast<int>(base->getType());
-		if(isCastable(base,ParadoxType::BOOLEAN)){
-			value = static_cast<int>(ParadoxType::BOOLEAN);
-		}
 		std::string name("");
 		name.append(item);
 		name.append("@");
@@ -1017,12 +1014,9 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 		TriggerItem* ti = items[name];
 		ParadoxType type = ti->parameterType[0];
 
-		//now it is not necessary...
-		//if(!isCastable(base,type)) continue;
-
 		CommonTrigger* ct = new CommonTrigger(ti);
 		if(type == ParadoxType::BOOLEAN){
-			ct->reversed = castToBool(base->getAsString());
+			ct->reversed = base->getAsBoolean()->getValue();
 		}
 		else ct->pushObject(base);
 		

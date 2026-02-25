@@ -57,4 +57,5 @@ struct Institution : ParadoxDataBaseObj{
 };
 void registerGood();
 Good* getGood(std::string str);
+void listGoods(std::map<std::string,std::string>& maps);
 #endif

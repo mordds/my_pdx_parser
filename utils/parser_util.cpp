@@ -18,14 +18,16 @@ extern std::vector<ParadoxBase*> parsedObject;
 ParadoxTag* parseFile(std::string str){
     yyin = fopen(str.c_str(),"r");
     yyparse();
+
     int error = yylex();
     while(error != 0){
         if(error == '}') std::cout << '}' <<std::endl;
-        else if(error <= 0xFF) std::cout << (char)error;
+        else if(error <= 0x7F) std::cout << (char)error;
         else if(error == 258) std::cout << yylval.name;
         else if(error == 259) std::cout << "T_LITERAL" ;
         else if(error == 261) std::cout << "T_NUM_CONSTANT" ;
         else if(error == 260) std::cout << "T_DATE" ;
+        else if(error == 263) std::cout << "T_BOOLEAN" ;
         error = yylex();
     }
     return ROOT;

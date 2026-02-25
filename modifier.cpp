@@ -347,7 +347,6 @@ void loadInternalModifier(){
 	registerModifier("global_trade_goods_size_modifier",ModifierType::PERCENTAGE,"全局商品产出修正");
 	registerModifier("max_absolutism",ModifierType::NORMAL,"最大专制度");
 	registerModifier("core_creation",ModifierType::MINUS_PERCENTAGE,"核心化花费");
-	registerModifier("shock_damage_received",ModifierType::MINUS_PERCENTAGE,"受到的冲击伤害");
 	registerModifier("reinforce_cost_modifier",ModifierType::MINUS_PERCENTAGE,"军队补员花费");
 	registerModifier("min_autonomy_in_territories",ModifierType::MINUS_PERCENTAGE,"自治领地最低自治度");
 	registerModifier("adm_tech_cost_modifier",ModifierType::MINUS_PERCENTAGE,"行政科技花费");
@@ -793,8 +792,8 @@ void ParseModifier(ParadoxTag* tag,Modifier& modifier){
 			mod_item.value = base->getAsInteger()->getIntegerContent();
 			modifier.items.push_back(mod_item);
 		}
-		else if(base->getType() == ParadoxType::STRING && isMark){
-			mod_item.value = base->getAsString()->getStringContent() == "no" ? 0 : 1;
+		else if(base->getType() == ParadoxType::BOOLEAN && isMark){
+			mod_item.value = base->getAsBoolean()->getValue();
 			modifier.items.push_back(mod_item);
 		}
 	}

@@ -8,9 +8,20 @@ extern ParadoxString* createString(std::string);
 extern ParadoxInteger* createInteger(long long);
 extern ParadoxDate* createDate(Date);
 
+
+
+ParadoxBoolean* getBooleanInstance(bool value){
+	static ParadoxBoolean BOOLEAN_YES(true);
+	static ParadoxBoolean BOOLEAN_NO(false);
+	return (value ? &BOOLEAN_YES : &BOOLEAN_NO);
+}
+
 ParadoxString* ParadoxBase::getAsString(){
 	if(getType() != ParadoxType::STRING) return nullptr;
 	return static_cast<ParadoxString*>(this); 
+}
+int ParadoxTag::size(){
+	return seq.size();
 }
 ParadoxInteger* ParadoxBase::getAsInteger(){
 	if(getType() != ParadoxType::INTEGER) return nullptr;
@@ -27,6 +38,10 @@ ParadoxArray* ParadoxBase::getAsArray(){
 ParadoxDate* ParadoxBase::getAsDate(){
 	if(getType() != ParadoxType::DATE) return nullptr;
 	return static_cast<ParadoxDate*>(this); 
+}
+ParadoxBoolean* ParadoxBase::getAsBoolean(){
+	if(getType() != ParadoxType::BOOLEAN) return nullptr;
+	return static_cast<ParadoxBoolean*>(this);
 }
 
 ParadoxBase* ParadoxTag::get(std::string name){
@@ -161,10 +176,7 @@ bool isCastable(ParadoxBase* base,ParadoxType type){
 		}
 		if(base->getType() == ParadoxType::STRING){
 			std::string content = base->getAsString()->getStringContent();
-			if(type == ParadoxType::BOOLEAN){
-				return content == "yes" || content == "no";
-			}
-			else if(type == ParadoxType::SCOPE){
+			if(type == ParadoxType::SCOPE){
 				if(startWith(content,"event_target:") && content.length() > 13) return true;
 				else if(content.length() == 3){
 					if(content[0] < 'A' || content[0] > 'Z') return false;
@@ -176,9 +188,6 @@ bool isCastable(ParadoxBase* base,ParadoxType type){
 		}
 		return false;
 	}
-}
-bool castToBool(ParadoxString* string){
-	return string->getStringContent() == "yes";
 }
 
 //!WARNING!
@@ -205,6 +214,11 @@ ParadoxBase* deep_copy(ParadoxBase* base){
 			nArray->append(base_copy);
 		}
 		return nArray;
+	}
+	if(base->getType() == ParadoxType::BOOLEAN){
+		ParadoxBoolean* pBoolean = base->getAsBoolean();
+		ParadoxBoolean* nBoolean = new ParadoxBoolean(pBoolean->getValue());
+		return nBoolean;
 	}
 	else {
 		ParadoxTag* pTag = base->getAsTag();
@@ -239,6 +253,13 @@ ParadoxBase* deep_copy_safe(ParadoxBase* base){
 			nArray->append(base_copy);
 		}
 		return nArray;
+	}
+	if(base->getType() == ParadoxType::BOOLEAN){
+		ParadoxBoolean* pBoolean = base->getAsBoolean();
+		ParadoxBoolean* nBoolean = new ParadoxBoolean(pBoolean->getValue());
+		extern std::vector<ParadoxBase*> parsedObject;
+		parsedObject.push_back(nBoolean);
+		return nBoolean;
 	}
 	else {
 		ParadoxTag* pTag = base->getAsTag();

@@ -16,6 +16,12 @@ Good* getGood(std::string str){
     return &goodRegistry[str];
 }
 
+void listGoods(std::map<std::string,std::string>& maps){
+    for(auto it : goodRegistry){
+        maps[it.first] = it.second.localizedName;
+    }
+}
+
 void registerGood(){
     ParadoxTag* root = parseFile("./datas/price.txt");
     for(std::string str : root->seq){
@@ -37,9 +43,9 @@ void registerGood(){
         goodRegistry[str].globalModifier = std::make_shared<Modifier>();
         goodRegistry[str].provinceModifier = std::make_shared<Modifier>();
         ParseModifier(root->tags[str]->getAsTag()->getAsTag("modifier",1), *(goodRegistry[str].globalModifier.get()));
-        goodRegistry[str].globalModifier->name = "贸易优势奖励";
+        goodRegistry[str].globalModifier->name = getLocalizationKeyPtr("贸易优势奖励");
         ParseModifier(root->tags[str]->getAsTag()->getAsTag("province",1), *(goodRegistry[str].provinceModifier.get()));
-        goodRegistry[str].provinceModifier->name = "生产该商品的省份效果";
+        goodRegistry[str].provinceModifier->name =  getLocalizationKeyPtr("生产该商品的省份效果");
     }
     clearParserDatas();
 }

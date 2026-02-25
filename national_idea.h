@@ -23,6 +23,6 @@ void loadNationalIdea();
 const NationalIdea* getTagIdea(std::string tag);
 
 const NationalIdea* getFromName(std::string name);
-
+void reloadNationalIdeas();
 
 #endif 

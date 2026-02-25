@@ -15,9 +15,9 @@ enum class ParadoxType : uint8_t{
 	TAG = 2,
 	ARRAY = 3,
 	DATE = 4,
+	BOOLEAN = 5,
 	SCOPE = 129,
-	BOOLEAN = 130,
-	GOOD = 131
+	GOOD = 130
 };
 
 struct Date{
@@ -33,16 +33,17 @@ struct ParadoxInteger;
 struct ParadoxTag;
 struct ParadoxArray;
 struct ParadoxDate;
-
+struct ParadoxBoolean;
 
 struct ParadoxBase{
 	virtual void* getContent() = 0;
-	virtual ParadoxType getType() = 0;
+	virtual ParadoxType getType() const = 0;
 	ParadoxString* getAsString();
 	ParadoxInteger* getAsInteger();
 	ParadoxTag* getAsTag();
 	ParadoxArray* getAsArray();
 	ParadoxDate* getAsDate();
+	ParadoxBoolean* getAsBoolean();
 };
 
 struct ParadoxString : public ParadoxBase{
@@ -56,7 +57,7 @@ struct ParadoxString : public ParadoxBase{
 	virtual void* getContent(){
 		return (void*)&content;
 	}
-	virtual ParadoxType getType(){
+	virtual ParadoxType getType() const{
 		return ParadoxType::STRING;
 	}
 	std::string getStringContent(){
@@ -74,7 +75,7 @@ struct ParadoxInteger : public ParadoxBase{
 		virtual void* getContent(){
 			return (void*)&content;
 		}
-		virtual ParadoxType getType(){
+		virtual ParadoxType getType() const{
 			return ParadoxType::INTEGER;
 		}
 		long long getIntegerContent(){
@@ -101,7 +102,7 @@ struct ParadoxTag : public ParadoxBase{
 		virtual void* getContent(){
 			return (void*)&tags;
 		}
-		virtual ParadoxType getType(){
+		virtual ParadoxType getType() const {
 			return ParadoxType::TAG;
 		}
 		ParadoxBase* get(std::string name);
@@ -110,14 +111,14 @@ struct ParadoxTag : public ParadoxBase{
 		ParadoxTag* getAsTag(std::string name);
 		ParadoxTag* getAsTag(std::string name,int index);
 		ParadoxTag* getAsTag(int index);
-		
+		int size();
 		void add(std::string name,ParadoxBase* base);
 		void remove(std::string name,int index);
 };
 
 struct ParadoxArray : public ParadoxBase{
 	std::vector<ParadoxBase*> contents;
-	virtual ParadoxType getType(){
+	virtual ParadoxType getType() const{
 		return ParadoxType::ARRAY;
 	}
 	virtual void* getContent(){
@@ -149,7 +150,7 @@ struct ParadoxDate : public ParadoxBase{
 	ParadoxDate(Date date){
 		this->date = date;
 	}
-	virtual ParadoxType getType(){
+	virtual ParadoxType getType() const{
 		return ParadoxType::DATE;
 	}
 	virtual void* getContent(){
@@ -160,9 +161,25 @@ struct ParadoxDate : public ParadoxBase{
 	}
 };
 
+struct ParadoxBoolean : public ParadoxBase {
+	private:
+		bool value;
+	public:
+	constexpr ParadoxBoolean(bool boolean) : value(boolean){}
+	virtual void* getContent(){
+		return (void*)&value;
+	}
+	bool getValue() const{
+		return value;
+	}
+	virtual ParadoxType getType() const{
+		return ParadoxType::BOOLEAN;
+	}
+};
+
+ParadoxBoolean* getBooleanInstance(bool value);
 std::string stripTag(std::string original);
 bool isCastable(ParadoxBase* base,ParadoxType type);
-bool castToBool(ParadoxString* base);
 bool Xor(bool a,bool b);
 ParadoxBase* deep_copy(ParadoxBase*);
 #endif

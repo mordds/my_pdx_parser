@@ -81,6 +81,8 @@ ParadoxTag* createTag(){
 %token<name> T_DATE
 %token<num> T_NUM_CONSTANT
 %token<name> T_PARAMETER
+%token<num> T_BOOLEAN
+%token<name> T_EVENT_IDENTIFIER
 
 %type<base> GT
 %type<base> T
@@ -163,6 +165,15 @@ C: C T_NUM_CONSTANT {
 	array->append(createInteger($1));
 	$$ = array;
   }
+  | C T_EVENT_IDENTIFIER{
+	$1->getAsArray()->append(createString($2));
+	$$ = $1;
+  }
+  | T_EVENT_IDENTIFIER {
+	ParadoxArray* array = createArray();
+	array->append(createString($1));
+	$$ = array;
+  }
   | C BLANK
 lVal: T_IDENT {$$ = createTempString($1);}
   | T_DATE {$$ = createTempDate($1);}
@@ -172,6 +183,12 @@ rVal: GT {$$ = $1;}
   | T_LITERAL {
 	$$ = createString(*$1);
   } 
+  | T_BOOLEAN {
+	$$ = getBooleanInstance($1);
+  }
+  | T_EVENT_IDENTIFIER {
+	$$ = createString($1);
+  }
   | lVal { 
 	ParadoxType type = $1->getType();
 	if(type == ParadoxType::STRING){
@@ -190,6 +207,7 @@ rVal: GT {$$ = $1;}
 		delete $1;
 	}
   }
+  
 BLANK: ' ' { $$ = 1;}
 	 | BLANK ' '{ $$ = 1;}
 LBR: '{' {$$ = 1;}
