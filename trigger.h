@@ -39,8 +39,8 @@ struct Trigger{
 	virtual std::string toString(bool reversed) = 0;
 	virtual std::string toHtml(bool reversed) = 0;
 	virtual void takeOverLifeCycle() = 0;
-	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
-	virtual bool foreach(std::function<bool(Trigger*)>);
+	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger)) = 0;
+	virtual bool foreach(std::function<bool(Trigger*)>) = 0;
 	ComplexTrigger* getAsComplexTrigger();
 	LogicTrigger* getAsLogicTrigger();
 	CommonTrigger* getAsCommonTrigger();
