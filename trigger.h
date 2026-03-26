@@ -5,6 +5,7 @@
 #include<map>
 #include "paradox_type.h"
 #include "scope.h"
+#include <functional>
 
 enum class TriggerType{
 	COMMON,LOGIC,CHANGE_SCOPE,CONDITIONAL,NUM,HIDDEN,CUSTOM_TT
@@ -16,6 +17,8 @@ const int SINGLE_SCOPE_MERGABLE = 0x1;
 struct ComplexTrigger;
 struct LogicTrigger;
 struct CommonTrigger;
+
+
 struct TriggerItem{
 	std::string pattern;
 	std::string reversePattern;
@@ -30,11 +33,14 @@ struct TriggerItem{
 	TriggerItem(std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter);
 };
 
+
 struct Trigger{
 	virtual TriggerType getType() = 0;
 	virtual std::string toString(bool reversed) = 0;
 	virtual std::string toHtml(bool reversed) = 0;
 	virtual void takeOverLifeCycle() = 0;
+	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
+	virtual bool foreach(std::function<bool(Trigger*)>);
 	ComplexTrigger* getAsComplexTrigger();
 	LogicTrigger* getAsLogicTrigger();
 	CommonTrigger* getAsCommonTrigger();
@@ -42,17 +48,19 @@ struct Trigger{
 	bool copied;
 };
 struct ComplexTrigger : Trigger{
+	virtual void takeOverLifeCycle();
+	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
+	virtual bool foreach(std::function<bool(Trigger*)>);
 	std::vector<Trigger*> subTriggers;
 	bool ignored;
 	bool omitted;
-
 	~ComplexTrigger(){
 		for(Trigger* trigger : subTriggers){
 			delete trigger;
 		}
 	}
 	void putTrigger(Trigger* trigger);
-	virtual void takeOverLifeCycle();
+
 };
 struct CommonTrigger : Trigger{
 	virtual TriggerType getType(){
@@ -60,7 +68,9 @@ struct CommonTrigger : Trigger{
 	}
 	virtual std::string toString(bool reversed);
 	virtual std::string toHtml(bool reversed);
+	virtual bool foreach(std::function<bool(Trigger*)>);	
 	virtual void takeOverLifeCycle();
+	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
 	CommonTrigger(TriggerItem* item);
 	void pushObject(ParadoxBase* base);
 	TriggerItem* item;

@@ -146,7 +146,7 @@ int main(){
 	handlers["reload_loc"] = [](std::vector<std::string> vec){
 		readLocalizations();
 	};
-	/*
+	
 	handlers["extract_mission"] = [](std::vector<std::string> vec){
 		if(vec.empty()){
 			std::cout << "usage: extract_mission <mission_file_name>";
@@ -173,7 +173,7 @@ int main(){
 			std::cout << str << std::endl;
 		}
 	};
-	*/
+	
 	/*
 	handlers["freespace"] = [](std::vector<std::string> vec){
 		std::bitset<2600> tag1;

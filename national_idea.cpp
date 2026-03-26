@@ -3,7 +3,7 @@
 #include "utils/parser_util.h"
 #include "paradox_type.h"
 #include <map>
-
+#include <functional>
 
 std::map<std::string,const NationalIdea*> nationalIdeas;
 std::map<std::string,const NationalIdea*> tagIdeas;
@@ -45,13 +45,15 @@ void loadNationalIdea(){
             }
         }
         nationalIdeas[str] = idea;
-        if(idea->trigger != nullptr && idea->trigger->getAsComplexTrigger()->subTriggers.size() == 1){
-            CommonTrigger* trigger = idea->trigger->getAsComplexTrigger()->subTriggers[0]->getAsCommonTrigger();
-            if(trigger == nullptr) continue;
-            if(trigger->item->name == "tag"){
-                std::string tagName = trigger->base[0]->getAsString()->getStringContent();
-                tagIdeas[tagName] = idea;
-            }
+        if(idea->trigger != nullptr){
+            idea->trigger->foreach([&idea](Trigger* trigger){
+                CommonTrigger* commonTrigger = trigger->getAsCommonTrigger();
+                if(commonTrigger == nullptr) return true;
+                if(commonTrigger->item->name != "tag") return true;
+                std::string tagName = commonTrigger->base[0]->getAsString()->getStringContent();
+                if(tagIdeas.find(tagName) == tagIdeas.end()) tagIdeas[tagName] = idea;
+                return true;
+            });
         }
     }
     clearParserDatas();

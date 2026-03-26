@@ -532,6 +532,21 @@ void ComplexTrigger::takeOverLifeCycle(){
 		trigger->takeOverLifeCycle();
 	}
 }
+bool ComplexTrigger::hasAnyTrigger(bool(*predicate)(Trigger*)){
+	if(predicate(this)) return true;
+	for(Trigger* trigger : this->subTriggers){
+		if(predicate(trigger)) return true;
+	}
+	return false;
+}
+
+bool ComplexTrigger::foreach(std::function<bool(Trigger*)> action){
+	if(!action(this)) return false;
+	for(Trigger* trigger : this->subTriggers){
+		if(trigger->foreach(action)) return false;
+	}
+	return true;
+}
 ChangeScopeTrigger::ChangeScopeTrigger(Scope* scope){
 	this->changedScope = scope;
 	this->depth = 0;
@@ -574,7 +589,12 @@ void CommonTrigger::takeOverLifeCycle(){
 		this->base[i] = deep_copy(this->base[i]);
 	}
 }
-
+bool CommonTrigger::hasAnyTrigger(bool(*predicate)(Trigger*)){
+	return predicate(this);
+}
+bool CommonTrigger::foreach(std::function<bool(Trigger*)> action){
+	return action(this);
+}
 std::string ChangeScopeTrigger::toString(bool reversed){
 	std::string str("");
 	if(this->subTriggers.empty()) return str;
@@ -778,6 +798,7 @@ std::string CustomTooltipTrigger::toString(bool reversed){
 	}
 	return str;
 }
+
 
 
 
