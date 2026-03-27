@@ -543,7 +543,7 @@ bool ComplexTrigger::hasAnyTrigger(bool(*predicate)(Trigger*)){
 bool ComplexTrigger::foreach(std::function<bool(Trigger*)> action){
 	if(!action(this)) return false;
 	for(Trigger* trigger : this->subTriggers){
-		if(trigger->foreach(action)) return false;
+		if(!trigger->foreach(action)) return false;
 	}
 	return true;
 }
