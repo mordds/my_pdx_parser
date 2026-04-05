@@ -26,11 +26,12 @@ struct TriggerItem{
 	std::map<std::string,int> parameterName;
 	std::vector<ParadoxType> parameterType;
 	std::vector<int> usedParameter;
-	long long attribue;
+	ScopeType usable_scope;
+	int attribue;
 	std::string toString(std::vector<ParadoxBase*> base,bool reversed);
 	std::string toHtml(std::vector<ParadoxBase*> base,bool reversed);
 	TriggerItem(){}
-	TriggerItem(std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter);
+	TriggerItem(std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter,ScopeType scope_type = ScopeType::COUNTRY);
 };
 
 

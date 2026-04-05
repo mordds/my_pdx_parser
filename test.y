@@ -21,7 +21,11 @@ ParadoxString* createString(std::string str){
 	parsedObject.push_back(string);
 	return string;
 }
-
+ParadoxScope* createScope(Scope* scope){
+	ParadoxScope* pScope = new ParadoxScope(scope);
+	tempObject.push_back(pScope);
+	return pScope;
+}
 ParadoxString* createTempString(std::string str){
 	ParadoxString* string = new ParadoxString(str);
 	tempObject.push_back(string);

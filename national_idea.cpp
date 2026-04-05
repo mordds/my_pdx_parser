@@ -50,7 +50,7 @@ void loadNationalIdea(){
                 CommonTrigger* commonTrigger = trigger->getAsCommonTrigger();
                 if(commonTrigger == nullptr) return true;
                 if(commonTrigger->item->name != "tag") return true;
-                std::string tagName = commonTrigger->base[0]->getAsString()->getStringContent();
+                std::string tagName = commonTrigger->base[0]->getAsScope()->getValue()->getAsCountryScope()->getTag();
                 if(tagIdeas.find(tagName) == tagIdeas.end()) tagIdeas[tagName] = idea;
                 return true;
             });

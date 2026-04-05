@@ -1,5 +1,7 @@
 #include "paradox_type.h"
 #include "utils/string_util.h"
+#include "scope.h"
+#include <iostream>
 #include <algorithm>
 
 extern ParadoxTag* createTag();
@@ -7,7 +9,7 @@ extern ParadoxArray* createArray();
 extern ParadoxString* createString(std::string);
 extern ParadoxInteger* createInteger(long long);
 extern ParadoxDate* createDate(Date);
-
+extern ParadoxScope* createScope(Scope*);
 
 
 ParadoxBoolean* getBooleanInstance(bool value){
@@ -42,6 +44,10 @@ ParadoxDate* ParadoxBase::getAsDate(){
 ParadoxBoolean* ParadoxBase::getAsBoolean(){
 	if(getType() != ParadoxType::BOOLEAN) return nullptr;
 	return static_cast<ParadoxBoolean*>(this);
+}
+ParadoxScope* ParadoxBase::getAsScope(){
+	if(getType() != ParadoxType::SCOPE) return nullptr;
+	return static_cast<ParadoxScope*>(this);
 }
 
 ParadoxBase* ParadoxTag::get(std::string name){
@@ -167,8 +173,8 @@ bool Xor(bool a,bool b){
 } 
 
 bool isCastable(ParadoxBase* base,ParadoxType type){
-	if((int)type < 127){
-		return base->getType() == type;
+	if(base->getType() == type){
+		return true;
 	}
 	else{
 		if(base->getType() == ParadoxType::INTEGER){
@@ -192,7 +198,7 @@ bool isCastable(ParadoxBase* base,ParadoxType type){
 
 //!WARNING!
 //the returned pointer is created by 'new' operator and the caller has the responsibility to manage memory
-//this function is used to create a ParadoxBase Object which do not managed by global manager.
+//this function is used to create a ParadoxBase Object which do not managed by global object manager.
 ParadoxBase* deep_copy(ParadoxBase* base){
 	if(base->getType() == ParadoxType::INTEGER){
 		ParadoxInteger* pInt = base->getAsInteger();
@@ -220,6 +226,11 @@ ParadoxBase* deep_copy(ParadoxBase* base){
 		ParadoxBoolean* nBoolean = new ParadoxBoolean(pBoolean->getValue());
 		return nBoolean;
 	}
+	if(base->getType() == ParadoxType::SCOPE){
+		ParadoxScope* pScope = base->getAsScope();
+		ParadoxScope* nScope = new ParadoxScope(pScope->getValue());
+		return nScope;
+	}
 	else {
 		ParadoxTag* pTag = base->getAsTag();
 		ParadoxTag* nTag = new ParadoxTag();
@@ -231,7 +242,6 @@ ParadoxBase* deep_copy(ParadoxBase* base){
 	}
 }
 //this function is used to deep copy a ParadoxBase Object safely.
-
 ParadoxBase* deep_copy_safe(ParadoxBase* base){
 	if(base->getType() == ParadoxType::INTEGER){
 		ParadoxInteger* pInt = base->getAsInteger();
@@ -261,6 +271,11 @@ ParadoxBase* deep_copy_safe(ParadoxBase* base){
 		parsedObject.push_back(nBoolean);
 		return nBoolean;
 	}
+	if(base->getType() == ParadoxType::SCOPE){
+		ParadoxScope* pScope = base->getAsScope();
+		ParadoxScope* nScope = createScope(pScope->getValue());
+		return nScope;
+	}	
 	else {
 		ParadoxTag* pTag = base->getAsTag();
 		ParadoxTag* nTag = createTag();
@@ -268,6 +283,53 @@ ParadoxBase* deep_copy_safe(ParadoxBase* base){
 			ParadoxBase* base_copy = deep_copy_safe(pTag->get(entry));
 			nTag->add(entry,base);
 		}
+	
 		return nTag;
 	}
+
 }
+template<ParadoxObject T>
+ParadoxBase* castTo(T base,ParadoxType type){
+	if(base == nullptr) return nullptr;
+	ParadoxBase* aBase = base;
+	if(aBase->getType() == type) return base;
+	else return nullptr;
+}
+
+template<>
+ParadoxBase* castTo(ParadoxBase* base,ParadoxType type){
+	if(base == nullptr) return nullptr;
+	if(base->getType() == ParadoxType::INTEGER){
+		return castTo(static_cast<ParadoxInteger*>(base),type);
+	}
+	if(base->getType() == ParadoxType::STRING){
+		return castTo(static_cast<ParadoxString*>(base),type);
+	}
+	if(base->getType() == type) return base;
+	else return nullptr;
+}
+
+template<>
+ParadoxBase* castTo(ParadoxString* string,ParadoxType type){
+	if(string == nullptr) return nullptr;
+	if(type == ParadoxType::STRING) return string;
+	if(type == ParadoxType::SCOPE){
+		Scope* scope = createScopeFromString(string->getStringContent());
+		if(scope == nullptr) return nullptr;
+		return createScope(scope);
+	}
+	return nullptr;
+}
+//
+template<>
+ParadoxBase* castTo(ParadoxInteger* number, ParadoxType type){
+	if(number) return nullptr;
+	if(type == ParadoxType::INTEGER) return number;
+	if(type == ParadoxType::SCOPE) {
+		Scope* scope = createScopeFromString(std::to_string(number->getIntegerContent()));
+		if(scope == nullptr) return nullptr;
+		return new ParadoxScope(scope);
+	}
+	return nullptr;
+}
+

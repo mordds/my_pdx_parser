@@ -2,9 +2,11 @@
 #include "scope.h"
 #include "paradox_type.h"
 #include "utils/string_util.h"
+#include "localization.h"
 #include<sstream>
 #include<string.h>
-std::map<std::string,std::string> CustomScope::localizeMap = std::map<std::string,std::string>();
+std::map<std::string,std::string> AnyScope::localizeMap = std::map<std::string,std::string>();
+std::map<std::string,std::string> UnitScope::localizeMap = std::map<std::string,std::string>();
 CountryScope* basicScopes[2600];
 ProvinceScope* provinceScopes[8000];
 std::map<std::string,Scope*> cachedScopes;
@@ -22,9 +24,9 @@ CountryScope* Scope::getAsCountryScope(){
 	}
 	return nullptr;
 }
-CustomScope* Scope::getAsCustomScope(){
-	if(this->getType() == ScopeType::SPECIAL){
-		return static_cast<CustomScope*>(this);
+AnyScope* Scope::getAsAnyScope(){
+	if(this->getType() == ScopeType::ANY){
+		return static_cast<AnyScope*>(this);
 	}
 	return nullptr;
 }
@@ -38,12 +40,13 @@ CountryScope::CountryScope(std::string str){
 		for(int i = 0;i < 3;i++) this->tag[i] = str[i];
 	}
 }
-CustomScope::CustomScope(std::string str){
+AnyScope::AnyScope(std::string str){
 	this->data = str;
 }
 std::string ProvinceScope::toString(){
- 	std::string ret = "";
+ 	std::string ret = "PROV";
  	ret.append(std::to_string(this->id));
+	ret = getLocalization(ret);
 	return ret;
 } 
 std::string ProvinceScope::toHtml(){
@@ -54,9 +57,7 @@ std::string ProvinceScope::toHtml(){
 	return ret;
 } 
 std::string CountryScope::toString(){
-	std::string ret = "";
-	ret.append(this->tag);
-	return ret;
+	return std::string(" ").append(getLocalization(this->tag)).append(" ");
 }
 std::string CountryScope::toHtml(){
 	std::string ret = "";
@@ -65,14 +66,22 @@ std::string CountryScope::toHtml(){
 	ret.append("}}");
 	return ret;
 }
-std::string CustomScope::toString(){
-	if(CustomScope::localizeMap.find(this->data) != CustomScope::localizeMap.end()){
-		return CustomScope::localizeMap[this->data];
+std::string AnyScope::toString(){
+	if(AnyScope::localizeMap.find(this->data) != AnyScope::localizeMap.end()){
+		return AnyScope::localizeMap[this->data];
 	}
-	return "";
+	return "<AnyScope>";
 }
-void CustomScope::registerLocalizeText(std::string key,std::string value){
-	if(CustomScope::localizeMap.find(key) == CustomScope::localizeMap.end()) CustomScope::localizeMap[key] = value;
+
+std::string UnitScope::toString(){
+	if(UnitScope::localizeMap.find(this->data) != UnitScope::localizeMap.end()){
+		return UnitScope::localizeMap[this->data];
+	}
+	return "<UnitScope>";
+}
+
+void AnyScope::registerLocalizeText(std::string key,std::string value){
+	if(AnyScope::localizeMap.find(key) == AnyScope::localizeMap.end()) AnyScope::localizeMap[key] = value;
 }
 void initScope(){
 	for(int i = 0;i < 2600;i++) basicScopes[i] = nullptr;
@@ -81,7 +90,7 @@ void initScope(){
 
 
 Scope* createScopeFromString(std::string str){
-	//Check Number First
+	
 	if(isNumber(str)){
 		std::stringstream sin(str);
 		long long i;
@@ -114,15 +123,15 @@ Scope* createScopeFromString(std::string str){
 	}
 	else if(startWith(str,"event_target:") && str.length() >= 13){
 		if(cachedScopes.find(str) != cachedScopes.end()) return cachedScopes[str];
-		CustomScope* scope = new CustomScope(str);
-		CustomScope::registerLocalizeText(str,str);
+		AnyScope* scope = new AnyScope(str);
+		AnyScope::registerLocalizeText(str,str);
 		cachedScopes[str] = scope;
 		return scope;
 	}
 	else{
 		if(registeredCustomScopes.find(str) == registeredCustomScopes.end()) return nullptr;
 		if(cachedScopes.find(str) == cachedScopes.end()){
-			cachedScopes[str] = new CustomScope(str);
+			cachedScopes[str] = new AnyScope(str);
 		}
 		return cachedScopes[str];
 	}

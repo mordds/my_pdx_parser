@@ -7,6 +7,7 @@
 #include<vector>
 #include<stdio.h>
 #include<cstdint>
+#include<concepts>
 
 enum class ParadoxType : uint8_t{
 	BASE = 255,
@@ -27,6 +28,7 @@ struct Date{
 	std::string toString();
 };
 
+struct Scope;
 struct ParadoxBase;
 struct ParadoxString;
 struct ParadoxInteger;
@@ -34,6 +36,7 @@ struct ParadoxTag;
 struct ParadoxArray;
 struct ParadoxDate;
 struct ParadoxBoolean;
+struct ParadoxScope;
 
 struct ParadoxBase{
 	virtual void* getContent() = 0;
@@ -44,8 +47,10 @@ struct ParadoxBase{
 	ParadoxArray* getAsArray();
 	ParadoxDate* getAsDate();
 	ParadoxBoolean* getAsBoolean();
+	ParadoxScope* getAsScope();
 };
-
+template<typename T>
+concept ParadoxObject = std::convertible_to<T,ParadoxBase*>;
 struct ParadoxString : public ParadoxBase{
 	private:
 		std::string content;
@@ -165,21 +170,44 @@ struct ParadoxBoolean : public ParadoxBase {
 	private:
 		bool value;
 	public:
-	constexpr ParadoxBoolean(bool boolean) : value(boolean){}
-	virtual void* getContent(){
-		return (void*)&value;
-	}
-	bool getValue() const{
-		return value;
-	}
-	virtual ParadoxType getType() const{
-		return ParadoxType::BOOLEAN;
-	}
+		constexpr ParadoxBoolean(bool boolean) : value(boolean){}
+		virtual void* getContent(){
+			return (void*)&value;
+		}
+		bool getValue() const{
+			return value;
+		}
+		virtual ParadoxType getType() const{
+			return ParadoxType::BOOLEAN;
+		}
 };
-
+struct ParadoxScope : public ParadoxBase {
+	private:
+		Scope* scope;
+	public:
+		ParadoxScope(Scope* scope) : scope(scope) {}
+		virtual void* getContent(){
+			return scope;
+		}
+		Scope* getValue() {
+			return scope;
+		}
+		virtual ParadoxType getType() const {
+			return ParadoxType::SCOPE;
+		}
+};
 ParadoxBoolean* getBooleanInstance(bool value);
 std::string stripTag(std::string original);
 bool isCastable(ParadoxBase* base,ParadoxType type);
+template<ParadoxObject From>
+ParadoxBase* castTo(From base,ParadoxType type);
+template<>
+ParadoxBase* castTo(ParadoxBase* base,ParadoxType type);
+template<>
+ParadoxBase* castTo(ParadoxInteger* base,ParadoxType type);
+template<>
+ParadoxBase* castTo(ParadoxString* base,ParadoxType type);
 bool Xor(bool a,bool b);
 ParadoxBase* deep_copy(ParadoxBase*);
+
 #endif

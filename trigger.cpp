@@ -19,27 +19,30 @@ bool parseConditionalTrigger(ParadoxTag*,ConditionalTrigger*);
 
 extern ParadoxString* createString(std::string str);
 
-
+const ParadoxType INTEGER_MATCH_SEQUENCE[] = {ParadoxType::INTEGER,ParadoxType::SCOPE};
+const ParadoxType STRING_MATCH_SEQUENCE[] = {ParadoxType::SCOPE,ParadoxType::STRING};
 //No arg means only yes/no or even only allowing yes.
 //those trigger will be registered as 1 BOOL type args.
 //and no args will be used in localization text
-void registerNoArgTrigger(std::string name,std::string pattern,std::string reversePattern){
+void registerNoArgTrigger(std::string name,std::string pattern,std::string reversePattern,ScopeType scopeType = ScopeType::COUNTRY){
 	TriggerItem* item = new TriggerItem();
 	item->pattern = pattern;
 	item->reversePattern = reversePattern;
 	item->parameterType.push_back(ParadoxType::BOOLEAN);
+	item->usable_scope = scopeType;
 	items[name] = item;
 	simpleTriggers.insert(name);
 	registeredTriggers.insert(name);
 }
 //1 arg type.
 //arg 0 will be used in patterns.
-void registerSimpleTrigger(std::string name,std::string pattern,std::string reversePattern,ParadoxType type){
+void registerSimpleTrigger(std::string name,std::string pattern,std::string reversePattern,ParadoxType type,ScopeType scopeType = ScopeType::COUNTRY){
 	TriggerItem* item = new TriggerItem();
 	item->pattern = pattern;
 	item->reversePattern = reversePattern;
 	item->parameterType.push_back(type);
 	item->usedParameter.push_back(0);
+	item->usable_scope = scopeType;
 	item->name = name;
 	items[name] = item;
 	registeredTriggers.insert(name);
@@ -52,18 +55,19 @@ void registerSimpleClauseTrigger(std::string name,TriggerItem* triggerItem){
 	items[name] = triggerItem;
 	registeredTriggers.insert(name);
 }
-void registerNumberRequiredTrigger(std::string name,std::string amountKey,std::string pattern,std::string reversePattern){
+void registerNumberRequiredTrigger(std::string name,std::string amountKey,std::string pattern,std::string reversePattern,ScopeType scopeType = ScopeType::COUNTRY){
 	TriggerItem* item = new TriggerItem();
 	item->name = name;
 	item->reversePattern = reversePattern;
 	item->pattern = pattern;
 	item->parameterType.push_back(ParadoxType::INTEGER);
 	item->usedParameter.push_back(0);
+	item->usable_scope = scopeType;
 	numberRequiredItems[name] = amountKey;
 	items[name] = item;
 	registeredTriggers.insert(name);
 }
-void registerBooleanTrigger(std::string name,std::string pattern,std::string reversePattern){
+void registerBooleanTrigger(std::string name,std::string pattern,std::string reversePattern,ScopeType scopeType = ScopeType::COUNTRY){
 	std::string actual_name(name);
 	actual_name.append("@");
 	actual_name.append(std::to_string(static_cast<int>(ParadoxType::BOOLEAN)));
@@ -71,12 +75,13 @@ void registerBooleanTrigger(std::string name,std::string pattern,std::string rev
 	item->name = name;
 	item->pattern = pattern;
 	item->reversePattern = reversePattern;
+	item->usable_scope = scopeType;
 	item->parameterType.push_back(ParadoxType::BOOLEAN);
 	items[actual_name] = item;
 	registeredTriggers.insert(name);
 
 }
-void registerSingleArgTrigger(std::string name,std::string pattern,std::string reversePattern,ParadoxType type){
+void registerSingleArgTrigger(std::string name,std::string pattern,std::string reversePattern,ParadoxType type,ScopeType scopeType = ScopeType::COUNTRY){
 	if(type == ParadoxType::BOOLEAN){
 		registerBooleanTrigger(name,pattern,reversePattern);
 		return;
@@ -92,6 +97,7 @@ void registerSingleArgTrigger(std::string name,std::string pattern,std::string r
 	item->reversePattern = reversePattern;
 	item->parameterType.push_back(type);
 	item->usedParameter.push_back(0);
+	item->usable_scope = scopeType;
 	items[actual_name] = item;
 	registeredTriggers.insert(name);
 }
@@ -398,7 +404,7 @@ void registerTriggerItems(){
 
 
 	registerSimpleTrigger("innovativeness","创新度至少为%d","创新度小于%d",ParadoxType::INTEGER);
-	registerSimpleTrigger("treasury","拥有至少%d[[File:crown.png]]","拥有少于%d[[File:crown]]",ParadoxType::INTEGER);
+	registerSimpleTrigger("treasury","拥有至少%d克朗","拥有少于%d克朗",ParadoxType::INTEGER);
 	registerNumberRequiredTrigger("num_of_owned_provinces_with","value","至少%d个拥有的省份满足下列条件:","少于%d个拥有的省份满足下列条件:");
 	registerSimpleTrigger("has_country_flag","国家标签'%s'已被设置","国家标签'%s'未被设置",ParadoxType::STRING);
 	
@@ -431,9 +437,8 @@ std::string TriggerItem::toString(std::vector<ParadoxBase*> base,bool reversed){
 					success = p.setNextString(base1->getAsDate()->getDateContent().toString());			
 				}
 				else if(parameterType[index] == ParadoxType::SCOPE){
-					std::string str = base1->getAsString()->getStringContent();
-					Scope* scope = createScopeFromString(str);
-					if(scope == nullptr) return "<ERROR>";
+					Scope* scope = base1->getAsScope()->getValue();
+					if(scope == nullptr) return "<ERROR2>";
 					success = p.setNextString(scope->toString());
 						
 				}
@@ -484,11 +489,12 @@ std::string TriggerItem::toHtml(std::vector<ParadoxBase*> base,bool reversed){
 }
 
 
-TriggerItem::TriggerItem(std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter){
+TriggerItem::TriggerItem(std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter,ScopeType scope_type){
 	this->pattern = patterns.first;
 	this->reversePattern = patterns.second;
 	this->parameterType = parameterType;
 	this->usedParameter = usedParameter;
+	this->usable_scope = usable_scope;
 	for(int i = 0;i < parameterName.size();i++){
 		this->parameterName[parameterName[i]] = i;
 	}
@@ -600,7 +606,7 @@ std::string ChangeScopeTrigger::toString(bool reversed){
 	if(this->subTriggers.empty()) return str;
 	if(this->changedScope != nullptr){
 		preInit(this,str);
-		bool should_add_bracket = this->changedScope->getType() != ScopeType::SPECIAL;
+		bool should_add_bracket = this->changedScope->getType() != ScopeType::ANY;
 		if(should_add_bracket) str.append("(");
 		if(!should_add_bracket && !condition.empty()) str.append("满足特定条件的");
 		if(use_type){
@@ -689,7 +695,7 @@ std::string LogicTrigger::toString(bool reversed){
 					this->ignored = true;
 					ignoreCurrentDepth(this);
 				}
-				return this->subTriggers[0]->toString(!reversed);
+				return this->subTriggers[0]->toString(!reversed).append("\n");
 			}
 			else {
 				if(!this->omitted) str.append("下列条件需全部满足:\n");
@@ -878,7 +884,8 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				ParadoxString* tt = subTag->get("tooltip",1)->getAsString();
 				
 				if(tt == nullptr) {
-					//error case should be passed.
+					std::cout << "#Warning:No tooltip for a custom_tt provided, the content will be ignored.";
+					
 					continue;
 				}
 				else{
@@ -996,52 +1003,68 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			
 			TriggerItem* ti = items[item];
 			ParadoxType type = ti->parameterType[0];
-			if(!isCastable(base,type)) continue;
+			ParadoxBase* base1 = castTo(base,type);
+			if(base1 == nullptr) continue;
 			CommonTrigger* ct = new CommonTrigger(ti);
-			ct->pushObject(base);
+			ct->pushObject(base1);
 			trigger->putTrigger(ct); 
 			
 			continue;
 		}
-		//for overrides
-		//TODO: Needs Rewrite to a list implementation.
-		int value = static_cast<int>(base->getType());
-		std::string name("");
-		name.append(item);
-		name.append("@");
-		name.append(std::to_string(value));
-		//if the parameter not fit...
-		if(items.find(name) == items.end()) {
-			//check is it a scope
-			if(value == static_cast<int>(ParadoxType::INTEGER) || value == static_cast<int>(ParadoxType::STRING)){
-				name = "";
+		ParadoxType type = base->getType();
+		std::cout << (int)type << std::endl;
+		if(type == ParadoxType::INTEGER){
+			ParadoxInteger* pInteger = base->getAsInteger();
+			for(int i = 0;i < sizeof(INTEGER_MATCH_SEQUENCE) / sizeof(ParadoxType);i++) {
+				std::string name("");
 				name.append(item);
 				name.append("@");
-				value = static_cast<int>(ParadoxType::SCOPE);
-				name.append(std::to_string(value));
+				name.append(std::to_string(static_cast<int>(INTEGER_MATCH_SEQUENCE[i])));
 				if(items.find(name) == items.end()) continue;
+				TriggerItem* ti = items[name];
+				ParadoxBase* arg1 = castTo(base,INTEGER_MATCH_SEQUENCE[i]);
+				if(arg1 == nullptr) continue;
+				CommonTrigger* ct = new CommonTrigger(ti);
+				ct->pushObject(arg1);		
+				trigger->putTrigger(ct);
 			}
-			else continue;
-		}
-		else if(base->getType() == ParadoxType::STRING){
-			std::string scope_name(item);
-			scope_name.append("@");
-			scope_name.append(std::to_string(static_cast<int>(ParadoxType::SCOPE)));
-			if(items.find(scope_name) != items.end() && isCastable(base,ParadoxType::SCOPE)){
-				name = scope_name;
-			}
-		}
-		
-		TriggerItem* ti = items[name];
-		ParadoxType type = ti->parameterType[0];
+			//when nothing matched
+			std::cout << "#ERROR: No Matching Trigger for \"" << item << " = " << pInteger->getIntegerContent() << "\"";
 
-		CommonTrigger* ct = new CommonTrigger(ti);
-		if(type == ParadoxType::BOOLEAN){
-			ct->reversed = base->getAsBoolean()->getValue();
 		}
-		else ct->pushObject(base);
-		
-		trigger->putTrigger(ct); 
+		else if(type == ParadoxType::STRING){
+			ParadoxString* pString = base->getAsString();
+			for(int i = 0;i < sizeof(STRING_MATCH_SEQUENCE) / sizeof(ParadoxType);i++){
+				std::string name("");
+				name.append(item);
+				name.append("@");
+				name.append(std::to_string(static_cast<int>(STRING_MATCH_SEQUENCE[i])));
+				if(items.find(name) == items.end()) continue;		
+				TriggerItem* ti = items[name];
+				ParadoxBase* arg1 = castTo(pString,STRING_MATCH_SEQUENCE[i]);
+				if(arg1 == nullptr) continue;
+				std::cout << (int)STRING_MATCH_SEQUENCE[i] << std::endl;
+				CommonTrigger* ct = new CommonTrigger(ti);
+				ct->pushObject(arg1);		
+				trigger->putTrigger(ct);
+			}
+			//when nothing matched
+			std::cout << "#ERROR: No Matching Trigger for \"" << item << " = " << pString->getStringContent() << "\"";
+		}
+		else{
+			std::string name("");
+			name.append(item);
+			name.append("@");
+			name.append(std::to_string(static_cast<int>(type)));
+			if(items.find(name) == items.end()) continue;
+			TriggerItem* ti = items[name];
+			CommonTrigger* ct = new CommonTrigger(ti);
+			if(type == ParadoxType::BOOLEAN){
+				ct->reversed = base->getAsBoolean()->getValue();
+			}
+			else ct->pushObject(base);
+			trigger->putTrigger(ct); 
+		}
 	}
 }
 
