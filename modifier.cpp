@@ -123,7 +123,8 @@ void loadInternalModifier(){
 	registerModifier("local_colony_cost_modifier",ModifierType::MINUS_PERCENTAGE,"本地殖民花费修正");
 	registerModifier("spy_action_cost_modifier",ModifierType::MINUS_PERCENTAGE,"间谍行动花费修正");
 	registerModifier("placed_merchant_power_modifier",ModifierType::PERCENTAGE,"已配置商人团竞争力修正");
-	registerModifier("reduced_liberty_desire_on_other_continent",ModifierType::REVERSED_PERCENTAGE2,"降低其他大洲属国独立倾向");
+	registerModifier("reduced_liberty_desire_on_other_continent",ModifierType::REVERSED_PERCENTAGE2,"其他大洲属国独立倾向");
+	registerModifier("reduced_liberty_desire",ModifierType::REVERSED_PERCENTAGE2,"属国独立倾向");
 	registerModifier("overextension_impact_modifier",ModifierType::MINUS_PERCENTAGE,"过度扩张影响修正");
 	registerModifier("artillery_level_modifier",ModifierType::NORMAL,"炮兵等级对围城的贡献");
 	registerModifier("local_tolerance_of_heretics",ModifierType::NORMAL,"本地异端容忍度");
@@ -390,7 +391,7 @@ void loadInternalModifier(){
 
 	registerModifier("imperial_authority",ModifierType::PERCENTAGE,"帝国权威修正");
 	registerModifier("imperial_authority_value",ModifierType::NORMAL,"帝国权威");
-	registerModifier("imperial_mandate",ModifierType::PERCENTAGE,"猫命增长修正");
+	registerModifier("imperial_mandate",ModifierType::NORMAL,"每月猫命增长");
 	registerModifier("national_focus_years",ModifierType::MINUS,"切换国家焦点所需年数");
 	registerModifier("vassal_forcelimit_bonus",ModifierType::PERCENTAGE,"附庸提供的陆军上限");
 	registerModifier("vassal_naval_forcelimit_bonus",ModifierType::PERCENTAGE,"附庸提供的海军上限");

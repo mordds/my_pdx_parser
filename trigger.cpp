@@ -3,11 +3,14 @@
 #include "trigger.h"
 #include "pattern.h"
 #include "scope.h"
+#include "localization.h"
 #include<map>
 #include<iostream>
 #include<set>
 
-typedef bool(*OverrideHandler)(std::map<std::string,ParadoxBase*>&);
+
+
+using OverrideHandler = bool(*)(std::map<std::string,ParadoxBase*>&);
 
 std::map<std::string,std::string> numberRequiredItems;
 std::set<std::string> simpleTriggers;
@@ -25,7 +28,7 @@ const ParadoxType STRING_MATCH_SEQUENCE[] = {ParadoxType::SCOPE,ParadoxType::STR
 //those trigger will be registered as 1 BOOL type args.
 //and no args will be used in localization text
 void registerNoArgTrigger(std::string name,std::string pattern,std::string reversePattern,ScopeType scopeType = ScopeType::COUNTRY){
-	TriggerItem* item = new TriggerItem();
+	TriggerItem* item = new TriggerItem(registerShortString(name));
 	item->pattern = pattern;
 	item->reversePattern = reversePattern;
 	item->parameterType.push_back(ParadoxType::BOOLEAN);
@@ -37,27 +40,24 @@ void registerNoArgTrigger(std::string name,std::string pattern,std::string rever
 //1 arg type.
 //arg 0 will be used in patterns.
 void registerSimpleTrigger(std::string name,std::string pattern,std::string reversePattern,ParadoxType type,ScopeType scopeType = ScopeType::COUNTRY){
-	TriggerItem* item = new TriggerItem();
+	TriggerItem* item = new TriggerItem(registerShortString(name));
 	item->pattern = pattern;
 	item->reversePattern = reversePattern;
 	item->parameterType.push_back(type);
 	item->usedParameter.push_back(0);
 	item->usable_scope = scopeType;
-	item->name = name;
 	items[name] = item;
 	registeredTriggers.insert(name);
 	simpleTriggers.insert(name);
 }
 
 void registerSimpleClauseTrigger(std::string name,TriggerItem* triggerItem){
-	simpleTriggers.insert(name);
-	triggerItem->name = name;
+	simpleTriggers.insert(registerShortString(name));
 	items[name] = triggerItem;
 	registeredTriggers.insert(name);
 }
 void registerNumberRequiredTrigger(std::string name,std::string amountKey,std::string pattern,std::string reversePattern,ScopeType scopeType = ScopeType::COUNTRY){
-	TriggerItem* item = new TriggerItem();
-	item->name = name;
+	TriggerItem* item = new TriggerItem(registerShortString(name));
 	item->reversePattern = reversePattern;
 	item->pattern = pattern;
 	item->parameterType.push_back(ParadoxType::INTEGER);
@@ -71,8 +71,7 @@ void registerBooleanTrigger(std::string name,std::string pattern,std::string rev
 	std::string actual_name(name);
 	actual_name.append("@");
 	actual_name.append(std::to_string(static_cast<int>(ParadoxType::BOOLEAN)));
-	TriggerItem* item = new TriggerItem();
-	item->name = name;
+	TriggerItem* item = new TriggerItem(registerShortString(name));
 	item->pattern = pattern;
 	item->reversePattern = reversePattern;
 	item->usable_scope = scopeType;
@@ -90,9 +89,7 @@ void registerSingleArgTrigger(std::string name,std::string pattern,std::string r
 	std::string actual_name(name);
 	actual_name.append("@");
 	actual_name.append(std::to_string(static_cast<int>(type)));
-	
-	TriggerItem* item = new TriggerItem();
-	item->name = name;
+	TriggerItem* item = new TriggerItem(registerShortString(name));
 	item->pattern = pattern;
 	item->reversePattern = reversePattern;
 	item->parameterType.push_back(type);
@@ -102,7 +99,6 @@ void registerSingleArgTrigger(std::string name,std::string pattern,std::string r
 	registeredTriggers.insert(name);
 }
 void registerClausedTrigger(std::string name,TriggerItem* item,OverrideHandler handler){
-	item->name = name;
 	items[name] = item;
 	overrideHandlers[name] = handler;
 	registeredTriggers.insert(name);
@@ -292,7 +288,7 @@ void registerTriggerItems(){
 	registerSimpleTrigger("adm_tech"," 行政科技至少为%d","行政科技低于%d",ParadoxType::INTEGER);
 	registerSimpleTrigger("advisor","已经雇佣了%s","尚未雇佣%s",ParadoxType::STRING);
 	registerSimpleTrigger("advisor_exists","id为%d的顾问存在","id为%d的顾问存在",ParadoxType::INTEGER);
-	registerSimpleClauseTrigger("ai_attitude",new TriggerItem(
+	registerSimpleClauseTrigger("ai_attitude",new TriggerItem(registerShortString("ai_attitude"),
 		{"%s对该国的态度为%s","%s为该国的态度不为%s"},
 		{"who","attitude"},
 		{ParadoxType::SCOPE,ParadoxType::STRING},
@@ -302,7 +298,7 @@ void registerTriggerItems(){
 	registerSingleArgTrigger("army_size","军队规模至少为%dK","军队规模小于%dK",ParadoxType::INTEGER);
 	registerSingleArgTrigger("army_size","拥有至少和%s规模相同的军队","军队规模小于%s",ParadoxType::SCOPE);
 	registerSimpleTrigger("army_size_percentage","军队规模至少为上限的%p%%","军队规模小于上限的%p%%",ParadoxType::INTEGER);
-	registerSimpleClauseTrigger("army_strength",new TriggerItem(
+	registerSimpleClauseTrigger("army_strength",new TriggerItem(registerShortString("army_strength"),
 		{"陆军实力至少为%s的%p%%","陆军实力少于%s的%p%%"},
 		{"who","value"},
 		{ParadoxType::SCOPE,ParadoxType::INTEGER},
@@ -327,7 +323,7 @@ void registerTriggerItems(){
 	registerSingleArgTrigger("base_tax","基础税收至少为variable:%s","基础税收少于variable:%s",ParadoxType::STRING);
 	registerSimpleTrigger("blockade","被封锁的港口至少为%p%%","被封锁的港口的少于%p%%",ParadoxType::INTEGER);
 	
-	registerSimpleClauseTrigger("border_distance",new TriggerItem(
+	registerSimpleClauseTrigger("border_distance",new TriggerItem(registerShortString("border_distance"),
 		{"与%s的边境距离至少为%d","与%s的边境距离少于%d"},
 		{"who","distance"},
 		{ParadoxType::SCOPE,ParadoxType::INTEGER},
@@ -340,14 +336,14 @@ void registerTriggerItems(){
 	registerSimpleTrigger("can_justify_trade_conflict","可以正当化与%s的贸易争端","无法正当化与%s的贸易争端",ParadoxType::SCOPE);
 	registerSimpleTrigger("can_spawn_rebel","当地有效的叛军类型为%s","当地有效的叛军类型不是%s",ParadoxType::STRING);
 	
-	registerSimpleClauseTrigger("can_use_peace_treaty",new TriggerItem(
+	registerSimpleClauseTrigger("can_use_peace_treaty",new TriggerItem(registerShortString("can_use_peace_treaty"),
 		{"%s可以使用%s条款","%s不可以使用%s条款"},
 		{"who","treaty"},
 		{ParadoxType::SCOPE,ParadoxType::STRING},
 		{0,1}
 	));
 	registerSimpleTrigger("capital","首都位于%s","首都不位于%s",ParadoxType::SCOPE);
-	registerSimpleClauseTrigger("",new TriggerItem(
+	registerSimpleClauseTrigger("capital_distance",new TriggerItem(registerShortString("capital_distance"),
 		{"与%s首都之间的距离至少为%d","与%s首都之间的距离小于%d"},
 		{"who","distance"},
 		{ParadoxType::SCOPE,ParadoxType::INTEGER},
@@ -357,7 +353,7 @@ void registerTriggerItems(){
 	registerSingleArgTrigger("cavalry_in_province","有至少%d队骑兵", "骑兵的数量小于%d队",ParadoxType::INTEGER);
 	registerSingleArgTrigger("cavalry_in_province","有来自%s的骑兵", "没有来自%s的骑兵",ParadoxType::SCOPE);
 	registerSimpleTrigger("province_has_center_of_trade_of_level","省份至少有%d级的贸易中心","省份没有至少%d级的贸易中心",ParadoxType::INTEGER);
-	registerClausedTrigger("check_variable", new TriggerItem(
+	registerClausedTrigger("check_variable", new TriggerItem(registerShortString("check_variable"),
 		{"%s的值大于或等于%s","%s的值小于%s"},
 		{"src","tar"},
 		{ParadoxType::STRING,ParadoxType::STRING},
@@ -401,7 +397,31 @@ void registerTriggerItems(){
 	registerSimpleTrigger("consort_dip","有一个外交能力至少为%d的配偶","没有一个外交能力至少为%d的配偶",ParadoxType::INTEGER);
 	registerSimpleTrigger("consort_mil","有一个军事能力至少为%d的配偶","没有一个军事能力至少为%d的配偶",ParadoxType::INTEGER);
 	registerSimpleTrigger("consort_culture","有一个文化为%s的配偶","没有一个文化为%s的配偶",ParadoxType::STRING);
+	registerSimpleTrigger("consort_has_personality","配偶拥有%s特质","配偶没有%s特质",ParadoxType::STRING);
+	
+	registerSingleArgTrigger("consort_religion","有一个信仰%s的配偶","没有一个信仰%s的配偶",ParadoxType::STRING);
+	registerSingleArgTrigger("consort_religion", "有一个信仰%s正信的配偶","没有一个信仰%s正信的配偶",ParadoxType::SCOPE);
 
+	registerSimpleTrigger("construction_progress","修建进度至少为%p%%","修建进度少于%p%%",ParadoxType::INTEGER);
+	
+	registerSingleArgTrigger("continent", "省份位于%s大陆","省份不位于%s大陆",ParadoxType::STRING);
+	registerSingleArgTrigger("continent", "省份位于%s所在大陆","省份不位于%s所在大陆",ParadoxType::SCOPE);
+
+	registerSimpleTrigger("controlled_by", "省份被%s所控制","省份未被%s所控制",ParadoxType::SCOPE);
+	registerSimpleTrigger("controls","控制省份%s","没有控制省份%s",ParadoxType::SCOPE);
+	
+	registerSimpleTrigger("claim","拥有对%s的宣称","没有对%s的宣称",ParadoxType::SCOPE);
+	registerSimpleTrigger("core_claim","拥有对%s的核心宣称","没有对%s的核心宣称",ParadoxType::SCOPE);
+
+	registerSimpleTrigger("core_percentage","核心省份比例至少为%p%%","核心省份比例小于%p%%",ParadoxType::SCOPE);
+
+	registerSimpleTrigger("corruption","腐败度至少为%d","腐败度小于%d",ParadoxType::INTEGER);
+	registerSimpleTrigger("council_position","在揭秘教辩论会中持有%s立场","没有在揭秘教辩论会中持有%s立场",ParadoxType::STRING);
+	registerSimpleTrigger("country_or_non_sovereign_subject_holds","被%s或其非朝贡属国持有","没有被%s或其非朝贡属国持有",ParadoxType::SCOPE);
+	registerSimpleTrigger("country_or_subject_holds","被%s或其属国持有","没有被%s或其属国持有",ParadoxType::SCOPE);
+
+	registerSingleArgTrigger("crown_land_share","王室领地比例至少为%p%%","王室领地比例少于%p%%",ParadoxType::INTEGER);
+	registerSingleArgTrigger("crown_land_share","王室领地比例大于%s阶级持有比例","王室领地比例大于%s阶级持有比例",ParadoxType::STRING);
 
 	registerSimpleTrigger("innovativeness","创新度至少为%d","创新度小于%d",ParadoxType::INTEGER);
 	registerSimpleTrigger("treasury","拥有至少%d克朗","拥有少于%d克朗",ParadoxType::INTEGER);
@@ -426,19 +446,21 @@ std::string TriggerItem::toString(std::vector<ParadoxBase*> base,bool reversed){
 		else{
 			ParadoxBase* base1 = base[index];
 			if(isCastable(base1,parameterType[index])){
+				ParadoxBase* base2 = castTo(base1,parameterType[index]);
 				bool success = false;
+
 				if(parameterType[index] == ParadoxType::INTEGER){
-					success = p.setNextInteger(base1->getAsInteger()->getIntegerContent());
+					success = p.setNextInteger(base2->getAsInteger()->getIntegerContent());
 				}
 				else if(parameterType[index] == ParadoxType::STRING){
-					success = p.setNextString(base1->getAsString()->getStringContent());
+					success = p.setNextString(base2->getAsString()->getStringContent());
 				}
 				else if(parameterType[index] == ParadoxType::DATE){
-					success = p.setNextString(base1->getAsDate()->getDateContent().toString());			
+					success = p.setNextString(base2->getAsDate()->getDateContent().toString());			
 				}
 				else if(parameterType[index] == ParadoxType::SCOPE){
-					Scope* scope = base1->getAsScope()->getValue();
-					if(scope == nullptr) return "<ERROR2>";
+					Scope* scope = base2->getAsScope()->getValue();
+					if(scope == nullptr) return "<ERROR>";
 					success = p.setNextString(scope->toString());
 						
 				}
@@ -463,19 +485,19 @@ std::string TriggerItem::toHtml(std::vector<ParadoxBase*> base,bool reversed){
 		else{
 			ParadoxBase* base1 = base[index];
 			if(isCastable(base1,parameterType[index])){
+				ParadoxBase* base2 = castTo(base1,parameterType[index]);
 				bool success = false;
 				if(parameterType[index] == ParadoxType::INTEGER){
-					success = p.setNextInteger(base1->getAsInteger()->getIntegerContent());
+					success = p.setNextInteger(base2->getAsInteger()->getIntegerContent());
 				}
 				else if(parameterType[index] == ParadoxType::STRING){
-					success = p.setNextString(base1->getAsString()->getStringContent());
+					success = p.setNextString(base2->getAsString()->getStringContent());
 				}
 				else if(parameterType[index] == ParadoxType::DATE){
-					success = p.setNextString(base1->getAsDate()->getDateContent().toString());			
+					success = p.setNextString(base2->getAsDate()->getDateContent().toString());			
 				}
 				else if(parameterType[index] == ParadoxType::SCOPE){
-					std::string str = base1->getAsString()->getStringContent();
-					Scope* scope = createScopeFromString(str);
+					Scope* scope = base2->getAsScope()->getValue();
 					if(scope == nullptr) return "<ERROR>";
 					success = p.setNextString(scope->toHtml());
 						
@@ -489,7 +511,7 @@ std::string TriggerItem::toHtml(std::vector<ParadoxBase*> base,bool reversed){
 }
 
 
-TriggerItem::TriggerItem(std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter,ScopeType scope_type){
+TriggerItem::TriggerItem(std::string _name,std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter,ScopeType scope_type): name(_name){
 	this->pattern = patterns.first;
 	this->reversePattern = patterns.second;
 	this->parameterType = parameterType;
@@ -608,7 +630,6 @@ std::string ChangeScopeTrigger::toString(bool reversed){
 		preInit(this,str);
 		bool should_add_bracket = this->changedScope->getType() != ScopeType::ANY;
 		if(should_add_bracket) str.append("(");
-		if(!should_add_bracket && !condition.empty()) str.append("满足特定条件的");
 		if(use_type){
 			str.append(trigger_type ? "所有" : "任意");
 		}
@@ -616,15 +637,7 @@ std::string ChangeScopeTrigger::toString(bool reversed){
 		if(should_add_bracket) str.append(")");
 		str.append(":\n");
 	}
-	if(!condition.empty()){
-		preInit(this,str);
-		str.append("条件:");
-		for(int i = 0;i < this->condition.size();i++){
-			str.append(this->condition[i]->toString(false));
-			if(this->condition[i]->getType() == TriggerType::COMMON) str.append("\n");
 
-		}
-	}
 	for(int i = 0;i < this->subTriggers.size();i++){
 		str.append(this->subTriggers[i]->toString(reversed));
 		if(this->subTriggers[i]->getType() == TriggerType::COMMON) str.append("\n");
@@ -1012,28 +1025,32 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			continue;
 		}
 		ParadoxType type = base->getType();
-		std::cout << (int)type << std::endl;
 		if(type == ParadoxType::INTEGER){
 			ParadoxInteger* pInteger = base->getAsInteger();
+			bool flag = false;
 			for(int i = 0;i < sizeof(INTEGER_MATCH_SEQUENCE) / sizeof(ParadoxType);i++) {
 				std::string name("");
 				name.append(item);
 				name.append("@");
 				name.append(std::to_string(static_cast<int>(INTEGER_MATCH_SEQUENCE[i])));
-				if(items.find(name) == items.end()) continue;
+				if(!items.contains(name)) continue;
 				TriggerItem* ti = items[name];
 				ParadoxBase* arg1 = castTo(base,INTEGER_MATCH_SEQUENCE[i]);
 				if(arg1 == nullptr) continue;
 				CommonTrigger* ct = new CommonTrigger(ti);
 				ct->pushObject(arg1);		
 				trigger->putTrigger(ct);
+				flag = true;
+				break;
 			}
 			//when nothing matched
-			std::cout << "#ERROR: No Matching Trigger for \"" << item << " = " << pInteger->getIntegerContent() << "\"";
-
+			if(!flag) log_error(current_location(),"ERROR: No Matching Trigger for \"",item," = ",pInteger->getIntegerContent() / 1000.0,"\"");
+			
+			
 		}
 		else if(type == ParadoxType::STRING){
 			ParadoxString* pString = base->getAsString();
+			bool flag = false;
 			for(int i = 0;i < sizeof(STRING_MATCH_SEQUENCE) / sizeof(ParadoxType);i++){
 				std::string name("");
 				name.append(item);
@@ -1047,9 +1064,11 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				CommonTrigger* ct = new CommonTrigger(ti);
 				ct->pushObject(arg1);		
 				trigger->putTrigger(ct);
+				flag = true;
+				break;
 			}
 			//when nothing matched
-			std::cout << "#ERROR: No Matching Trigger for \"" << item << " = " << pString->getStringContent() << "\"";
+			if(!flag) log_error(current_location(),"#ERROR: No Matching Trigger for \"" , item , " = " , pString->getStringContent() , "\"");
 		}
 		else{
 			std::string name("");

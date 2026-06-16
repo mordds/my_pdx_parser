@@ -6,7 +6,14 @@ bool isNumber(std::string str){
 	}
 	return true;
 }
+inline bool _inRange(int a,int b,int c){ return a >= b && a <= c; }
 
+bool isTagString(std::string str){
+    return str.size() == 3 &&
+        _inRange(str[0],'A','Z') && 
+        (_inRange(str[1],'A','Z') || _inRange(str[1],'0','9')) &&
+        (_inRange(str[2],'A','Z') || _inRange(str[2],'0','9')); 
+}
 bool startWith(std::string from,std::string to){
 	if(from.length() < to.length()) return false;
 	for(int i = 0;i < to.length();i++){

@@ -6,6 +6,7 @@
 #include <set>
 #include <unordered_map>
 #include <filesystem>
+
 extern YYSTYPE yylval;
 extern FILE* yyin;
 extern FILE* yyout;
@@ -14,13 +15,16 @@ extern int yylex();
 extern ParadoxTag* ROOT;
 extern std::vector<ParadoxBase*> parsedObject;
 extern std::map<std::string,ModifierObject> modifierObjects; 
-
+//
 
 
 int main(){
-	yyin = fopen("a0.txt","r");
+	std::cout << "请输入要解析的文件名称:" << std::endl;
+	std::string name;
+	getline(std::cin,name);
+	yyin = fopen(name.c_str(),"r");
 	loadInternalModifier();
-	std::cout << "Registered Modifier Number:" << modifierObjects.size() << std::endl;
+	//std::cout << "Registered Modifier Number:" << modifierObjects.size() << std::endl;
 	yyparse();
 	int token = yylex();
 	if(token != 0){

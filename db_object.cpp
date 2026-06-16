@@ -18,7 +18,7 @@ Good* getGood(std::string str){
 
 void listGoods(std::map<std::string,std::string>& maps){
     for(auto it : goodRegistry){
-        maps[it.first] = it.second.localizedName;
+        maps[it.first] = getLocalization(*it.second.localizedNamePtr);
     }
 }
 
@@ -33,7 +33,7 @@ void registerGood(){
         good.defaultPrice = base->getAsInteger()->getIntegerContent();
         std::string localizeKey = "good_";
         localizeKey.append(str);
-        good.localizedName = getLocalization(toUpperCase(localizeKey)); 
+        good.localizedNamePtr = getLocalizationKeyPtr(toUpperCase(localizeKey));
         goodRegistry[str] = good;
     }
     clearParserDatas();

@@ -7,7 +7,12 @@
 #include<vector>
 #include<stdio.h>
 #include<cstdint>
+#include<iostream>
 #include<concepts>
+#include<source_location>
+consteval std::source_location current_location(std::source_location current = std::source_location::current()){
+    return current;
+}
 
 enum class ParadoxType : uint8_t{
 	BASE = 255,
@@ -129,7 +134,11 @@ struct ParadoxArray : public ParadoxBase{
 	virtual void* getContent(){
 		return (void*)&contents;
 	}
-	ParadoxBase* get(int index){
+	ParadoxType getContentType() const{
+		if(contents.empty()) return ParadoxType::BASE;
+		else return contents[0]->getType();
+	}
+	ParadoxBase* get(int index) const{
 		if(index < 0 || contents.size() <= index) return nullptr;
 		else return contents[index];
 	}
@@ -209,5 +218,102 @@ template<>
 ParadoxBase* castTo(ParadoxString* base,ParadoxType type);
 bool Xor(bool a,bool b);
 ParadoxBase* deep_copy(ParadoxBase*);
+template<typename T>
+consteval ParadoxType getParadoxType(){
+	return ParadoxType::BASE;
+}
+template<>
+consteval ParadoxType getParadoxType<long long>(){
+	return ParadoxType::INTEGER;
+}
+template<>
+consteval ParadoxType getParadoxType<std::string>(){
+	return ParadoxType::STRING;
+}
+template<>
+consteval ParadoxType getParadoxType<Date>(){
+	return ParadoxType::DATE;
+}
+template<>
+consteval ParadoxType getParadoxType<bool>(){
+	return ParadoxType::BOOLEAN;
+}
+template<>
+consteval ParadoxType getParadoxType<Scope*>(){
+	return ParadoxType::SCOPE;
+}
+template<ParadoxType enumType>
+struct ParadoxTypeMap{
+	using rawType = void*;
+	using pdxType = ParadoxBase;
+};
+template<>
+struct ParadoxTypeMap<ParadoxType::DATE>{
+	using rawType = Date;
+	using pdxType = ParadoxDate;
+};
+template<>
+struct ParadoxTypeMap<ParadoxType::INTEGER>{
+	using rawType = long long;
+	using pdxType = ParadoxInteger;
+};
+template<>
+struct ParadoxTypeMap<ParadoxType::STRING>{
+	using rawType = std::string;
+	using pdxType = ParadoxString;
+};
 
+template<>
+struct ParadoxTypeMap<ParadoxType::SCOPE>{
+	using rawType = Scope*;
+	using pdxType = ParadoxScope;
+};
+template<>
+struct ParadoxTypeMap<ParadoxType::BOOLEAN>{
+	using rawType = bool;
+	using pdxType = ParadoxBoolean;
+};
+template<ParadoxType type>
+using rawType = typename ParadoxTypeMap<type>::rawType;
+template<ParadoxType type>
+using pdxType = typename ParadoxTypeMap<type>::pdxType;
+
+
+template<typename T>
+struct ParadoxTypeMap2{
+	using pdxType = ParadoxBase;
+};
+template<>
+struct ParadoxTypeMap2<long long>{
+	using pdxType = ParadoxInteger;
+};
+template<>
+struct ParadoxTypeMap2<std::string>{
+	using pdxType = ParadoxString;
+};
+template<>
+struct ParadoxTypeMap2<Date>{
+	using pdxType = ParadoxDate;
+};
+template<>
+struct ParadoxTypeMap2<bool>{
+	using pdxType = ParadoxBoolean;
+};
+template<>
+struct ParadoxTypeMap2<Scope*>{
+	using pdxType = ParadoxScope;
+};
+
+template<typename type>
+using pdxTypeFromRaw = typename ParadoxTypeMap2<type>::pdxType;
+
+
+template<typename... types>
+void log_error(const std::source_location location,types... args){
+	(std::cerr << "#[ERROR][" << location.file_name() << ":" << location.line() << " " <<location.function_name() << "]: " << ... << args) << std::endl;
+}
+template<typename... types>
+void log_warning(const std::source_location location,types... args){
+	(std::cerr << "#[WARNING][" << location.file_name() << ":" << location.line() << " " <<location.function_name() << "]: " << ... << args) << std::endl;
+}
 #endif

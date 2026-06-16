@@ -4,13 +4,26 @@
 #include "utils/string_util.h"
 #include "localization.h"
 #include<sstream>
+#include<iostream>
 #include<string.h>
+#include<charconv>
 std::map<std::string,std::string> AnyScope::localizeMap = std::map<std::string,std::string>();
 std::map<std::string,std::string> UnitScope::localizeMap = std::map<std::string,std::string>();
+std::map<std::string,std::string> MultiCountryScope::localizeMap = std::map<std::string,std::string>();
+std::map<std::string,std::string> MultiProvinceScope::localizeMap = std::map<std::string,std::string>();
 CountryScope* basicScopes[2600];
 ProvinceScope* provinceScopes[8000];
 std::map<std::string,Scope*> cachedScopes;
 std::set<std::string> registeredCustomScopes;
+
+bool hasRegistered(std::string str){
+	if(isNumber(str)) return true; // Numbers should not be registered as AnyScope or MultiScope
+	if(isTagString(str)) return true; //Tag Strings are reserved for tags.
+	if(AnyScope::localizeMap.find(str) != AnyScope::localizeMap.end()) return true;
+	if(MultiCountryScope::localizeMap.find(str) != MultiCountryScope::localizeMap.end()) return true;
+	if(MultiProvinceScope::localizeMap.find(str) != MultiProvinceScope::localizeMap.end()) return true;
+	return false;
+}
 
 ProvinceScope* Scope::getAsProvinceScope(){
 	if(this->getType() == ScopeType::PROVINCE){
@@ -57,7 +70,7 @@ std::string ProvinceScope::toHtml(){
 	return ret;
 } 
 std::string CountryScope::toString(){
-	return std::string(" ").append(getLocalization(this->tag)).append(" ");
+	return std::string(getLocalization(this->tag));
 }
 std::string CountryScope::toHtml(){
 	std::string ret = "";
@@ -80,21 +93,78 @@ std::string UnitScope::toString(){
 	return "<UnitScope>";
 }
 
-void AnyScope::registerLocalizeText(std::string key,std::string value){
-	if(AnyScope::localizeMap.find(key) == AnyScope::localizeMap.end()) AnyScope::localizeMap[key] = value;
+
+std::string MultiCountryScope::toString(){
+	if(MultiCountryScope::localizeMap.find(this->data) != MultiCountryScope::localizeMap.end()){
+		return MultiCountryScope::localizeMap[this->data];
+	}
+	return "<MultiCountryScope>";
 }
+
+std::string MultiProvinceScope::toString(){
+	if(MultiProvinceScope::localizeMap.find(this->data) != MultiProvinceScope::localizeMap.end()){
+		return MultiProvinceScope::localizeMap[this->data];
+	}
+	return "<MultiProvinceScope>";
+}
+
+void AnyScope::registerLocalizeText(std::string key,std::string value){
+	if(hasRegistered(key)){
+		std::cerr << "[ERROR][Scope.cpp:86 AnyScope::registerLocalizeText]: " <<
+		 key << "have been registered or is not a valid Scope Name.";
+		return;
+	}
+	AnyScope::localizeMap[key] = value;
+}
+
+void MultiProvinceScope::registerMultiProvinceScope(std::string key,std::string value){
+	if(hasRegistered(key)){
+		std::cerr << "[ERROR][Scope.cpp:94 MultiProvinceScope::registerMultiProvinceScope]: " << 
+		key << "have been registered or is not a valid Scope Name.";
+		return;
+	}
+	MultiProvinceScope::localizeMap[key] = value;	
+}
+
+void MultiCountryScope::registerMultiCountryScope(std::string key,std::string value){
+	if(hasRegistered(key)){
+		std::cerr << "[ERROR][Scope.cpp:104 MultiCountryScope::registerMultiCountryScope]: " << 
+		key << "have been registered or is not a valid Scope Name.";
+		return;
+	}
+	MultiCountryScope::localizeMap[key] = value;	
+}
+
+
+
+Scope* getCustomScope(std::string str){
+	if(auto it = AnyScope::localizeMap.find(str); it != AnyScope::localizeMap.end()) return new AnyScope(it->first);
+	if(auto it = MultiCountryScope::localizeMap.find(str); it != MultiCountryScope::localizeMap.end()) return new MultiCountryScope(it->first);
+	if(auto it = MultiCountryScope::localizeMap.find(str); it != MultiCountryScope::localizeMap.end()) return new MultiCountryScope(it->first);
+	return nullptr;
+}
+
 void initScope(){
 	for(int i = 0;i < 2600;i++) basicScopes[i] = nullptr;
 	for(int i = 0;i < 8000;i++) provinceScopes[i] = nullptr;
 }
 
 
+ProvinceScope* getProvinceScope(int id){
+	if(id < 8000){
+		if(provinceScopes[id] == nullptr){
+			provinceScopes[id] = new ProvinceScope(id);
+		}
+		return provinceScopes[id];		
+	}
+	return nullptr;
+}
+
 Scope* createScopeFromString(std::string str){
 	
 	if(isNumber(str)){
-		std::stringstream sin(str);
 		long long i;
-		sin >> i;
+		std::from_chars(str.data(),str.data()+str.size(),i);
 		if(i < 8000){
 			if(provinceScopes[i] == nullptr){
 				provinceScopes[i] = new ProvinceScope(i);
@@ -129,11 +199,17 @@ Scope* createScopeFromString(std::string str){
 		return scope;
 	}
 	else{
-		if(registeredCustomScopes.find(str) == registeredCustomScopes.end()) return nullptr;
 		if(cachedScopes.find(str) == cachedScopes.end()){
-			cachedScopes[str] = new AnyScope(str);
+			Scope* scope = getCustomScope(str);
+			if(scope != nullptr) cachedScopes[str] = scope;
 		}
 		return cachedScopes[str];
 	}
 	return nullptr;
+}
+
+
+void registerInternalScopes(){
+
+	
 }

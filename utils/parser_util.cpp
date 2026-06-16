@@ -1,3 +1,4 @@
+
 #include "parser_util.h"
 #include <stdio.h>
 #include <iostream>
@@ -28,4 +29,3 @@ void clearParserDatas(){
     parsedObject.clear();
     parsedObject.shrink_to_fit();
 }
-

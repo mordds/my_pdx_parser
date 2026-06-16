@@ -22,7 +22,7 @@ struct CommonTrigger;
 struct TriggerItem{
 	std::string pattern;
 	std::string reversePattern;
-	std::string name;
+	const std::string& name;
 	std::map<std::string,int> parameterName;
 	std::vector<ParadoxType> parameterType;
 	std::vector<int> usedParameter;
@@ -30,8 +30,8 @@ struct TriggerItem{
 	int attribue;
 	std::string toString(std::vector<ParadoxBase*> base,bool reversed);
 	std::string toHtml(std::vector<ParadoxBase*> base,bool reversed);
-	TriggerItem(){}
-	TriggerItem(std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter,ScopeType scope_type = ScopeType::COUNTRY);
+	TriggerItem(std::string _name) : name(_name){}
+	TriggerItem(std::string _name,std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter,ScopeType scope_type = ScopeType::COUNTRY);
 };
 
 
@@ -105,7 +105,6 @@ struct ChangeScopeTrigger : ComplexTrigger{
 	ChangeScopeTrigger(Scope* scope);
 	virtual std::string toString(bool reversed);
 	Scope* changedScope;
-	std::vector<Trigger*> condition;
 	bool trigger_type;
 	bool use_type;
 };

@@ -4,10 +4,13 @@
 #include "localization.h"
 #include "utils/parser_util.h"
 #include "national_idea.h"
+#include "effect.h"
 #include <iostream>
 #include <map>
 #include <bitset>
 #include <sstream>
+#include <chrono>
+#include <memory>
 
 typedef void(*CommandHandler)(std::vector<std::string>);
 
@@ -23,6 +26,23 @@ void printModifier(std::vector<std::string> vec){
 		std::cout << std::endl; 
 	}	
     clearParserDatas();
+}
+void printModifierHtml(std::vector<std::string> vec){
+    ParadoxTag* root = parseFile(vec[0]);
+	std::vector<Modifier> modifiers;
+	ParseModifier(root,modifiers);
+	for(int i = 0;i < modifiers.size();i++){
+		std::cout << modifiers[i].localizeHtml();
+		std::cout << std::endl; 
+		std::cout << std::endl; 
+	}	
+    clearParserDatas();
+}
+void printEffect(std::vector<std::string> vec){
+	ParadoxTag* root = parseFile(vec[0]);
+ 	std::unique_ptr<ComplexEffect> effect = createBaseEffect();
+	parseEffect(root,effect.get());
+	std::cout << effect->toString() << std::endl;
 }
 
 void printTrigger(std::vector<std::string> vec){
@@ -66,20 +86,50 @@ void printTrigger(std::vector<std::string> vec){
 
 int main(){
     using namespace std;
-
-    readLocalizations();
-
+    std::thread& th = readLocalizations();
     loadInternalModifier();
-
     registerGood();
-
     registerTriggerItems();
-	
+	registerEffectItems();
 	loadNationalIdea();
-
+	th.join();
     std::cout << "#Load Completed!" << std::endl;
     handlers["print_modifier"] = printModifier;
+	handlers["print_modifier_html"] = printModifierHtml;
     handlers["print_trigger"] = printTrigger;
+	handlers["print_effect"] = printEffect;
+	handlers["run_bench"] = [](std::vector<std::string> vec){
+		auto start = std::chrono::system_clock::now();
+		ParadoxTag* root = parseFile("./bench.txt");
+		auto end = std::chrono::system_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+		std::cout << "====== node parse phase ======" << std::endl;
+		std::cout << "parsed node count: " << root->getAsTag(0)->size() + root->getAsTag(1)->size() + 2 << std::endl;
+		std::cout << "time consumed: " << duration.count() << " microseconds" << std::endl;
+		std::cout << "time per node: " << duration.count() / (1.0 * root->getAsTag(0)->size() + 1) << " mircoseconds" << std::endl;
+		start = std::chrono::system_clock::now();
+		ComplexTrigger* ct = createBaseTrigger();
+		parseTrigger(root->getAsTag(0),ct);
+		end = std::chrono::system_clock::now();
+		duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+		std::cout << "====== trigger create phase ======" << std::endl;
+		std::cout << "parsed node count: " << root->getAsTag(0)->size() + 1 << std::endl;
+		std::cout << "time consumed: " << duration.count() << " microseconds" << std::endl;
+		std::cout << "time per node: " << duration.count() / (1.0 * root->getAsTag(0)->size() + 1) << " mircoseconds" << std::endl;
+		start = std::chrono::system_clock::now();
+		Modifier modifiers;
+		ParseModifier(root->getAsTag(1),modifiers);
+		end = std::chrono::system_clock::now();
+		duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+		
+		std::cout << "====== modifier create phase ======" << std::endl;
+		std::cout << "parsed node count: " << root->getAsTag(0)->size() + 1 << std::endl;
+		std::cout << "time consumed: " << duration.count() << " microseconds" << std::endl;
+		std::cout << "time per node: " << duration.count() / (1.0 * root->getAsTag(0)->size() + 1) << " mircoseconds" << std::endl;
+		
+		clearParserDatas();
+		delete ct;
+	};
     handlers["trade_good"] = [](std::vector<std::string> vec){
         if(vec.empty()){
             std::cout << "用法:trade_good <good_id>" << std::endl;
@@ -90,7 +140,7 @@ int main(){
             std::cout << "没有名为" << vec[0] << "的商品" << std::endl;
             return;
         }
-        std::cout << good->localizedName << std::endl;
+        std::cout << getLocalization(*good->localizedNamePtr) << std::endl;
         good->provinceModifier->localize();
         std::cout << "基础价格:" << good->defaultPrice / 1000.0 << std::endl;
         std::cout << good->globalModifier->localize(); 

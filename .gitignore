@@ -5,8 +5,9 @@
 resultset/
 scripted_effect/
 datas/*.txt
-localization/*.txt
+localization/*
 lex.yy.c
 lex2.yy.c
 y.tab.c
 /temp/*
+

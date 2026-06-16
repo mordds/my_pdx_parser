@@ -15,7 +15,7 @@ enum class DataBaseObjType{
 
 struct ParadoxDataBaseObj{
     virtual DataBaseObjType getType() = 0;   
-    std::string localizedName;
+    const std::string* localizedNamePtr;
 };
 struct Good : ParadoxDataBaseObj{
     virtual DataBaseObjType getType() {

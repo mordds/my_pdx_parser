@@ -95,7 +95,6 @@ void ParadoxTag::add(std::string name,ParadoxBase* base){
 		seq.push_back(key1);
 	}
 }
-//TODO Overwrite all Parser and ParadoxType)
 void ParadoxTag::remove(std::string name,int index){
 	if(tags.find(name) == tags.end()) return;
 	if(multiKeyCount.find(name) == multiKeyCount.end()){
@@ -176,26 +175,16 @@ bool isCastable(ParadoxBase* base,ParadoxType type){
 	if(base->getType() == type){
 		return true;
 	}
-	else{
+	else if(type == ParadoxType::SCOPE){
 		if(base->getType() == ParadoxType::INTEGER){
-			return base->getAsInteger()->getIntegerContent() <= 32767L && type == ParadoxType::SCOPE;
+			return base->getAsInteger()->getIntegerContent() <= 8000L;
 		}
 		if(base->getType() == ParadoxType::STRING){
-			std::string content = base->getAsString()->getStringContent();
-			if(type == ParadoxType::SCOPE){
-				if(startWith(content,"event_target:") && content.length() > 13) return true;
-				else if(content.length() == 3){
-					if(content[0] < 'A' || content[0] > 'Z') return false;
-					if((content[1] >= 'A' && content[1] <= 'Z') || (content[1] >= '0' && content[1] <= '9')){
-						return (content[2] >= 'A' && content[2] <= 'Z') || (content[2] >= '0' && content[2] <= '9');
-					}
-				}
-			}
+			return true;
 		}
-		return false;
 	}
+	return false;
 }
-
 //!WARNING!
 //the returned pointer is created by 'new' operator and the caller has the responsibility to manage memory
 //this function is used to create a ParadoxBase Object which do not managed by global object manager.
@@ -323,10 +312,10 @@ ParadoxBase* castTo(ParadoxString* string,ParadoxType type){
 //
 template<>
 ParadoxBase* castTo(ParadoxInteger* number, ParadoxType type){
-	if(number) return nullptr;
+	if(number == nullptr) return nullptr;
 	if(type == ParadoxType::INTEGER) return number;
 	if(type == ParadoxType::SCOPE) {
-		Scope* scope = createScopeFromString(std::to_string(number->getIntegerContent()));
+		Scope* scope = getProvinceScope(number->getIntegerContent());
 		if(scope == nullptr) return nullptr;
 		return new ParadoxScope(scope);
 	}

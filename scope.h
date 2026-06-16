@@ -3,6 +3,7 @@
 #include<string>
 #include<map>
 #include<set>
+#include "utils/string_util.h"
 enum ScopeType{
 	PROVINCE = 1,
 	COUNTRY = 2,
@@ -16,9 +17,11 @@ struct UnitScope;
 struct Scope{
 	virtual std::string toString() = 0;
 	virtual ScopeType getType() const = 0;
+	virtual bool isMultiScope() const = 0;
 	virtual std::string toHtml(){
 		return toString();
 	}
+	
 	ProvinceScope* getAsProvinceScope();
 	CountryScope* getAsCountryScope();
 	AnyScope* getAsAnyScope();
@@ -27,6 +30,7 @@ struct Scope{
 struct ProvinceScope : Scope{
 	virtual std::string toString();
 	virtual std::string toHtml();
+	virtual bool isMultiScope() const { return false; }
 	virtual ScopeType getType() const{
 		return ScopeType::PROVINCE;
 	}
@@ -36,6 +40,7 @@ struct ProvinceScope : Scope{
 };
 struct UnitScope : Scope {
 	virtual std::string toString();
+	virtual bool isMultiScope() const { return false; };
 	virtual ScopeType getType() const {
 		return ScopeType::UNIT;
 	}
@@ -48,6 +53,7 @@ struct UnitScope : Scope {
 struct CountryScope : Scope{
 	virtual std::string toString();
 	virtual std::string toHtml();
+	virtual bool isMultiScope() const { return false; };
 	virtual ScopeType getType() const{
 		return ScopeType::COUNTRY;
 	}
@@ -58,15 +64,48 @@ struct CountryScope : Scope{
 	private:
 	char tag[4]; 
 };
+struct MultiCountryScope : Scope {
+	virtual std::string toString();
+	virtual std::string toHtml(){ return toString(); }
+	virtual bool isMultiScope() const { return true; };
+	virtual ScopeType getType() const {
+		return ScopeType::COUNTRY;
+	}
+	MultiCountryScope(std::string name) : data(name){};
+	std::string data;
+	static void registerMultiCountryScope(std::string name,std::string value);	
+	static std::map<std::string,std::string> localizeMap;
+};
+//
+
+struct MultiProvinceScope : Scope {
+	virtual std::string toString();
+	virtual std::string toHtml(){ return toString(); }
+	virtual bool isMultiScope() const { return true; };
+	virtual ScopeType getType() const {
+		return ScopeType::COUNTRY;
+	}
+	MultiProvinceScope(std::string name) : data(name){};
+	std::string data;
+	static void registerMultiProvinceScope(std::string name,std::string value);	
+	static std::map<std::string,std::string> localizeMap;
+};
+
+
+
 struct AnyScope : Scope{
 	virtual std::string toString();
 	virtual ScopeType getType() const{
 		return ScopeType::ANY;
 	}
+	virtual bool isMultiScope() const { return false; };
 	AnyScope(std::string str);
 	std::string data;
 	static void registerLocalizeText(std::string key,std::string value);
 	static std::map<std::string,std::string> localizeMap;
 };
 Scope* createScopeFromString(std::string str);
+ProvinceScope* getProvinceScope(int id);
+
+void registerInternalScopes();
 #endif

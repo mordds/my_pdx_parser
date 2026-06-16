@@ -1,0 +1,258 @@
+#include "effect.h"
+#include "trigger.h"
+#include "localization.h"
+#include "pattern.h"
+#include "utils/functional_util.h"
+#include "paradox_type.h"
+#include <array>
+#include <string_view>
+#include <iostream>
+#include <source_location>
+
+
+using OverrideHandler = bool(*)(std::map<std::string,ParadoxBase*>&);
+
+std::map<const std::string*,EffectItem*> effectItems;
+std::set<const std::string*> simpleEffectItems;
+std::map<const EffectItem*,OverrideHandler> effectHandlers;
+
+void preInit(std::string& str,int depth){
+    for(int i = 0;i < depth;i++) str.push_back(' ');
+}
+
+bool isSimpleItem(std::string key){
+    return simpleEffectItems.find(getLocalizationKeyPtr(key)) != simpleEffectItems.end();
+}
+EffectItem* getEffectItem(std::string key){
+    return effectItems[getLocalizationKeyPtr(key)];
+}   
+template<ParadoxType types>
+void registerSingleArgEffect(std::string name,ScopeType usable_scope, std::function<std::string(rawType<types>)> localize){
+    const std::string* name_ptr = getLocalizationKeyPtr(name.append(std::to_string(static_cast<int>(types))));
+    EffectItem* u = new NativeEffectItem<rawType<types>>(*name_ptr,usable_scope,localize);
+    
+    effectItems[name_ptr] = u;
+}
+
+template<ParadoxType... types>
+void registerSimpleEffect(std::string name,ScopeType usable_scope, std::function<std::string(rawType<types>...)> localize){
+    const std::string* name_ptr = getLocalizationKeyPtr(name);
+    EffectItem* u = new NativeEffectItem<rawType<types>...>(*name_ptr,usable_scope,localize);
+    simpleEffectItems.insert(name_ptr);
+    effectItems[name_ptr] = u;
+}
+
+template<ParadoxType...types>
+void regiserSimpleClausedEffect(std::string name,ScopeType usable_scope,std::function<std::string(rawType<types>...)> localize,std::array<std::string,sizeof...(types)> names){
+    const std::string* name_ptr = getLocalizationKeyPtr(name);
+    if(!localize) std::cout << "ERROR!!!" << std::endl;
+    EffectItem* u = new ParameteredNativeEffectItem<rawType<types>...>(*name_ptr,usable_scope,localize,names);
+    simpleEffectItems.insert(name_ptr);
+    effectItems[name_ptr] = u;
+}
+
+template<ParadoxType...types>
+void regiserArrayEffect(std::string name,ScopeType usable_scope,std::function<std::string(rawType<types>...)> localize,std::array<std::string,sizeof...(types)> names){
+    name.append("_array");
+    const std::string* name_ptr = getLocalizationKeyPtr(name);
+    EffectItem* u = new NativeEffectItem<rawType<types>...>(*name_ptr,usable_scope,localize,names);
+    simpleEffectItems.insert(name_ptr);
+    effectItems[name_ptr] = u;
+}
+
+template<ParadoxType...types>
+void regiserClausedEffect(std::string name,ScopeType usable_scope,std::function<std::string(rawType<types>...)> localize,std::array<std::string,sizeof...(types)> names,OverrideHandler handler){
+    const std::string* name_ptr = getLocalizationKeyPtr(name);
+    const EffectItem* u = new ParameteredNativeEffectItem<rawType<types>...>(*name_ptr,usable_scope,localize,names);
+    simpleEffectItems.insert(name_ptr);
+    effectItems[name_ptr] = u;    
+    effectHandlers[u] = handler;
+}//
+
+void registerEffectItems(){
+    using namespace std::literals;
+    registerSimpleEffect<ParadoxType::INTEGER>("add_treasury"s,ScopeType::COUNTRY,
+        signedPattern<0,ParadoxType::INTEGER>("获得%d克朗"s,"失去-%d克朗"s));
+    regiserSimpleClausedEffect<ParadoxType::SCOPE,ParadoxType::INTEGER>("add_trust"s,ScopeType::COUNTRY,
+        signedOrderPattern<1,ParadoxType::SCOPE,ParadoxType::INTEGER>("对%s的信任提高了%d"s,"对%s的信任降低了-%d"s),{"who","value"});
+
+}
+
+//I HATE this function...
+//A fallback when Parser have some problems
+void ignoreCurrentDepth(ComplexEffect* effect){
+	for(int i = 0;i < effect->subEffects.size();i++){
+		effect->subEffects[i]->depth--;
+		ComplexEffect* effect2 = effect->subEffects[i]->getAsComplexEffect();
+		if(effect2 != nullptr) ignoreCurrentDepth(effect2);
+	}
+}
+
+
+std::string ChangeScopeEffect::toString(){
+    std::string str("");
+    if(this->target != nullptr){
+        preInit(str,this->depth);
+        if(this->subEffects.empty()) return str;
+        str.append(this->target->toString());
+        str.append(":\n");
+        if(this->condition != nullptr){
+            preInit(str,this->depth + 1);
+            str.append("若满足以下条件:");
+            str.append(this->condition->toString(false));
+            str.append("则:\n");
+        }
+    }
+    for(Effect* effect : this->subEffects){
+        str.append(effect->toString());
+    }
+    return str;
+}
+
+std::string HiddenEffect::toString(){
+    if(this->hidden_current) return "";
+    else{
+        std::string str("");
+        preInit(str,this->depth);
+        str.append("隐藏效果:\n");
+        std::cout << this->subEffects.size() << std::endl;
+        for(Effect* effect : this->subEffects){
+            str.append(effect->toString());
+        } 
+        return str;
+    }
+}
+
+std::string ConditionalEffect::toString(){
+    std::string str("");
+    if(this->condition == nullptr){
+        log_warning(current_location(),"unexcepted nullptr trigger in ConditionalEffect.");
+        ignoreCurrentDepth(this);
+    }
+    else {
+        preInit(str,this->depth);
+        str.append("若满足以下条件:\n");
+        preInit(str,this->depth + 1);
+        str.append(this->condition->toString(false));
+        preInit(str,this->depth);
+        str.append("则:\n");
+    }
+
+    for(Effect* effect : this->subEffects){
+        str.append(effect->toString());
+    }
+    return str;
+}
+
+std::unique_ptr<ComplexEffect> createBaseEffect(int depth){
+    auto ptr = std::unique_ptr<ComplexEffect>(static_cast<ComplexEffect*>(new ChangeScopeEffect(nullptr)));
+    ptr->depth = depth;
+    return ptr;
+}
+//Final Part of the Paradox Parser Base!
+void parseEffect(ParadoxTag* root,ComplexEffect* from){
+    for(int i = 0;i < root->size();i++){
+        std::string name = stripTag(root->seq[i]);
+        ParadoxBase* base = root->get(i);
+        ParadoxTag* tag = base->getAsTag();
+        
+        if(tag != nullptr){
+            if(name == "if"){
+                if(ParadoxTag* subTag = tag->getAsTag("limit");subTag != nullptr){
+                    ConditionalEffect* effect = new ConditionalEffect();
+                    from->addEffect(effect);
+                    ComplexTrigger* trigger = createBaseTrigger();
+                    trigger->depth = 0;
+                    parseTrigger(subTag,trigger);
+                    tag->remove("limit",0);
+                    effect->condition = trigger;
+                    parseEffect(tag,effect);
+                }
+                else {
+                    log_error(current_location(),"cannot create a Conditional Effect without \"limit\" block.");
+                }
+            }
+            else if(name == "hidden_effect"){
+                HiddenEffect* effect = new HiddenEffect();
+                from->addEffect(effect);
+                parseEffect(tag,effect);
+            }
+            else if(Scope* scope = createScopeFromString(name);scope != nullptr){
+                ParadoxTag* subTag = tag->getAsTag("limit");
+                
+                if(subTag != nullptr && !scope->isMultiScope()) log_error(current_location(),"\"limit\" block for single scope is Invalid.");
+                else {
+                    ChangeScopeEffect* effect = nullptr;
+                    if(subTag != nullptr){
+                        ComplexTrigger* trigger = createBaseTrigger();
+                        parseTrigger(subTag,trigger);
+                        effect = new ChangeScopeEffect(scope,trigger);   
+                        from->addEffect(effect);
+                        trigger->depth = effect->depth + 2;
+                        tag->remove("limit",0);
+                        effect->depth++;
+                        parseEffect(tag,effect);
+                        effect->depth--;
+                    }
+                    else {
+                        effect = new ChangeScopeEffect(scope);
+                        from->addEffect(effect);
+                        parseEffect(tag,effect);
+                    }
+                }
+            }
+            else {
+                EffectItem* item = getEffectItem(name);
+                if(item == nullptr) continue;
+                if(effectHandlers.contains(item)){
+                    bool success = effectHandlers[item](tag->tags);
+                    if(!success) continue;
+                }
+                Effect* effect = item->createInstance(tag->tags).release();
+                if(effect != nullptr) from->addEffect(effect);
+            }
+        }
+        else if(base->getType() == ParadoxType::ARRAY){
+            //arrays should not be 1 args...
+            name.append("_array");
+            EffectItem* item = getEffectItem(name);
+            if(item == nullptr) continue;
+            Effect* effect = item->createInstance(base->getAsArray()->contents).release();
+            if(effect != nullptr) from->addEffect(effect);
+        }
+        else {
+            if(isSimpleItem(name)){
+                EffectItem* item = getEffectItem(name);
+                Effect* effect = item->createInstance(std::vector<ParadoxBase*>{base}).release();
+                if(effect != nullptr) from->addEffect(effect);
+            }
+            else{
+                if(base->getType() == ParadoxType::INTEGER){
+                    if(EffectItem* item = getEffectItem(name + std::to_string(static_cast<uint8_t>(ParadoxType::INTEGER)));item != nullptr){
+                        Effect* effect = item->createInstance(std::vector<ParadoxBase*>{base}).release();
+                        if(effect != nullptr) from->addEffect(effect);    
+                    }
+                    else if(EffectItem* item = getEffectItem(name + std::to_string(static_cast<uint8_t>(ParadoxType::SCOPE)));item != nullptr){
+                        Effect* effect = item->createInstance(std::vector<ParadoxBase*>{castTo(base,ParadoxType::SCOPE)}).release();
+                        if(effect != nullptr) from->addEffect(effect);    
+                    }
+                }
+                else if(base->getType() == ParadoxType::STRING){
+                    if(EffectItem* item = getEffectItem(name + std::to_string(static_cast<uint8_t>(ParadoxType::SCOPE)));item != nullptr){
+                        Effect* effect = item->createInstance(std::vector<ParadoxBase*>{castTo(base,ParadoxType::SCOPE)}).release();
+                        if(effect != nullptr) from->addEffect(effect);    
+                    }
+                    else if(EffectItem* item = getEffectItem(name + std::to_string(static_cast<uint8_t>(ParadoxType::STRING)));item != nullptr){
+                        Effect* effect = item->createInstance(std::vector<ParadoxBase*>{base}).release();
+                        if(effect != nullptr) from->addEffect(effect);    
+                    }
+                }
+                else if(EffectItem* item = getEffectItem(name + std::to_string(static_cast<uint8_t>(base->getType())));item != nullptr){
+                    Effect* effect = item->createInstance(std::vector<ParadoxBase*>{base}).release();
+                    if(effect != nullptr) from->addEffect(effect);    
+                }
+            }
+
+        }
+    }
+}

@@ -72,6 +72,10 @@ bool Pattern::setNextInteger(long long value){
 			pos++;
 			return false;
 		}
+		if(pos != 0 && this->patternString[pos - 1] == '-') {
+			this->output.pop_back();
+			value *= -1;
+		}
 		if(this->patternString[pos+1] == '%') {
 			this->output.append("%");
 			pre = pos + 2;
