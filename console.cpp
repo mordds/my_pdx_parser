@@ -5,6 +5,7 @@
 #include "utils/parser_util.h"
 #include "national_idea.h"
 #include "effect.h"
+#include "paradox_marco.h"
 #include <iostream>
 #include <map>
 #include <bitset>
@@ -96,6 +97,13 @@ int main(){
     std::cout << "#Load Completed!" << std::endl;
     handlers["print_modifier"] = printModifier;
 	handlers["print_modifier_html"] = printModifierHtml;
+	handlers["debug_print"] = [](std::vector<std::string> vec){
+		std::cout << sizeof(HiddenEffect) << std::endl;	
+	};
+	handlers["st_test"] = [](std::vector<std::string> vec){
+		loadScriptedTrigger();
+		printAllScriptedTrigger();
+	};
     handlers["print_trigger"] = printTrigger;
 	handlers["print_effect"] = printEffect;
 	handlers["run_bench"] = [](std::vector<std::string> vec){
@@ -167,7 +175,7 @@ int main(){
 	};
 	handlers["ideas"] = [](std::vector<std::string> vec){
 		if(vec.empty()){
-			std::cout << "用法:tag_idea <tag>" << std::endl;
+			std::cout << "用法:ideas <tag>" << std::endl;
             return;
 		}
 		const NationalIdea* idea = getFromName(vec[0]);

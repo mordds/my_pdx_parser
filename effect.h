@@ -9,7 +9,8 @@
 #include<memory>
 #include<iostream>
 #include "scope.h"
-#include <cassert>
+#include<cassert>
+#include<cstdint>
 
 struct Trigger;
 struct Effect;
@@ -25,6 +26,7 @@ struct Effect{
 	virtual std::string toString() = 0;
 	virtual EffectType getType() = 0;
 	int depth;
+	uint8_t extra_data[4];
 	ComplexEffect* getAsComplexEffect(){
 		if(this->getType() != EffectType::COMMON) return (ComplexEffect*)this;
 		return nullptr;
@@ -302,13 +304,18 @@ struct ChangeScopeEffect : ComplexEffect{
 struct ConditionalEffect : ComplexEffect{
 	virtual std::string toString();
 	Trigger* condition;
+	void setElseIfState(){ this->extra_data[0] = 1; };
+	void setElseState() { this->extra_data[0] = 2; }
+	bool isElseIf() { return this->extra_data[0] == 1; }
+	bool isElse() { return this->extra_data[0] == 2; }
 	virtual EffectType getType(){
 		return EffectType::CONDITIONAL;
 	}
 };
 struct HiddenEffect : ComplexEffect{
 	virtual std::string toString();
-	bool hidden_current;
+	void setHidden(bool value) { this->extra_data[0] = value; }
+	bool isHidden() { return this->extra_data[0]; }
 	virtual EffectType getType(){
 		return EffectType::HIDDEN;
 	}

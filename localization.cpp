@@ -1,5 +1,6 @@
 #include "localization.h"
 #include "utils/string_util.h"
+#include "utils/filesystem_util.h"
 #include<vector>
 #include<filesystem>
 #include<fstream>
@@ -134,13 +135,6 @@ std::map<const std::string*,std::string*> localizations;
 
 
 
-void getAllFiles(std::string path, std::vector<std::string>& files) 
-{
-	std::filesystem::path dir(path);
-	for (const auto& entry : std::filesystem::directory_iterator(dir)) {
-		files.push_back(entry.path().string());
-	}
-}
 
 #ifndef PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
 void readFromFiles(std::string path){
@@ -224,19 +218,21 @@ const std::string& getLocalization(std::string key){
 #else
 const std::string& getLocalization(std::string key){
     const std::string* key2 = getLocalizationKeyPtr(key);
+    //std::cout << *key2 << std::endl;
     if(localizations.find(key2) != localizations.end()) return *localizations[key2];
     return *key2;
 }
 #endif
 const std::string* getLocalizationKeyPtr(std::string key){
-
     auto it2 = shortStringSet.find(key);
     if(it2 == shortStringSet.end())  return &(*shortStringSet.insert(key).first);
     return &(*it2);
 }
-const std::string& registerShortString(std::string str){
+const std::string& registerShortString(const std::string str){
     auto it2 = shortStringSet.find(str);
-    if(it2 == shortStringSet.end())  return (*shortStringSet.insert(str).first);
+    if(it2 == shortStringSet.end()) {
+        return *shortStringSet.insert(str).first;
+    }
     return (*it2);    
 }
 void _readLocalizations(){

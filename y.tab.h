@@ -59,7 +59,8 @@
 #define T_EVENT_IDENTIFIER 264
 #define LOWEST 265
 
-
+struct yy_buffer_state;
+typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -83,6 +84,7 @@ typedef union YYSTYPE
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
+
 
 extern YYSTYPE yylval;
 

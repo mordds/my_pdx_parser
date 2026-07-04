@@ -485,7 +485,7 @@ void loadInternalModifier(){
 	
 	registerModifier("yearly_harmony",ModifierType::NORMAL,"年度和谐度");
 	registerModifier("harmonization_speed",ModifierType::NORMAL,"宗教融合速度");
-	registerModifier("cav_to_inf_ratio",ModifierType::PERCENTAGE2,"骑兵比例");
+	registerModifier("cav_to_inf_ratio",ModifierType::PERCENTAGE,"骑兵比例");
 	registerModifier("monthly_favor_modifier",ModifierType::PERCENTAGE,"月度人情增长修正");
 	registerModifier("monthly_gold_inflation_modifier",ModifierType::MINUS_PERCENTAGE,"金矿引起的月度通货膨胀修正");
 	registerModifier("gold_depletion_chance_modifier",ModifierType::PERCENTAGE2,"金矿枯竭几率修正");

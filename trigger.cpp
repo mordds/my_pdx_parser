@@ -8,8 +8,6 @@
 #include<iostream>
 #include<set>
 
-
-
 using OverrideHandler = bool(*)(std::map<std::string,ParadoxBase*>&);
 
 std::map<std::string,std::string> numberRequiredItems;
@@ -40,6 +38,7 @@ void registerNoArgTrigger(std::string name,std::string pattern,std::string rever
 //1 arg type.
 //arg 0 will be used in patterns.
 void registerSimpleTrigger(std::string name,std::string pattern,std::string reversePattern,ParadoxType type,ScopeType scopeType = ScopeType::COUNTRY){
+	
 	TriggerItem* item = new TriggerItem(registerShortString(name));
 	item->pattern = pattern;
 	item->reversePattern = reversePattern;
@@ -58,6 +57,7 @@ void registerSimpleClauseTrigger(std::string name,TriggerItem* triggerItem){
 }
 void registerNumberRequiredTrigger(std::string name,std::string amountKey,std::string pattern,std::string reversePattern,ScopeType scopeType = ScopeType::COUNTRY){
 	TriggerItem* item = new TriggerItem(registerShortString(name));
+	std::cout << item->name << std::endl;
 	item->reversePattern = reversePattern;
 	item->pattern = pattern;
 	item->parameterType.push_back(ParadoxType::INTEGER);
@@ -427,8 +427,9 @@ void registerTriggerItems(){
 	registerSimpleTrigger("treasury","拥有至少%d克朗","拥有少于%d克朗",ParadoxType::INTEGER);
 	registerNumberRequiredTrigger("num_of_owned_provinces_with","value","至少%d个拥有的省份满足下列条件:","少于%d个拥有的省份满足下列条件:");
 	registerSimpleTrigger("has_country_flag","国家标签'%s'已被设置","国家标签'%s'未被设置",ParadoxType::STRING);
-	
-	
+	registerSimpleTrigger("monthly_dip","每月外交点数至少为%d","每月外交点数少于%d",ParadoxType::INTEGER);
+	registerSimpleTrigger("monthly_adm","每月行政点数至少为%d","每月行政点数少于%d",ParadoxType::INTEGER);
+	registerSimpleTrigger("monthly_mil","每月军事点数至少为%d","每月军事点数少于%d",ParadoxType::INTEGER);
 	
 }
 
@@ -511,7 +512,7 @@ std::string TriggerItem::toHtml(std::vector<ParadoxBase*> base,bool reversed){
 }
 
 
-TriggerItem::TriggerItem(std::string _name,std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter,ScopeType scope_type): name(_name){
+TriggerItem::TriggerItem(const std::string& _name,std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter,ScopeType scope_type): name(_name){
 	this->pattern = patterns.first;
 	this->reversePattern = patterns.second;
 	this->parameterType = parameterType;
@@ -1060,7 +1061,6 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				TriggerItem* ti = items[name];
 				ParadoxBase* arg1 = castTo(pString,STRING_MATCH_SEQUENCE[i]);
 				if(arg1 == nullptr) continue;
-				std::cout << (int)STRING_MATCH_SEQUENCE[i] << std::endl;
 				CommonTrigger* ct = new CommonTrigger(ti);
 				ct->pushObject(arg1);		
 				trigger->putTrigger(ct);

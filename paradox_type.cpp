@@ -150,7 +150,7 @@ void ParadoxTag::remove(std::string name,int index){
 		if(multiKeyCount[name] == 1) multiKeyCount.erase(name);
 	}
 }
-std::string Date::toString(){
+std::string Date::toString() const {
 	std::string str = "";
 	str.append(std::to_string((int)this->year));
 	str.append(".");
@@ -159,6 +159,8 @@ std::string Date::toString(){
 	str.append(std::to_string((int)this->day));
 	return str;
 }
+
+std::string ParadoxScope::toString() const { return scope->toString(); }
 
 std::string stripTag(std::string original){
 	size_t pos = original.find_last_of('@');

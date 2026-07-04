@@ -4,6 +4,7 @@
 #include "../pattern.h"
 #include "../scope.h"
 #include "../effect.h"
+#include "../localization.h"
 #include <functional>
 #include <tuple>
 #include <iostream>
@@ -20,12 +21,11 @@ std::string applyPattern(Pattern& pattern, types... args);
 
 template<typename head,typename... tails>
 std::string applyPattern(Pattern& pattern,head value,tails... args){
-    std::cout << 23 << std::endl;
 	if constexpr (std::is_integral_v<head> && !std::is_same_v<head,bool>){
 		pattern.setNextInteger(value);
 	}
 	if constexpr (std::is_same_v<head,std::string>){
-		pattern.setNextString(value);
+		pattern.setNextString(getLocalization(value));
 	}
 	if constexpr (std::is_same_v<head,Scope*>){
     
@@ -81,8 +81,8 @@ inline std::function<std::string(rawType<types>...)> signedOrderPattern(std::str
 }
 
 template<ParadoxType... types>
-inline std::function<std::string(rawType<types>...)> orderedPattern(std::string positive,std::string negative){
-    return _orderedPattern<rawType<types>...>(positive,negative);
+inline std::function<std::string(rawType<types>...)> orderedPattern(std::string pattern){
+    return _orderedPattern<rawType<types>...>(pattern);
 }
 /*
 template<int index,ParadoxType... types>

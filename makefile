@@ -2,7 +2,8 @@ CXX = g++
 CXXFLAGS = -O2 -std=c++20 -Werror
 CFLAGS = -O2 -std=c++20 -Werror
 
-SRCS = utils/string_util.cpp utils/parser_util.cpp pattern.cpp trigger.cpp scope.cpp modifier.cpp paradox_type.cpp localization.cpp db_object.cpp national_idea.cpp effect.cpp utils/functional_util.cpp
+SRCS := $(wildcard *.cpp) $(wildcard utils/*.cpp)
+SRCS := $(filter-out test.cpp console.cpp b.cpp, $(SRCS))
 SRCHEADERS = $(SRCS:.cpp=.h)
 OBJS = $(SRCS:.cpp=.o)
 TARGET = console.exe

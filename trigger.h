@@ -30,8 +30,11 @@ struct TriggerItem{
 	int attribue;
 	std::string toString(std::vector<ParadoxBase*> base,bool reversed);
 	std::string toHtml(std::vector<ParadoxBase*> base,bool reversed);
-	TriggerItem(std::string _name) : name(_name){}
-	TriggerItem(std::string _name,std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter,ScopeType scope_type = ScopeType::COUNTRY);
+	virtual bool isScriptedTrigger(){
+		return false;
+	}
+	TriggerItem(const std::string& _name) : name(_name){}
+	TriggerItem(const std::string& _name,std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter,ScopeType scope_type = ScopeType::COUNTRY);
 };
 
 

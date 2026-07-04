@@ -75,7 +75,13 @@ void registerEffectItems(){
         signedPattern<0,ParadoxType::INTEGER>("获得%d克朗"s,"失去-%d克朗"s));
     regiserSimpleClausedEffect<ParadoxType::SCOPE,ParadoxType::INTEGER>("add_trust"s,ScopeType::COUNTRY,
         signedOrderPattern<1,ParadoxType::SCOPE,ParadoxType::INTEGER>("对%s的信任提高了%d"s,"对%s的信任降低了-%d"s),{"who","value"});
-
+    registerSimpleEffect<ParadoxType::STRING>("set_global_flag"s,ScopeType::ANY,
+        orderedPattern<ParadoxType::STRING>("设置全局标签'%s'"s));
+    registerSimpleEffect<ParadoxType::STRING>("clr_global_flag"s,ScopeType::ANY,
+        orderedPattern<ParadoxType::STRING>("清除全局标签'%s'"s));
+    registerSimpleEffect<ParadoxType::STRING>("custom_tooltip"s,ScopeType::ANY,
+    [](std::string str){return getLocalization(str);});
+    
 }
 
 //I HATE this function...
@@ -110,7 +116,7 @@ std::string ChangeScopeEffect::toString(){
 }
 
 std::string HiddenEffect::toString(){
-    if(this->hidden_current) return "";
+    if(this->isHidden()) return "";
     else{
         std::string str("");
         preInit(str,this->depth);
@@ -125,9 +131,21 @@ std::string HiddenEffect::toString(){
 
 std::string ConditionalEffect::toString(){
     std::string str("");
-    if(this->condition == nullptr){
+    if(this->condition == nullptr && !this->isElse()){
         log_warning(current_location(),"unexcepted nullptr trigger in ConditionalEffect.");
         ignoreCurrentDepth(this);
+    }
+    else if(this->isElse()){
+        preInit(str,this->depth);
+        str.append("否则:\n");
+    }
+    else if(this->isElseIf()){
+        preInit(str,this->depth);
+        str.append("否则若满足以下条件:\n");
+        preInit(str,this->depth + 1);
+        str.append(this->condition->toString(false));
+        preInit(str,this->depth);
+        str.append("则:\n");
     }
     else {
         preInit(str,this->depth);
@@ -171,6 +189,36 @@ void parseEffect(ParadoxTag* root,ComplexEffect* from){
                 else {
                     log_error(current_location(),"cannot create a Conditional Effect without \"limit\" block.");
                 }
+            }
+            else if(name == "else_if"){
+                if(i == 0) log_error(current_location(),"cannot create \"else_if\" block before a \"if\" block.");
+                if (from->subEffects.back()->getType() == EffectType::CONDITIONAL && from->extra_data[0] == 0){
+                    if(ParadoxTag* subTag = tag->getAsTag("limit");subTag != nullptr){
+                        ConditionalEffect* effect = new ConditionalEffect();
+                        from->addEffect(effect);
+                        ComplexTrigger* trigger = createBaseTrigger();
+                        trigger->depth = 0;
+                        parseTrigger(subTag,trigger);
+                        tag->remove("limit",0);
+                        effect->condition = trigger;
+                        effect->setElseIfState();
+                        parseEffect(tag,effect);
+                    }
+                    else {
+                        log_error(current_location(),"cannot create a Conditional Effect without \"limit\" block.");
+                    }
+                }
+                else log_error(current_location(),"cannot create \"else_if\" block before a \"if\" block.");
+            }
+            else if(name == "else"){
+                if(i == 0) log_error(current_location(),"cannot create \"else\" block before a \"if\" block.");
+                if (from->subEffects.back()->getType() == EffectType::CONDITIONAL && from->extra_data[0] == 0){
+                        ConditionalEffect* effect = new ConditionalEffect();
+                        from->addEffect(effect);
+                        effect->setElseState();
+                        parseEffect(tag,effect);
+                }
+                else log_error(current_location(),"cannot create \"else\" block before a \"if\" block.");
             }
             else if(name == "hidden_effect"){
                 HiddenEffect* effect = new HiddenEffect();

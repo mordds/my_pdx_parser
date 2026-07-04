@@ -5,8 +5,6 @@
 
 #define PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
 
-void getAllFiles(std::string path);
-
 std::thread& readLocalizations();
 
 const std::string& getLocalization(std::string key);

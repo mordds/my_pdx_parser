@@ -49,8 +49,10 @@ void loadNationalIdea(){
             idea->trigger->foreach([&idea](Trigger* trigger){
                 CommonTrigger* commonTrigger = trigger->getAsCommonTrigger();
                 if(commonTrigger == nullptr) return true;
+                //std::cout << commonTrigger->item->name << std::endl;
                 if(commonTrigger->item->name != "tag") return true;
                 std::string tagName = commonTrigger->base[0]->getAsScope()->getValue()->getAsCountryScope()->getTag();
+
                 if(tagIdeas.find(tagName) == tagIdeas.end()) tagIdeas[tagName] = idea;
                 return true;
             });

@@ -30,7 +30,7 @@ struct Date{
 	short year;
 	unsigned char month;
 	unsigned char day;
-	std::string toString();
+	std::string toString() const;
 };
 
 struct Scope;
@@ -46,6 +46,7 @@ struct ParadoxScope;
 struct ParadoxBase{
 	virtual void* getContent() = 0;
 	virtual ParadoxType getType() const = 0;
+	virtual std::string toString() const = 0;
 	ParadoxString* getAsString();
 	ParadoxInteger* getAsInteger();
 	ParadoxTag* getAsTag();
@@ -60,7 +61,7 @@ struct ParadoxString : public ParadoxBase{
 	private:
 		std::string content;
 	public:
-		
+	virtual std::string toString() const { return content; }
 	ParadoxString(std::string str){ 
 		content = str;
 	}
@@ -79,6 +80,7 @@ struct ParadoxInteger : public ParadoxBase{
 	private:
 		long long content;
 	public:
+		virtual std::string toString() const { return std::to_string(content); }
 		ParadoxInteger(long long val){
 			content = val;
 		}
@@ -109,6 +111,7 @@ struct ParadoxTag : public ParadoxBase{
 		}
 		
 	public:
+		virtual std::string toString() const { return "[TAG]"; }
 		virtual void* getContent(){
 			return (void*)&tags;
 		}
@@ -128,6 +131,7 @@ struct ParadoxTag : public ParadoxBase{
 
 struct ParadoxArray : public ParadoxBase{
 	std::vector<ParadoxBase*> contents;
+	virtual std::string toString() const { return "[ARRAY]"; }
 	virtual ParadoxType getType() const{
 		return ParadoxType::ARRAY;
 	}
@@ -157,7 +161,7 @@ struct ParadoxArray : public ParadoxBase{
 
 struct ParadoxDate : public ParadoxBase{
 	Date date;
-	
+	virtual std::string toString() const { return date.toString(); }
 	ParadoxDate(std::string dateString){
 		sscanf(dateString.c_str(),"%d%*c%d%*c%d",&(date.year),&(date.month),&(date.day));
 	}
@@ -179,6 +183,7 @@ struct ParadoxBoolean : public ParadoxBase {
 	private:
 		bool value;
 	public:
+		virtual std::string toString() const { return value ? "yes" : "no"; }
 		constexpr ParadoxBoolean(bool boolean) : value(boolean){}
 		virtual void* getContent(){
 			return (void*)&value;
@@ -194,6 +199,7 @@ struct ParadoxScope : public ParadoxBase {
 	private:
 		Scope* scope;
 	public:
+		virtual std::string toString() const;
 		ParadoxScope(Scope* scope) : scope(scope) {}
 		virtual void* getContent(){
 			return scope;

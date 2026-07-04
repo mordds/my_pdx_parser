@@ -3,8 +3,9 @@
 #include<string>
 #include<map>
 #include<set>
+#include<cstdint>
 #include "utils/string_util.h"
-enum ScopeType{
+enum class ScopeType : uint8_t{
 	PROVINCE = 1,
 	COUNTRY = 2,
 	UNIT = 3,

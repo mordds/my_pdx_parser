@@ -8,6 +8,7 @@ bool isNumber(std::string str){
 }
 inline bool _inRange(int a,int b,int c){ return a >= b && a <= c; }
 
+
 bool isTagString(std::string str){
     return str.size() == 3 &&
         _inRange(str[0],'A','Z') && 
@@ -34,6 +35,7 @@ std::pair<std::string,std::string> splitWith(std::string source,std::string spli
     }
     return ret;
 }
+
 std::string toUpperCase(std::string str){
     std::string ret = str;
     for(int i = 0;i < str.length();i++){
@@ -70,11 +72,11 @@ void eraseFrom(std::string& source,std::string target){
 void trim(std::string& source){
     size_t pos;
     for(pos = 0;pos < source.length();pos++){
-        if(source[pos] != ' ') break;
+        if(source[pos] != ' ' && source[pos] != '\r' && source[pos] != '\n' && source[pos] != '\t') break;
     }
     source.erase(0,pos);
     for(pos = source.length() - 1;pos > 0;pos--){
-        if(source[pos] != ' ') break; 
+        if(source[pos] != ' ' && source[pos] != '\r' && source[pos] != '\n' && source[pos] != '\t') break; 
     }
     source.erase(pos + 1);
 }
