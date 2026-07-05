@@ -8,7 +8,7 @@
 #include <functional>
 
 enum class TriggerType{
-	COMMON,LOGIC,CHANGE_SCOPE,CONDITIONAL,NUM,HIDDEN,CUSTOM_TT
+	COMMON,LOGIC,CHANGE_SCOPE,CONDITIONAL,NUM,HIDDEN,CUSTOM_TT,SPECIAL
 };
 enum class LogicType{
 	AND,OR,NOT
@@ -17,7 +17,7 @@ const int SINGLE_SCOPE_MERGABLE = 0x1;
 struct ComplexTrigger;
 struct LogicTrigger;
 struct CommonTrigger;
-
+struct ScriptedTrigger;
 
 struct TriggerItem{
 	std::string pattern;
@@ -30,9 +30,6 @@ struct TriggerItem{
 	int attribue;
 	std::string toString(std::vector<ParadoxBase*> base,bool reversed);
 	std::string toHtml(std::vector<ParadoxBase*> base,bool reversed);
-	virtual bool isScriptedTrigger(){
-		return false;
-	}
 	TriggerItem(const std::string& _name) : name(_name){}
 	TriggerItem(const std::string& _name,std::pair<std::string,std::string>&& patterns,std::vector<std::string>&& parameterName,std::vector<ParadoxType>&& parameterType,std::vector<int>&& usedParameter,ScopeType scope_type = ScopeType::COUNTRY);
 };
@@ -85,6 +82,16 @@ struct CommonTrigger : Trigger{
 			for(ParadoxBase* base1 : base) delete base1;
 		}
 	}
+};
+
+//sizeof(SpecialTrigger) = 40
+struct SpecialTrigger : Trigger {
+	virtual TriggerType getType(){
+		return TriggerType::SPECIAL;
+	}
+	const ScriptedTrigger const * st;
+	const Trigger* instance;
+	const std::string& localizationText;
 };
 
 struct LogicTrigger : ComplexTrigger {

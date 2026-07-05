@@ -45,8 +45,11 @@ Trigger* ComplicateScriptedTrigger::createInstance(std::map<std::string,ParadoxB
             pos++;
         }
     }
-    std::cout << result << std::endl;
-    return nullptr;
+    ParadoxTag* root = parseString(result);
+    ComplexTrigger* ct = createBaseTrigger();
+    parseTrigger(root,ct);
+    return ct;
+
 }
 
 enum class MarcoToken{

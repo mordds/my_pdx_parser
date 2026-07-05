@@ -3,9 +3,13 @@
 #include<string>
 struct Scope;
 
+
+
+
 struct Pattern{
 	std::string patternString;
-	std::string output;
+
+
 	int pos;
 	Pattern(std::string str);
 	bool setNextString(std::string str);

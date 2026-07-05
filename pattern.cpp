@@ -1,160 +1,75 @@
 #include "pattern.h"
+#include "utils/string_util.h"
 #include<string>
 #include<string.h>
 #include<iostream>
+
+
+
 Pattern::Pattern(std::string str){
-	this->patternString = str;
-	pos = this->patternString.find("%");
-	if(pos == std::string::npos){
-		this->output = str;
-		pos = str.length();
-	}
-	else{
-		this->output = str.substr(0,pos);
-	}
+	this->patternString = str; 
+	pos = 0;
+	replaceWith(this->patternString,"%%","\x06");
 }
 std::string Pattern::getOutput(){
-	if(pos < this->patternString.length()){
-		std::string ret = output;
-		ret.append(this->patternString.substr(pos));
-		return ret;
-	}
-	else return output;
+	replaceWith(this->patternString,"\x06","%");
+	return this->patternString;
 }
 bool Pattern::setNextString(std::string str){
-	int pre = pos;
-	int len = this->patternString.length();
-	while(pos != std::string::npos){
-		if(pos == len - 1) {
-			pos++;
-			return false;
-		}
-		if(this->patternString[pos+1] == '%') {
-			this->output.append("%");
-			pre = pos + 2;
-		}
-		else if(this->patternString[pos+1] == 'd') return false;
-		else if(this->patternString[pos+1] == 'p') return false;
-		else if(this->patternString[pos+1] == 's'){
-			this->output.append(str);
-			pre = pos + 2;
-			pos = this->patternString.find("%",pre);
-			this->output.append(this->patternString.substr(pre,pos-pre));
-			while(pos != std::string::npos){
-				if(pos == len - 1) {
-					pos++;
-					break;
-				}
-				if(this->patternString[pos+1] == '%') {
-					this->output.append("%");
-					pre = pos + 2;
-				}
-				else break;
-				pos = this->patternString.find("%",pre);
-				this->output.append(this->patternString.substr(pre,pos-pre));	
-			}
-			if(pos == std::string::npos) pos = len;
-			return true;
-		}
-		pos = this->patternString.find("%",pre);
-		this->output.append(this->patternString.substr(pre,pos-pre));	
-	}
-	this->output.append(this->patternString.substr(pre));
-	pos = len;
-	return false;
-
+	size_t index = this->patternString.find('%',pos);
+	if(index == std::string::npos || index == this->patternString.length() - 1) return false;
+	char c = this->patternString[index + 1];
+	if(c != 's') return false;
+	else this->patternString.replace(index,2,str);
+	this->pos = index + str.length();
+	return true;
 }
 bool Pattern::setNextInteger(long long value){
-	int pre = pos;
-	int len = this->patternString.length();
-	while(pos != std::string::npos){
-		if(pos == len - 1) {
-			pos++;
-			return false;
-		}
-		if(pos != 0 && this->patternString[pos - 1] == '-') {
-			this->output.pop_back();
-			value *= -1;
-		}
-		if(this->patternString[pos+1] == '%') {
-			this->output.append("%");
-			pre = pos + 2;
-		}
-		else if(this->patternString[pos+1] == 'd') {
-			int q = value % 1000;
-			int p = value / 1000;
-			while(q % 10 == 0 && q != 0) q /= 10;
-			bool qminus = q < 0;
-			if(qminus) q *= -1;
-			if(q == 0){
-				this->output.append(std::to_string(p));
-			}
-			else{
-				char buffer[32];
-				memset(buffer,0,32);
-				if(p != 0 || !qminus)sprintf(buffer,"%d.%d",p,q);
-				else sprintf(buffer,"-%d.%d",p,q);
-				this->output.append(buffer);
-			}
-			pre = pos + 2;
-			pos = this->patternString.find("%",pre);
-			this->output.append(this->patternString.substr(pre,pos-pre));
-			while(pos != std::string::npos){
-				if(pos == len - 1) {
-					pos++;
-					break;
-				}
-				if(this->patternString[pos+1] == '%') {
-					this->output.append("%");
-					pre = pos + 2;
-				}
-				else break;
-				pos = this->patternString.find("%",pre);
-				this->output.append(this->patternString.substr(pre,pos-pre));	
-			}
-			if(pos == std::string::npos) pos = len;
-			return true;
-		}
-		else if(this->patternString[pos+1] == 'p') {
-			
-			int q = value % 10;
-			bool qminus = q < 0;
-			if(qminus) q *= -1;		
-			int p = value / 10;
-			if(q == 0){
-				this->output.append(std::to_string(p));
-			}
-			else{
-				char buffer[32];
-				memset(buffer,0,32);
-				if(p != 0 || !qminus)sprintf(buffer,"%d.%d",p,q);
-				else sprintf(buffer,"-%d.%d",p,q);
-				this->output.append(buffer);
-			}
-			pre = pos + 2;
-			pos = this->patternString.find("%",pre);
-			this->output.append(this->patternString.substr(pre,pos-pre));
-			while(pos != std::string::npos){
-				if(pos == len - 1) {
-					pos++;
-					break;
-				}
-				if(this->patternString[pos+1] == '%') {
-					this->output.append("%");
-					pre = pos + 2;
-				}
-				else break;
-				pos = this->patternString.find("%",pre);
-				this->output.append(this->patternString.substr(pre,pos-pre));	
-			}
-			if(pos == std::string::npos) pos = len;
-			return true;
-		}
-		else if(this->patternString[pos+1] == 's') return false;
-		pos = this->patternString.find("%",pre);
-		this->output.append(this->patternString.substr(pre,pos-pre));	
+	size_t index = this->patternString.find('%');
+	if(index == std::string::npos || index == this->patternString.length() - 1) return false;
+	size_t len = 2;
+	char c = this->patternString[index + 1];
+	std::string target;
+	if(index != 0 && this->patternString[index - 1] == '-') { 
+		value *= -1;
+		len++;
+		index--;
 	}
-	this->output.append(this->patternString.substr(pre));
-	pos = len;
-	return false;
+	if(c == 'd'){
+		long u = value / 1000;
+		long v = value % 1000;	
+		if(u < 0 || v < 0) {
+			target.push_back('-');
+			u *= -1;
+			v *= -1;
+		}
+		target.append(std::to_string(u));
+		if(v != 0){
+			target.push_back('.');
+			if(v < 100) target.push_back('0');
+			if(v < 10) target.push_back('0');
+			target.append(std::to_string(v));
+		} 
+		this->patternString.replace(index,len,target);
+		pos = index + target.length();
+	}
+	else if(c == 'p'){
+		long u = value / 10;
+		long v = value % 10;	
+		if(u < 0 || v < 0) {
+			target.push_back('-');
+			u *= -1;
+			v *= -1;
+		}
+		target.append(std::to_string(u));
+		if(v != 0){
+			target.push_back('.');
+			target.append(std::to_string(v));
+		} 
+		this->patternString.replace(index,len,target);
+		pos = index + target.length();
+	}
+	else return false;
+	return true;
 }
+
