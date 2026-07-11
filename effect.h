@@ -308,6 +308,11 @@ struct ConditionalEffect : ComplexEffect{
 	void setElseState() { this->extra_data[0] = 2; }
 	bool isElseIf() { return this->extra_data[0] == 1; }
 	bool isElse() { return this->extra_data[0] == 2; }
+	ConditionalEffect() noexcept{
+		this->extra_data[0] = 0;
+	}
+	ConditionalEffect(ConditionalEffect&& ce) = default;
+	ConditionalEffect(ConditionalEffect& ce) = default;
 	virtual EffectType getType(){
 		return EffectType::CONDITIONAL;
 	}

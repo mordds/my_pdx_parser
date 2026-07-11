@@ -16,7 +16,7 @@
 typedef void(*CommandHandler)(std::vector<std::string>);
 
 std::map<std::string,CommandHandler> handlers;
-
+extern std::set<std::string> shortStringSet;
 void printModifier(std::vector<std::string> vec){
     ParadoxTag* root = parseFile(vec[0]);
 	std::vector<Modifier> modifiers;
@@ -47,41 +47,13 @@ void printEffect(std::vector<std::string> vec){
 }
 
 void printTrigger(std::vector<std::string> vec){
-	bool multiTriggers = true; 
+	bool multiTriggers = false; 
     ParadoxTag* root = parseFile(vec[0]);
-	if(vec.size() >= 2){
-		std::string arg0(vec[1]);
-		if(arg0 == "single"){
-			multiTriggers = false;
-		}
-		else if(arg0 == "multi"){
-			multiTriggers = true;
-		} 
-	}
-	else{
-		for(int i = 0;i < root->seq.size();i++){
-			if(root->get(i)->getType() != ParadoxType::TAG){
-				multiTriggers = false;
-				break; 
-			}
-		}
-	}
-	if(multiTriggers){
-		for(auto it = root->tags.begin();it != root->tags.end();it++){
-	    	ComplexTrigger* ct = createBaseTrigger();
-			parseTrigger(it->second->getAsTag(),ct);
-			std::cout << it->first << std::endl;
-			std::cout << ct->toString(false) << std::endl;
-			delete ct;
-		}
-	}
-	else{
-		ComplexTrigger* ct = createBaseTrigger();
-		ct->depth = 0;
-		parseTrigger(root,ct);
-		std::cout << ct->toString(false) << std::endl;
-		delete ct;
-	}
+	ComplexTrigger* ct = createBaseTrigger();
+	ct->depth = 0;
+	parseTrigger(root,ct);
+	std::cout << ct->toString(false) << std::endl;
+	delete ct;
     clearParserDatas();
 }
 
@@ -98,7 +70,7 @@ int main(){
     handlers["print_modifier"] = printModifier;
 	handlers["print_modifier_html"] = printModifierHtml;
 	handlers["debug_print"] = [](std::vector<std::string> vec){
-		std::cout << sizeof(HiddenEffect) << std::endl;	
+		std::cout << shortStringSet.size() << '/' << shortStringSet.max_size() << std::endl;	
 	};
 	handlers["st_test"] = [](std::vector<std::string> vec){
 		loadScriptedTrigger();

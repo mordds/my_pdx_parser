@@ -45,10 +45,13 @@ Trigger* ComplicateScriptedTrigger::createInstance(std::map<std::string,ParadoxB
             pos++;
         }
     }
+    /*
     ParadoxTag* root = parseString(result);
     ComplexTrigger* ct = createBaseTrigger();
-    parseTrigger(root,ct);
-    return ct;
+    parseTrigger(root,ct);    
+    */
+
+    return nullptr;
 
 }
 

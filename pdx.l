@@ -33,6 +33,7 @@ no {
 }
 
 [A-Za-z]([A-za-z0-9_]+)?\.[0-9]{1,4} {
+	
 	strncpy(yylval.name,yytext,64);	
 	return T_EVENT_IDENTIFIER;
 
@@ -53,7 +54,7 @@ no {
 	return T_IDENT;
 }
 [0-9a-zA-Z@\%^\*_\+\\\./\-?`~']+ {
-
+	//
 	strncpy(yylval.name,yytext,64);	
 	return T_IDENT;
 }

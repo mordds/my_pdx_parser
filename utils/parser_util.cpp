@@ -2,6 +2,9 @@
 #include "parser_util.h"
 #include <stdio.h>
 #include <iostream>
+struct yy_buffer_state;
+typedef yy_buffer_state* YY_BUFFER_STATE;
+
 extern YYSTYPE yylval;
 extern YY_BUFFER_STATE yy_scan_string ( const char *yy_str );
 extern FILE* yyin;

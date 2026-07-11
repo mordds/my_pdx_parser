@@ -45,7 +45,7 @@ void registerSimpleEffect(std::string name,ScopeType usable_scope, std::function
 template<ParadoxType...types>
 void regiserSimpleClausedEffect(std::string name,ScopeType usable_scope,std::function<std::string(rawType<types>...)> localize,std::array<std::string,sizeof...(types)> names){
     const std::string* name_ptr = getLocalizationKeyPtr(name);
-    if(!localize) std::cout << "ERROR!!!" << std::endl;
+    if(!localize) log_error(current_location(),"An empty localize function was provided for effect ",name);
     EffectItem* u = new ParameteredNativeEffectItem<rawType<types>...>(*name_ptr,usable_scope,localize,names);
     simpleEffectItems.insert(name_ptr);
     effectItems[name_ptr] = u;
@@ -121,7 +121,6 @@ std::string HiddenEffect::toString(){
         std::string str("");
         preInit(str,this->depth);
         str.append("隐藏效果:\n");
-        std::cout << this->subEffects.size() << std::endl;
         for(Effect* effect : this->subEffects){
             str.append(effect->toString());
         } 

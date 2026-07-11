@@ -3,18 +3,19 @@
 #include <string>
 #include <thread>
 
-#define PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
 
 std::thread& readLocalizations();
 
-const std::string& getLocalization(std::string key);
+
 
 const std::string* getLocalizationKeyPtr(std::string key);
 
 const std::string& registerShortString(std::string str);
 
 #ifndef PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
-void closeActiveTempFile();
+std::string getLocalization(std::string key);
+#else
+const std::string& getLocalization(std::string key);
 #endif
 
 void clearThreads();

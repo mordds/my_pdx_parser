@@ -1,15 +1,15 @@
-Terminals unused in grammar
+终端机在文法中未使用
 
-   T_PARAMETER
-   LOWEST
-
-
-State 17 conflicts: 1 shift/reduce
-State 39 conflicts: 1 shift/reduce
-State 43 conflicts: 1 shift/reduce
+    T_PARAMETER
+    LOWEST
 
 
-Grammar
+状态 17冲突：1 项偏移/归约
+状态 39冲突：1 项偏移/归约
+状态 43冲突：1 项偏移/归约
+
+
+语法
 
     0 $accept: input $end
 
@@ -17,7 +17,7 @@ Grammar
     2      | A
     3      | BLANK A
     4      | BLANK GT
-    5      | /* empty */
+    5      | ε
 
     6 GT: T
     7   | Ar
@@ -59,495 +59,548 @@ Grammar
    34    | '{' BLANK
 
 
-Terminals, with rules where they appear
+终结语词，附有它们出现处的规则
+
+    $end (0) 0
+    ' ' (32) 31 32
+    '=' (61) 12 13
+    '{' (123) 33 34
+    '}' (125) 8 9 10 11
+    error (256)
+    T_IDENT <name> (258) 15 16 23
+    T_LITERAL <str> (259) 27
+    T_DATE <name> (260) 24
+    T_NUM_CONSTANT <num> (261) 18 19 25
+    T_PARAMETER <name> (262)
+    T_BOOLEAN <num> (263) 28
+    T_EVENT_IDENTIFIER <name> (264) 20 21 29
+    LOWEST (265)
 
-$end (0) 0
-' ' (32) 31 32
-'=' (61) 12 13
-'{' (123) 33 34
-'}' (125) 8 9 10 11
-error (256)
-T_IDENT (258) 15 16 23
-T_LITERAL (259) 27
-T_DATE (260) 24
-T_NUM_CONSTANT (261) 18 19 25
-T_PARAMETER (262)
-T_BOOLEAN (263) 28
-T_EVENT_IDENTIFIER (264) 20 21 29
-LOWEST (265)
 
+非终结语词，附有它们出现处的规则
 
-Nonterminals, with rules where they appear
+    $accept (15)
+        on left: 0
+    input (16)
+        on left: 1 2 3 4 5
+        on right: 0
+    GT <base> (17)
+        on left: 6 7 8
+        on right: 1 4 26
+    T <base> (18)
+        on left: 9
+        on right: 6
+    Ar <base> (19)
+        on left: 10 11
+        on right: 7
+    A <base> (20)
+        on left: 12 13 14
+        on right: 2 3 9 13 14
+    B <base> (21)
+        on left: 15 16 17
+        on right: 10 15 17
+    C <base> (22)
+        on left: 18 19 20 21 22
+        on right: 11 18 20 22
+    lVal <base> (23)
+        on left: 23 24 25
+        on right: 12 13 30
+    rVal <base> (24)
+        on left: 26 27 28 29 30
+        on right: 12 13
+    BLANK <num> (25)
+        on left: 31 32
+        on right: 3 4 14 17 22 32 34
+    LBR <num> (26)
+        on left: 33 34
+        on right: 8 9 10 11
 
-$accept (15)
-    on left: 0
-input (16)
-    on left: 1 2 3 4 5, on right: 0
-GT (17)
-    on left: 6 7 8, on right: 1 4 26
-T (18)
-    on left: 9, on right: 6
-Ar (19)
-    on left: 10 11, on right: 7
-A (20)
-    on left: 12 13 14, on right: 2 3 9 13 14
-B (21)
-    on left: 15 16 17, on right: 10 15 17
-C (22)
-    on left: 18 19 20 21 22, on right: 11 18 20 22
-lVal (23)
-    on left: 23 24 25, on right: 12 13 30
-rVal (24)
-    on left: 26 27 28 29 30, on right: 12 13
-BLANK (25)
-    on left: 31 32, on right: 3 4 14 17 22 32 34
-LBR (26)
-    on left: 33 34, on right: 8 9 10 11
 
+状态 0
 
-state 0
+    0 $accept: • input $end
 
-    0 $accept: . input $end
+    T_IDENT         偏移，并进入状态 1
+    T_DATE          偏移，并进入状态 2
+    T_NUM_CONSTANT  偏移，并进入状态 3
+    ' '             偏移，并进入状态 4
+    '{'             偏移，并进入状态 5
 
-    T_IDENT         shift, and go to state 1
-    T_DATE          shift, and go to state 2
-    T_NUM_CONSTANT  shift, and go to state 3
-    ' '             shift, and go to state 4
-    '{'             shift, and go to state 5
+    $default  使用规则 5 以归约 (input)
 
-    $default  reduce using rule 5 (input)
+    input  转到状态 6
+    GT     转到状态 7
+    T      转到状态 8
+    Ar     转到状态 9
+    A      转到状态 10
+    lVal   转到状态 11
+    BLANK  转到状态 12
+    LBR    转到状态 13
 
-    input  go to state 6
-    GT     go to state 7
-    T      go to state 8
-    Ar     go to state 9
-    A      go to state 10
-    lVal   go to state 11
-    BLANK  go to state 12
-    LBR    go to state 13
 
+状态 1
 
-state 1
+   23 lVal: T_IDENT •
 
-   23 lVal: T_IDENT .
+    $default  使用规则 23 以归约 (lVal)
 
-    $default  reduce using rule 23 (lVal)
 
+状态 2
 
-state 2
+   24 lVal: T_DATE •
 
-   24 lVal: T_DATE .
+    $default  使用规则 24 以归约 (lVal)
 
-    $default  reduce using rule 24 (lVal)
 
+状态 3
 
-state 3
+   25 lVal: T_NUM_CONSTANT •
 
-   25 lVal: T_NUM_CONSTANT .
+    $default  使用规则 25 以归约 (lVal)
 
-    $default  reduce using rule 25 (lVal)
 
+状态 4
 
-state 4
+   31 BLANK: ' ' •
 
-   31 BLANK: ' ' .
+    $default  使用规则 31 以归约 (BLANK)
 
-    $default  reduce using rule 31 (BLANK)
 
+状态 5
 
-state 5
+   33 LBR: '{' •
+   34    | '{' • BLANK
 
-   33 LBR: '{' .
-   34    | '{' . BLANK
+    ' '  偏移，并进入状态 4
 
-    ' '  shift, and go to state 4
+    $default  使用规则 33 以归约 (LBR)
 
-    $default  reduce using rule 33 (LBR)
+    BLANK  转到状态 14
 
-    BLANK  go to state 14
 
+状态 6
 
-state 6
+    0 $accept: input • $end
 
-    0 $accept: input . $end
+    $end  偏移，并进入状态 15
 
-    $end  shift, and go to state 15
 
+状态 7
 
-state 7
+    1 input: GT •
 
-    1 input: GT .
+    $default  使用规则 1 以归约 (input)
 
-    $default  reduce using rule 1 (input)
 
+状态 8
 
-state 8
+    6 GT: T •
 
-    6 GT: T .
+    $default  使用规则 6 以归约 (GT)
 
-    $default  reduce using rule 6 (GT)
 
+状态 9
 
-state 9
+    7 GT: Ar •
 
-    7 GT: Ar .
+    $default  使用规则 7 以归约 (GT)
 
-    $default  reduce using rule 7 (GT)
 
+状态 10
 
-state 10
+    2 input: A •
+   13 A: A • lVal '=' rVal
+   14  | A • BLANK
 
-    2 input: A .
-   13 A: A . lVal '=' rVal
-   14  | A . BLANK
+    T_IDENT         偏移，并进入状态 1
+    T_DATE          偏移，并进入状态 2
+    T_NUM_CONSTANT  偏移，并进入状态 3
+    ' '             偏移，并进入状态 4
 
-    T_IDENT         shift, and go to state 1
-    T_DATE          shift, and go to state 2
-    T_NUM_CONSTANT  shift, and go to state 3
-    ' '             shift, and go to state 4
+    $default  使用规则 2 以归约 (input)
 
-    $default  reduce using rule 2 (input)
+    lVal   转到状态 16
+    BLANK  转到状态 17
 
-    lVal   go to state 16
-    BLANK  go to state 17
 
+状态 11
 
-state 11
+   12 A: lVal • '=' rVal
 
-   12 A: lVal . '=' rVal
+    '='  偏移，并进入状态 18
 
-    '='  shift, and go to state 18
 
+状态 12
 
-state 12
+    3 input: BLANK • A
+    4      | BLANK • GT
+   32 BLANK: BLANK • ' '
 
-    3 input: BLANK . A
-    4      | BLANK . GT
-   32 BLANK: BLANK . ' '
+    T_IDENT         偏移，并进入状态 1
+    T_DATE          偏移，并进入状态 2
+    T_NUM_CONSTANT  偏移，并进入状态 3
+    ' '             偏移，并进入状态 19
+    '{'             偏移，并进入状态 5
 
-    T_IDENT         shift, and go to state 1
-    T_DATE          shift, and go to state 2
-    T_NUM_CONSTANT  shift, and go to state 3
-    ' '             shift, and go to state 19
-    '{'             shift, and go to state 5
+    GT    转到状态 20
+    T     转到状态 8
+    Ar    转到状态 9
+    A     转到状态 21
+    lVal  转到状态 11
+    LBR   转到状态 13
 
-    GT    go to state 20
-    T     go to state 8
-    Ar    go to state 9
-    A     go to state 21
-    lVal  go to state 11
-    LBR   go to state 13
 
+状态 13
 
-state 13
+    8 GT: LBR • '}'
+    9 T: LBR • A '}'
+   10 Ar: LBR • B '}'
+   11   | LBR • C '}'
 
-    8 GT: LBR . '}'
-    9 T: LBR . A '}'
-   10 Ar: LBR . B '}'
-   11   | LBR . C '}'
+    T_IDENT             偏移，并进入状态 22
+    T_DATE              偏移，并进入状态 2
+    T_NUM_CONSTANT      偏移，并进入状态 23
+    T_EVENT_IDENTIFIER  偏移，并进入状态 24
+    '}'                 偏移，并进入状态 25
 
-    T_IDENT             shift, and go to state 22
-    T_DATE              shift, and go to state 2
-    T_NUM_CONSTANT      shift, and go to state 23
-    T_EVENT_IDENTIFIER  shift, and go to state 24
-    '}'                 shift, and go to state 25
+    A     转到状态 26
+    B     转到状态 27
+    C     转到状态 28
+    lVal  转到状态 11
 
-    A     go to state 26
-    B     go to state 27
-    C     go to state 28
-    lVal  go to state 11
 
+状态 14
 
-state 14
+   32 BLANK: BLANK • ' '
+   34 LBR: '{' BLANK •
 
-   32 BLANK: BLANK . ' '
-   34 LBR: '{' BLANK .
+    ' '  偏移，并进入状态 19
 
-    ' '  shift, and go to state 19
+    $default  使用规则 34 以归约 (LBR)
 
-    $default  reduce using rule 34 (LBR)
 
+状态 15
 
-state 15
+    0 $accept: input $end •
 
-    0 $accept: input $end .
+    $default  接受
 
-    $default  accept
 
+状态 16
 
-state 16
+   13 A: A lVal • '=' rVal
 
-   13 A: A lVal . '=' rVal
+    '='  偏移，并进入状态 29
 
-    '='  shift, and go to state 29
 
+状态 17
 
-state 17
+   14 A: A BLANK •
+   32 BLANK: BLANK • ' '
 
-   14 A: A BLANK .
-   32 BLANK: BLANK . ' '
+    ' '  偏移，并进入状态 19
 
-    ' '  shift, and go to state 19
+    ' '       [使用规则 14 以归约 (A)]
+    $default  使用规则 14 以归约 (A)
 
-    ' '       [reduce using rule 14 (A)]
-    $default  reduce using rule 14 (A)
+    shift/reduce conflict on token ' ':
+       14 A: A BLANK •
+       32 BLANK: BLANK • ' '
+      Example: A BLANK • ' '
+      Shift derivation
+        A
+        ↳ 14: A BLANK
+                ↳ 32: BLANK • ' '
+      Reduce derivation
+        A
+        ↳ 14: A               BLANK
+              ↳ 14: A BLANK • ↳ 31: ' '
 
 
-state 18
 
-   12 A: lVal '=' . rVal
+状态 18
 
-    T_IDENT             shift, and go to state 1
-    T_LITERAL           shift, and go to state 30
-    T_DATE              shift, and go to state 2
-    T_NUM_CONSTANT      shift, and go to state 3
-    T_BOOLEAN           shift, and go to state 31
-    T_EVENT_IDENTIFIER  shift, and go to state 32
-    '{'                 shift, and go to state 5
+   12 A: lVal '=' • rVal
 
-    GT    go to state 33
-    T     go to state 8
-    Ar    go to state 9
-    lVal  go to state 34
-    rVal  go to state 35
-    LBR   go to state 13
+    T_IDENT             偏移，并进入状态 1
+    T_LITERAL           偏移，并进入状态 30
+    T_DATE              偏移，并进入状态 2
+    T_NUM_CONSTANT      偏移，并进入状态 3
+    T_BOOLEAN           偏移，并进入状态 31
+    T_EVENT_IDENTIFIER  偏移，并进入状态 32
+    '{'                 偏移，并进入状态 5
 
+    GT    转到状态 33
+    T     转到状态 8
+    Ar    转到状态 9
+    lVal  转到状态 34
+    rVal  转到状态 35
+    LBR   转到状态 13
 
-state 19
 
-   32 BLANK: BLANK ' ' .
+状态 19
 
-    $default  reduce using rule 32 (BLANK)
+   32 BLANK: BLANK ' ' •
 
+    $default  使用规则 32 以归约 (BLANK)
 
-state 20
 
-    4 input: BLANK GT .
+状态 20
 
-    $default  reduce using rule 4 (input)
+    4 input: BLANK GT •
 
+    $default  使用规则 4 以归约 (input)
 
-state 21
 
-    3 input: BLANK A .
-   13 A: A . lVal '=' rVal
-   14  | A . BLANK
+状态 21
 
-    T_IDENT         shift, and go to state 1
-    T_DATE          shift, and go to state 2
-    T_NUM_CONSTANT  shift, and go to state 3
-    ' '             shift, and go to state 4
+    3 input: BLANK A •
+   13 A: A • lVal '=' rVal
+   14  | A • BLANK
 
-    $default  reduce using rule 3 (input)
+    T_IDENT         偏移，并进入状态 1
+    T_DATE          偏移，并进入状态 2
+    T_NUM_CONSTANT  偏移，并进入状态 3
+    ' '             偏移，并进入状态 4
 
-    lVal   go to state 16
-    BLANK  go to state 17
+    $default  使用规则 3 以归约 (input)
 
+    lVal   转到状态 16
+    BLANK  转到状态 17
 
-state 22
 
-   16 B: T_IDENT .
-   23 lVal: T_IDENT .
+状态 22
 
-    '='       reduce using rule 23 (lVal)
-    $default  reduce using rule 16 (B)
+   16 B: T_IDENT •
+   23 lVal: T_IDENT •
 
+    '='       使用规则 23 以归约 (lVal)
+    $default  使用规则 16 以归约 (B)
 
-state 23
 
-   19 C: T_NUM_CONSTANT .
-   25 lVal: T_NUM_CONSTANT .
+状态 23
 
-    '='       reduce using rule 25 (lVal)
-    $default  reduce using rule 19 (C)
+   19 C: T_NUM_CONSTANT •
+   25 lVal: T_NUM_CONSTANT •
 
+    '='       使用规则 25 以归约 (lVal)
+    $default  使用规则 19 以归约 (C)
 
-state 24
 
-   21 C: T_EVENT_IDENTIFIER .
+状态 24
 
-    $default  reduce using rule 21 (C)
+   21 C: T_EVENT_IDENTIFIER •
 
+    $default  使用规则 21 以归约 (C)
 
-state 25
 
-    8 GT: LBR '}' .
+状态 25
 
-    $default  reduce using rule 8 (GT)
+    8 GT: LBR '}' •
 
+    $default  使用规则 8 以归约 (GT)
 
-state 26
 
-    9 T: LBR A . '}'
-   13 A: A . lVal '=' rVal
-   14  | A . BLANK
+状态 26
 
-    T_IDENT         shift, and go to state 1
-    T_DATE          shift, and go to state 2
-    T_NUM_CONSTANT  shift, and go to state 3
-    ' '             shift, and go to state 4
-    '}'             shift, and go to state 36
+    9 T: LBR A • '}'
+   13 A: A • lVal '=' rVal
+   14  | A • BLANK
 
-    lVal   go to state 16
-    BLANK  go to state 17
+    T_IDENT         偏移，并进入状态 1
+    T_DATE          偏移，并进入状态 2
+    T_NUM_CONSTANT  偏移，并进入状态 3
+    ' '             偏移，并进入状态 4
+    '}'             偏移，并进入状态 36
 
+    lVal   转到状态 16
+    BLANK  转到状态 17
 
-state 27
 
-   10 Ar: LBR B . '}'
-   15 B: B . T_IDENT
-   17  | B . BLANK
+状态 27
 
-    T_IDENT  shift, and go to state 37
-    ' '      shift, and go to state 4
-    '}'      shift, and go to state 38
+   10 Ar: LBR B • '}'
+   15 B: B • T_IDENT
+   17  | B • BLANK
 
-    BLANK  go to state 39
+    T_IDENT  偏移，并进入状态 37
+    ' '      偏移，并进入状态 4
+    '}'      偏移，并进入状态 38
 
+    BLANK  转到状态 39
 
-state 28
 
-   11 Ar: LBR C . '}'
-   18 C: C . T_NUM_CONSTANT
-   20  | C . T_EVENT_IDENTIFIER
-   22  | C . BLANK
+状态 28
 
-    T_NUM_CONSTANT      shift, and go to state 40
-    T_EVENT_IDENTIFIER  shift, and go to state 41
-    ' '                 shift, and go to state 4
-    '}'                 shift, and go to state 42
+   11 Ar: LBR C • '}'
+   18 C: C • T_NUM_CONSTANT
+   20  | C • T_EVENT_IDENTIFIER
+   22  | C • BLANK
 
-    BLANK  go to state 43
+    T_NUM_CONSTANT      偏移，并进入状态 40
+    T_EVENT_IDENTIFIER  偏移，并进入状态 41
+    ' '                 偏移，并进入状态 4
+    '}'                 偏移，并进入状态 42
 
+    BLANK  转到状态 43
 
-state 29
 
-   13 A: A lVal '=' . rVal
+状态 29
 
-    T_IDENT             shift, and go to state 1
-    T_LITERAL           shift, and go to state 30
-    T_DATE              shift, and go to state 2
-    T_NUM_CONSTANT      shift, and go to state 3
-    T_BOOLEAN           shift, and go to state 31
-    T_EVENT_IDENTIFIER  shift, and go to state 32
-    '{'                 shift, and go to state 5
+   13 A: A lVal '=' • rVal
 
-    GT    go to state 33
-    T     go to state 8
-    Ar    go to state 9
-    lVal  go to state 34
-    rVal  go to state 44
-    LBR   go to state 13
+    T_IDENT             偏移，并进入状态 1
+    T_LITERAL           偏移，并进入状态 30
+    T_DATE              偏移，并进入状态 2
+    T_NUM_CONSTANT      偏移，并进入状态 3
+    T_BOOLEAN           偏移，并进入状态 31
+    T_EVENT_IDENTIFIER  偏移，并进入状态 32
+    '{'                 偏移，并进入状态 5
 
+    GT    转到状态 33
+    T     转到状态 8
+    Ar    转到状态 9
+    lVal  转到状态 34
+    rVal  转到状态 44
+    LBR   转到状态 13
 
-state 30
 
-   27 rVal: T_LITERAL .
+状态 30
 
-    $default  reduce using rule 27 (rVal)
+   27 rVal: T_LITERAL •
 
+    $default  使用规则 27 以归约 (rVal)
 
-state 31
 
-   28 rVal: T_BOOLEAN .
+状态 31
 
-    $default  reduce using rule 28 (rVal)
+   28 rVal: T_BOOLEAN •
 
+    $default  使用规则 28 以归约 (rVal)
 
-state 32
 
-   29 rVal: T_EVENT_IDENTIFIER .
+状态 32
 
-    $default  reduce using rule 29 (rVal)
+   29 rVal: T_EVENT_IDENTIFIER •
 
+    $default  使用规则 29 以归约 (rVal)
 
-state 33
 
-   26 rVal: GT .
+状态 33
 
-    $default  reduce using rule 26 (rVal)
+   26 rVal: GT •
 
+    $default  使用规则 26 以归约 (rVal)
 
-state 34
 
-   30 rVal: lVal .
+状态 34
 
-    $default  reduce using rule 30 (rVal)
+   30 rVal: lVal •
 
+    $default  使用规则 30 以归约 (rVal)
 
-state 35
 
-   12 A: lVal '=' rVal .
+状态 35
 
-    $default  reduce using rule 12 (A)
+   12 A: lVal '=' rVal •
 
+    $default  使用规则 12 以归约 (A)
 
-state 36
 
-    9 T: LBR A '}' .
+状态 36
 
-    $default  reduce using rule 9 (T)
+    9 T: LBR A '}' •
 
+    $default  使用规则 9 以归约 (T)
 
-state 37
 
-   15 B: B T_IDENT .
+状态 37
 
-    $default  reduce using rule 15 (B)
+   15 B: B T_IDENT •
 
+    $default  使用规则 15 以归约 (B)
 
-state 38
 
-   10 Ar: LBR B '}' .
+状态 38
 
-    $default  reduce using rule 10 (Ar)
+   10 Ar: LBR B '}' •
 
+    $default  使用规则 10 以归约 (Ar)
 
-state 39
 
-   17 B: B BLANK .
-   32 BLANK: BLANK . ' '
+状态 39
 
-    ' '  shift, and go to state 19
+   17 B: B BLANK •
+   32 BLANK: BLANK • ' '
 
-    ' '       [reduce using rule 17 (B)]
-    $default  reduce using rule 17 (B)
+    ' '  偏移，并进入状态 19
 
+    ' '       [使用规则 17 以归约 (B)]
+    $default  使用规则 17 以归约 (B)
 
-state 40
+    shift/reduce conflict on token ' ':
+       17 B: B BLANK •
+       32 BLANK: BLANK • ' '
+      Example: B BLANK • ' '
+      Shift derivation
+        B
+        ↳ 17: B BLANK
+                ↳ 32: BLANK • ' '
+      Reduce derivation
+        B
+        ↳ 17: B               BLANK
+              ↳ 17: B BLANK • ↳ 31: ' '
 
-   18 C: C T_NUM_CONSTANT .
 
-    $default  reduce using rule 18 (C)
 
+状态 40
 
-state 41
+   18 C: C T_NUM_CONSTANT •
 
-   20 C: C T_EVENT_IDENTIFIER .
+    $default  使用规则 18 以归约 (C)
 
-    $default  reduce using rule 20 (C)
 
+状态 41
 
-state 42
+   20 C: C T_EVENT_IDENTIFIER •
 
-   11 Ar: LBR C '}' .
+    $default  使用规则 20 以归约 (C)
 
-    $default  reduce using rule 11 (Ar)
 
+状态 42
 
-state 43
+   11 Ar: LBR C '}' •
 
-   22 C: C BLANK .
-   32 BLANK: BLANK . ' '
+    $default  使用规则 11 以归约 (Ar)
 
-    ' '  shift, and go to state 19
 
-    ' '       [reduce using rule 22 (C)]
-    $default  reduce using rule 22 (C)
+状态 43
 
+   22 C: C BLANK •
+   32 BLANK: BLANK • ' '
 
-state 44
+    ' '  偏移，并进入状态 19
 
-   13 A: A lVal '=' rVal .
+    ' '       [使用规则 22 以归约 (C)]
+    $default  使用规则 22 以归约 (C)
 
-    $default  reduce using rule 13 (A)
+    shift/reduce conflict on token ' ':
+       22 C: C BLANK •
+       32 BLANK: BLANK • ' '
+      Example: C BLANK • ' '
+      Shift derivation
+        C
+        ↳ 22: C BLANK
+                ↳ 32: BLANK • ' '
+      Reduce derivation
+        C
+        ↳ 22: C               BLANK
+              ↳ 22: C BLANK • ↳ 31: ' '
+
+
+
+状态 44
+
+   13 A: A lVal '=' rVal •
+
+    $default  使用规则 13 以归约 (A)

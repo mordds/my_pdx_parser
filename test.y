@@ -98,7 +98,7 @@ ParadoxTag* createTag(){
 %type<base> rVal
 %type<num> BLANK
 %type<num> LBR
-%error-verbose
+%define parse.error verbose
 
 %nonassoc LOWEST
 %left ' '

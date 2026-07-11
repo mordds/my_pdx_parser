@@ -1,6 +1,7 @@
 #include "localization.h"
 #include "utils/string_util.h"
 #include "utils/filesystem_util.h"
+#include "paradox_type.h"
 #include<vector>
 #include<filesystem>
 #include<fstream>
@@ -38,12 +39,15 @@ std::map<int,std::string> longStringBuffer;
 std::queue<int> longStringBufferIndex;
 std::set<std::string> shortStringSet;
 std::map<const std::string*,LocalizationItem> localizations;
-std::shared_mutex mtx;
-std::fstream activeFile;
+
 int activeFileId = 0;
+int activeFilePage = 0;
 bool file_open = false;
-char buffer[8192];
+//1M + 4k buffer
+char head_buffer[4 * 1024];
+char string_buffer[1024 * 1024];
 uint16_t file_id = 0,file_index = 0;
+size_t current_offset = 0;
 void createTempFiles(){
     //defaultly capacity is 256K string.
     if(!std::filesystem::exists("./temp")){
@@ -59,67 +63,77 @@ void createTempFiles(){
         for(int i = 0;i < 4;i++) fout.write(smallBuffer,1024);
         fout.flush();
     }
+    delete [] smallBuffer;
 }
-std::fstream& getTempFile(int id){
-    if(file_open){
-        if(activeFileId == id) return activeFile;
-        activeFile.flush();
-        activeFile.close();
+void loadTempFileHead(int index){
+    if(activeFileId == index) return;
+    std::string path("./temp/t_");
+    path.append(std::to_string(index));
+    path.append(".bin");
+    std::fstream activeFile;
+    activeFile.open(path,std::ios::out | std::ios::binary | std::ios::in);
+    activeFile.read(head_buffer,4096);
+}
+
+void loadTempFileData(int index,int page = 0){
+    if(activeFileId == index && activeFilePage == page) return;
+    else {
         std::string path("./temp/t_");
-        path.append(std::to_string(id));
+        path.append(std::to_string(index));
         path.append(".bin");
+        size_t fileSize = std::filesystem::file_size(path);
+        if(fileSize < 4096 + page * 1048576) return;
+        std::fstream activeFile;
         activeFile.open(path,std::ios::out | std::ios::binary | std::ios::in);
-        activeFileId = id;
-        return activeFile;        
-    }
-    else{
-        std::string path("./temp/t_");
-        path.append(std::to_string(id));
-        path.append(".bin");
-        activeFile.open(path,std::ios::out | std::ios::binary | std::ios::in);
-        activeFileId = id;        
-        file_open = true;
-        return activeFile;
-    }
-}
-void closeActiveTempFile(){
-    if(file_open){
-        activeFile.flush();
+        activeFile.seekg(4096 + page * 1048576,std::ios::beg);
+        activeFile.read(string_buffer,1048576);
         activeFile.close();
-        file_open = false;
+        activeFileId = index;
+        activeFilePage = page;
     }
 }
-LocalizationItem createLongStringItem(std::string& str){
+void storeTempFileData(int index,int page = 0){
+    std::string path("./temp/t_");
+    path.append(std::to_string(index));
+    path.append(".bin");
+    size_t fileSize = std::filesystem::file_size(path);
+    while(fileSize < 4096 + page * 1048576) page--;
+    std::fstream activeFile;
+    activeFile.open(path,std::ios::out | std::ios::binary | std::ios::in);
+    activeFile.write(head_buffer,4096);
+    activeFile.seekg(4096 + page * 1048576,std::ios::beg);
+    activeFile.write(string_buffer,1048576);
+    activeFile.close();
+}
+
+LocalizationItem createLongStringItem(const std::string& str){
+    
     LocalizationItem item;
    
     item.data.file_data.file_id = file_id;
     item.data.file_data.file_index = file_index;
     item.data.file_data.str_len = str.length();
     item.is_short = false;
-    int offset = 4096;      
-    std::fstream& file = getTempFile(file_id);
-    file.exceptions(std::ifstream::failbit);
-    if(file_index != 0) {
-        file.seekg((file_index - 1) * 4,std::ios::beg);
-        try{
-            file.read((char*)(&offset),sizeof(int));
-        }
-        catch(std::ios_base::failure& e){
-            std::cout << e.what() << std::endl;
-        }
-    }    
 
-    file.seekg(file_index * 4,std::ios::beg);
-    int off1 = offset + str.length() + 1;
-    
-    file.write(((char*)(&off1)),sizeof(int));
-    
-    file.seekg(0,std::ios::end);
-    file.write(str.c_str(),str.size() + 1);
+    size_t page = current_offset / 1048576;
+          
+    size_t mOffset = current_offset + str.length() + 1;
+    if(mOffset / 1048576 > page) {
+        current_offset = (page + 1) * 1048576;
+        storeTempFileData(file_id,page);
+        mOffset = current_offset + str.length() + 1;
+    }
+    unsigned int* target = (unsigned int*)(head_buffer + (file_index * 4));
+    *target = current_offset;
+    memcpy(string_buffer + (current_offset % 1048576),str.c_str(),str.length() + 1);
+    current_offset = mOffset;
     file_index++;
     if(file_index >= 1024){
         file_index = 0;
+        storeTempFileData(file_id,current_offset / 1048576);
+        memset(head_buffer,0,4096);
         file_id++;
+        current_offset = 0;
     }
     return item;
 }
@@ -181,7 +195,7 @@ void readFromFiles(std::string path){
 
 
 #ifndef PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
-const std::string& getLocalization(std::string key){
+std::string getLocalization(std::string key){
     //std::shared_lock<std::shared_mutex> lock(mtx);
     
     const std::string* ret;
@@ -193,24 +207,23 @@ const std::string& getLocalization(std::string key){
         else{
             int id = ((((int)item.data.file_data.file_id) << 16) + item.data.file_data.file_index);
             if(longStringBuffer.find(id) != longStringBuffer.end()) return longStringBuffer[id];
-            std::fstream& file = getTempFile(item.data.file_data.file_id);
-            int offset = 4096;
-            if(item.data.file_data.file_index != 0){
-                file.seekg((item.data.file_data.file_index - 1)*4,std::ios::beg);
-                file.read((char*)&offset,4);
-            }
 
-            file.seekg(offset,std::ios::beg);
-            memset(buffer,0,8192);
-            file.read(buffer,item.data.file_data.str_len);
+            if(key == "I26_memories_of_the_remnant_fleet_desc") log_error(current_location(),item.data.file_data.file_id,",",item.data.file_data.file_index);
+            loadTempFileHead(item.data.file_data.file_id);
+            unsigned int* uOffset = (unsigned int*)head_buffer;
+            int offset = uOffset[item.data.file_data.file_index];
+            int page = offset / 1048576;
+             if(key == "I26_memories_of_the_remnant_fleet_desc") log_error(current_location(),offset," ",page);
+            loadTempFileData(item.data.file_data.file_id,page);
+            
             longStringBufferIndex.push(id);
             if(longStringBufferIndex.size() > 256) {
                 int pop_id = longStringBufferIndex.front();
                 longStringBufferIndex.pop();
                 longStringBuffer.erase(pop_id);
             }
-            longStringBuffer[id] = std::string(buffer);
-            return longStringBuffer[id];
+            longStringBuffer[id] = std::string(string_buffer + (offset % 1048576),item.data.file_data.str_len);
+            ret = &longStringBuffer[id];
         }
     } 
     return *ret;
@@ -236,7 +249,6 @@ const std::string& registerShortString(const std::string str){
     return (*it2);    
 }
 void _readLocalizations(){
-    //std::unique_lock<std::shared_mutex> lock(mtx);
     #ifndef PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
     file_id = 0;
     file_index = 0;
@@ -251,8 +263,11 @@ void _readLocalizations(){
         readFromFiles(str);
     }
     #ifndef PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
-    closeActiveTempFile();
+    storeTempFileData(file_id,current_offset / 1048576);
+    activeFileId = -1;
+    activeFilePage = -1;
     #endif
+
     std::cout << "#locs loaded!" << std::endl;
 }
 

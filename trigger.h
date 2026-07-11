@@ -37,8 +37,8 @@ struct TriggerItem{
 
 struct Trigger{
 	virtual TriggerType getType() = 0;
-	virtual std::string toString(bool reversed) = 0;
-	virtual std::string toHtml(bool reversed) = 0;
+	virtual std::string toString(bool reversed,int depth = 1) = 0;
+	virtual std::string toHtml(bool reversed,int depth = 1) = 0;
 	virtual void takeOverLifeCycle() = 0;
 	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger)) = 0;
 	virtual bool foreach(std::function<bool(Trigger*)>) = 0;
@@ -67,8 +67,8 @@ struct CommonTrigger : Trigger{
 	virtual TriggerType getType(){
 		return TriggerType::COMMON;
 	}
-	virtual std::string toString(bool reversed);
-	virtual std::string toHtml(bool reversed);
+	virtual std::string toString(bool reversed,int depth = 1);
+	virtual std::string toHtml(bool reversed,int depth = 1);
 	virtual bool foreach(std::function<bool(Trigger*)>);	
 	virtual void takeOverLifeCycle();
 	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
@@ -84,36 +84,36 @@ struct CommonTrigger : Trigger{
 	}
 };
 
-//sizeof(SpecialTrigger) = 40
+//sizeof(SpecialTrigger) = 56 
 struct SpecialTrigger : Trigger {
 	virtual TriggerType getType(){
 		return TriggerType::SPECIAL;
 	}
-	const ScriptedTrigger const * st;
+	const ScriptedTrigger * const st;
 	const Trigger* instance;
-	const std::string& localizationText;
+	const std::vector<std::string> locKey;
 };
 
 struct LogicTrigger : ComplexTrigger {
 	virtual TriggerType getType(){
 		return TriggerType::LOGIC;
 	}
-	virtual std::string toHtml(bool reversed){
+	virtual std::string toHtml(bool reversed,int depth = 1){
 		return this->toString(reversed);
 	}
 	LogicTrigger(LogicType type);
-	virtual std::string toString(bool reversed);
+	virtual std::string toString(bool reversed,int depth = 1);
 	LogicType type;
 };
 struct ChangeScopeTrigger : ComplexTrigger{
 	virtual TriggerType getType(){
 		return TriggerType::CHANGE_SCOPE;
 	}
-	virtual std::string toHtml(bool reversed){
+	virtual std::string toHtml(bool reversed,int depth = 1){
 		return this->toString(reversed);
 	}
 	ChangeScopeTrigger(Scope* scope);
-	virtual std::string toString(bool reversed);
+	virtual std::string toString(bool reversed,int depth = 1);
 	Scope* changedScope;
 	bool trigger_type;
 	bool use_type;
@@ -122,11 +122,11 @@ struct ConditionalTrigger : ComplexTrigger{
 	virtual TriggerType getType(){
 		return TriggerType::CONDITIONAL;
 	}
-	virtual std::string toHtml(bool reversed){
+	virtual std::string toHtml(bool reversed,int depth = 1){
 		return this->toString(reversed);
 	}
-	virtual std::string toString(bool reversed);
-	std::vector<Trigger*> condition;
+	virtual std::string toString(bool reversed,int depth = 1);
+	ComplexTrigger* condition;
 	bool isElseTrigger;
 	void putCondition(Trigger* trigger);
 };
@@ -135,10 +135,10 @@ struct NumberRequiredTrigger : ComplexTrigger{
 	virtual TriggerType getType(){
 		return TriggerType::NUM;
 	}
-	virtual std::string toHtml(bool reversed){
-		return this->toString(reversed);
+	virtual std::string toHtml(bool reversed,int depth = 1){
+		return this->toString(reversed,depth);
 	}
-	virtual std::string toString(bool reversed);
+	virtual std::string toString(bool reversed,int depth = 1);
 	int amount;
 	TriggerItem* item;
 };
@@ -146,10 +146,10 @@ struct CustomTooltipTrigger : ComplexTrigger{
 	virtual TriggerType getType(){
 		return TriggerType::CUSTOM_TT;
 	}
-	virtual std::string toHtml(bool reversed){
-		return this->toString(reversed);
+	virtual std::string toHtml(bool reversed,int depth = 1){
+		return this->toString(reversed,depth);
 	}
-	virtual std::string toString(bool reversed);
+	virtual std::string toString(bool reversed,int depth = 1);
 	std::string tooltip;
 	bool show_origin;
 };
@@ -158,14 +158,13 @@ struct HiddenTrigger : ComplexTrigger{
 	virtual TriggerType getType(){
 		return TriggerType::HIDDEN;
 	}
-	virtual std::string toHtml(bool reversed){
-		return this->toString(reversed);
+	virtual std::string toHtml(bool reversed,int depth = 1){
+		return this->toString(reversed,depth);
 	}
-	virtual std::string toString(bool reversed);
+	virtual std::string toString(bool reversed,int depth = 1);
 	bool hidden_current;
 };
 
-std::vector<Trigger*> parseTriggerList(ParadoxTag*,int root_depth);
 void registerTriggerItems();
 ComplexTrigger* createBaseTrigger(); 
 void parseTrigger(ParadoxTag*,ComplexTrigger* trigger);

@@ -27,7 +27,7 @@ b.exe: lexer.o b.cpp paradox_type.o modifier.o parser.o trigger.o scope.o patter
 	g++ lexer.o parser.o b.cpp modifier.o paradox_type.o trigger.o scope.o pattern.o utils/string_util.o -o b.exe $(CXXFLAGS) -lstdc++fs -Werror 
 
 lex2.yy.c: pdx.l
-	flex++ pdx.l
+	flex pdx.l
 	sed 's/register//g' lex.yy.c > lex2.yy.c
 
 lexer.o: lex2.yy.c 
