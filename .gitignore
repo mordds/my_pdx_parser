@@ -11,3 +11,4 @@ lex2.yy.c
 y.tab.c
 /temp/*
 scripted_triggers/
+y.output
