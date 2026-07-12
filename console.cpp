@@ -5,7 +5,7 @@
 #include "utils/parser_util.h"
 #include "national_idea.h"
 #include "effect.h"
-#include "paradox_marco.h"
+#include "paradox_macro.h"
 #include <iostream>
 #include <map>
 #include <bitset>
@@ -17,6 +17,7 @@ typedef void(*CommandHandler)(std::vector<std::string>);
 
 std::map<std::string,CommandHandler> handlers;
 extern std::set<std::string> shortStringSet;
+extern std::set<std::string> registeredTriggers;
 void printModifier(std::vector<std::string> vec){
     ParadoxTag* root = parseFile(vec[0]);
 	std::vector<Modifier> modifiers;
@@ -49,6 +50,7 @@ void printEffect(std::vector<std::string> vec){
 void printTrigger(std::vector<std::string> vec){
 	bool multiTriggers = false; 
     ParadoxTag* root = parseFile(vec[0]);
+	if(root == nullptr) return;
 	ComplexTrigger* ct = createBaseTrigger();
 	ct->depth = 0;
 	parseTrigger(root,ct);
@@ -56,29 +58,7 @@ void printTrigger(std::vector<std::string> vec){
 	delete ct;
     clearParserDatas();
 }
-
-int main(){
-    using namespace std;
-    std::thread& th = readLocalizations();
-    loadInternalModifier();
-    registerGood();
-    registerTriggerItems();
-	registerEffectItems();
-	loadNationalIdea();
-	th.join();
-    std::cout << "#Load Completed!" << std::endl;
-    handlers["print_modifier"] = printModifier;
-	handlers["print_modifier_html"] = printModifierHtml;
-	handlers["debug_print"] = [](std::vector<std::string> vec){
-		std::cout << shortStringSet.size() << '/' << shortStringSet.max_size() << std::endl;	
-	};
-	handlers["st_test"] = [](std::vector<std::string> vec){
-		loadScriptedTrigger();
-		printAllScriptedTrigger();
-	};
-    handlers["print_trigger"] = printTrigger;
-	handlers["print_effect"] = printEffect;
-	handlers["run_bench"] = [](std::vector<std::string> vec){
+void runBench(std::vector<std::string> vec){
 		auto start = std::chrono::system_clock::now();
 		ParadoxTag* root = parseFile("./bench.txt");
 		auto end = std::chrono::system_clock::now();
@@ -109,7 +89,41 @@ int main(){
 		
 		clearParserDatas();
 		delete ct;
+}
+int main(){
+    using namespace std;
+    std::thread& th = readLocalizations();
+    loadInternalModifier();
+    registerGood();
+    log_info(current_location(),"Modifier Loaded!");
+	registerTriggerItems();
+	log_info(current_location(),"Trigger Loaded!");
+	loadScriptedTrigger();
+	log_info(current_location(),"Scripted Trigger Loaded!");
+	registerEffectItems();
+	log_info(current_location(),"Effect Loaded!");
+	loadNationalIdea();
+	log_info(current_location(),"Ni Loaded!");
+	th.join();
+    std::cout << "#Load Completed!" << std::endl;
+	handlers["credits"] = [](std::vector<std::string> vec){
+		std::cout << "Paradox Data Parser \nV0.4.0-20260711\nAuthor: Mordd";
 	};
+	handlers["future_plan"] = [](std::vector<std::string> vec){
+		std::cout << "4 / 5 Implement Scripted Trigger" << std::endl;
+		std::cout << registeredTriggers.size() << " / 898 Internal Triggers" << std::endl;
+		std::cout << "TODO Implement Scripted Effect" << std::endl;
+		std::cout << "TODO Event Parser" << std::endl;
+	};
+    handlers["print_modifier"] = printModifier;
+	handlers["print_modifier_html"] = printModifierHtml;
+	handlers["debug_print"] = [](std::vector<std::string> vec){
+		std::cout << shortStringSet.size() << '/' << shortStringSet.max_size() << std::endl;	
+	};
+
+    handlers["print_trigger"] = printTrigger;
+	handlers["print_effect"] = printEffect;
+	handlers["run_bench"] = runBench;
     handlers["trade_good"] = [](std::vector<std::string> vec){
         if(vec.empty()){
             std::cout << "用法:trade_good <good_id>" << std::endl;

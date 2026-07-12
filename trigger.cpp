@@ -4,6 +4,7 @@
 #include "pattern.h"
 #include "scope.h"
 #include "localization.h"
+#include "paradox_macro.h"
 #include<map>
 #include<iostream>
 #include<set>
@@ -15,6 +16,8 @@ std::set<std::string> simpleTriggers;
 std::set<std::string> registeredTriggers;
 std::map<std::string,OverrideHandler> overrideHandlers;
 std::map<std::string,TriggerItem*> items;
+
+extern std::map<std::string,ScriptedTrigger*> loadedSTs;
 
 bool parseConditionalTrigger(ParadoxTag*,ConditionalTrigger*);
 
@@ -353,34 +356,55 @@ void registerTriggerItems(){
 	registerSingleArgTrigger("cavalry_in_province","有来自%s的骑兵", "没有来自%s的骑兵",ParadoxType::SCOPE);
 	registerSimpleTrigger("province_has_center_of_trade_of_level","省份至少有%d级的贸易中心","省份没有至少%d级的贸易中心",ParadoxType::INTEGER);
 	registerClausedTrigger("check_variable", new TriggerItem(registerShortString("check_variable"),
-		{"%s的值大于或等于%s","%s的值小于%s"},
+		{"变量%s的值至少为%s","变量%s的值小于%s"},
 		{"src","tar"},
 		{ParadoxType::STRING,ParadoxType::STRING},
 		{0,1}
 	),
 	[](std::map<std::string,ParadoxBase*>& map)-> bool {
-		std::string src_string = map["which"]->getAsString()->getStringContent();
+		std::string src_string = "";
 		std::string tar_string = "";
-		if(map.find("value") != map.end()){
-			tar_string = std::to_string(map["value"]->getAsInteger()->getIntegerContent() / 1000);
-		}
-		else if(map.find("which@2") != map.end()){
-			if(isCastable(map["which@2"],ParadoxType::SCOPE)){
-				std::string tar1 = "";
-				if(map["which@2"]->getType() == ParadoxType::INTEGER) {
-					tar1 = std::to_string(map["which@2"]->getAsInteger()->getIntegerContent() / 1000);
-				}
-				else tar1 = map["which@2"]->getAsString()->getStringContent();
-				Scope* scope = createScopeFromString(tar1);
-				if(scope == nullptr) return false;
-				else tar_string = scope->toString();
+		if(map.size() != 1){
+			src_string = map["which"]->getAsString()->getStringContent();
+			if(map.find("value") != map.end()){
+				tar_string = std::to_string(map["value"]->getAsInteger()->getIntegerContent() / 1000);
 			}
-			else tar_string = map["which@2"]->getAsString()->getStringContent();
+			else if(map.find("which@2") != map.end()){
+				if(isCastable(map["which@2"],ParadoxType::SCOPE)){
+					std::string tar1 = "";
+					if(map["which@2"]->getType() == ParadoxType::INTEGER) {
+						tar1 = std::to_string(map["which@2"]->getAsInteger()->getIntegerContent() / 1000);
+					}
+					else tar1 = map["which@2"]->getAsString()->getStringContent();
+					Scope* scope = createScopeFromString(tar1);
+					if(scope == nullptr) return false;
+					else tar_string = scope->toString();
+				}
+				else tar_string = map["which@2"]->getAsString()->getStringContent();
+			}
+			else return false;
+			map.clear();
+			map["src"] = createString(src_string);
+			map["tar"] = createString(tar_string);
 		}
-		else return false;
-		map.clear();
-		map["src"] = createString(src_string);
-		map["tar"] = createString(tar_string);
+		else {
+			auto [k,v] = *map.begin();
+			
+			map.clear();
+			map["src"] = createString(k);
+			ParadoxString* str = v->getAsString();
+			if(str != nullptr){
+				if(Scope *scope = createScopeFromString(str->getStringContent());scope != nullptr){
+					map["tar"] = createString(scope->toString());
+				}
+				else map["tar"] = str;
+			}
+			else if(ParadoxInteger* pi = v->getAsInteger();pi != nullptr){
+				map["tar"] = createString(std::to_string(pi->getIntegerContent() / 1000));
+			}
+			else return false;
+		}
+
 		return true;
 	}
 	);
@@ -522,28 +546,23 @@ TriggerItem::TriggerItem(const std::string& _name,std::pair<std::string,std::str
 	}
 }
 
-void preInit(Trigger* trigger,std::string& str){
-	for(int i = 0;i < trigger->depth;i++){
-		str.append("*");
-	}
-}
 void preInit(const int depth,std::string& str){
 	for(int i = 0;i < depth;i++){
 		str.append("*");
 	}	
 }
-ComplexTrigger* Trigger::getAsComplexTrigger(){
+ComplexTrigger* Trigger::getAsComplexTrigger() const{
 	if(this->getType() == TriggerType::COMMON) return nullptr;
-	return static_cast<ComplexTrigger*>(this);
+	return const_cast<ComplexTrigger*>(static_cast<const ComplexTrigger*>(this));
 }
 
-LogicTrigger* Trigger::getAsLogicTrigger(){
+LogicTrigger* Trigger::getAsLogicTrigger() const{
 	if(this->getType() != TriggerType::LOGIC) return nullptr;
-	return static_cast<LogicTrigger*>(this);
+	return const_cast<LogicTrigger*>(static_cast<const LogicTrigger*>(this));
 }
-CommonTrigger* Trigger::getAsCommonTrigger(){
+CommonTrigger* Trigger::getAsCommonTrigger() const{
 	if(this->getType() != TriggerType::COMMON) return nullptr;
-	return static_cast<CommonTrigger*>(this);
+	return const_cast<CommonTrigger*>(static_cast<const CommonTrigger*>(this));
 }
 
 void ignoreCurrentDepth(ComplexTrigger* trigger){
@@ -565,7 +584,7 @@ void ComplexTrigger::takeOverLifeCycle(){
 		trigger->takeOverLifeCycle();
 	}
 }
-bool ComplexTrigger::hasAnyTrigger(bool(*predicate)(Trigger*)){
+bool ComplexTrigger::hasAnyTrigger(bool(*predicate)(const Trigger*)){
 	if(predicate(this)) return true;
 	for(Trigger* trigger : this->subTriggers){
 		if(predicate(trigger)) return true;
@@ -573,7 +592,7 @@ bool ComplexTrigger::hasAnyTrigger(bool(*predicate)(Trigger*)){
 	return false;
 }
 
-bool ComplexTrigger::foreach(std::function<bool(Trigger*)> action){
+bool ComplexTrigger::foreach(std::function<bool(const Trigger*)> action){
 	if(!action(this)) return false;
 	for(Trigger* trigger : this->subTriggers){
 		if(!trigger->foreach(action)) return false;
@@ -583,6 +602,7 @@ bool ComplexTrigger::foreach(std::function<bool(Trigger*)> action){
 ChangeScopeTrigger::ChangeScopeTrigger(Scope* scope){
 	this->changedScope = scope;
 	this->depth = 0;
+	this->use_type = false;
 }
 CommonTrigger::CommonTrigger(TriggerItem* item){
 	this->item = item;
@@ -608,11 +628,10 @@ std::string CommonTrigger::toHtml(bool reversed,int depth){
 	this->depth = 0;
 	return str;
 }
-std::string CommonTrigger::toString(bool reversed,int depth){
+std::string CommonTrigger::toString(bool reversed,int depth) const{
 	std::string str("");
 	preInit(depth,str);
 	str.append(this->item->toString(this->base,Xor(reversed,this->reversed)));
-	this->depth = 0;
 	return str;
 }
 void CommonTrigger::takeOverLifeCycle(){
@@ -622,13 +641,13 @@ void CommonTrigger::takeOverLifeCycle(){
 		this->base[i] = deep_copy(this->base[i]);
 	}
 }
-bool CommonTrigger::hasAnyTrigger(bool(*predicate)(Trigger*)){
+bool CommonTrigger::hasAnyTrigger(bool(*predicate)(const Trigger*)){
 	return predicate(this);
 }
-bool CommonTrigger::foreach(std::function<bool(Trigger*)> action){
+bool CommonTrigger::foreach(std::function<bool(const Trigger*)> action){
 	return action(this);
 }
-std::string ChangeScopeTrigger::toString(bool reversed,int depth){
+std::string ChangeScopeTrigger::toString(bool reversed,int depth) const{
 	std::string str("");
 	if(this->subTriggers.empty()) return str;
 	int cDepth = depth;
@@ -652,7 +671,7 @@ std::string ChangeScopeTrigger::toString(bool reversed,int depth){
 	return str;
 }
 
-std::string LogicTrigger::toString(bool reversed,int depth){
+std::string LogicTrigger::toString(bool reversed,int depth) const{
 	std::string str("");
 	int size = this->subTriggers.size();
 	if(size == 0) return str;
@@ -726,7 +745,7 @@ std::string LogicTrigger::toString(bool reversed,int depth){
 	return str;
 }
 
-std::string NumberRequiredTrigger::toString(bool reversed,int depth){
+std::string NumberRequiredTrigger::toString(bool reversed,int depth) const{
 	std::string str("");
 	if(this->subTriggers.empty()) return str;
 	preInit(depth,str);
@@ -743,7 +762,7 @@ std::string NumberRequiredTrigger::toString(bool reversed,int depth){
 	return str;
 }
 
-std::string ConditionalTrigger::toString(bool reversed,int depth){
+std::string ConditionalTrigger::toString(bool reversed,int depth) const{
 	std::string str("");
 	if(this->subTriggers.empty()) return str;
 	if(this->condition->subTriggers.empty()) {
@@ -774,13 +793,13 @@ std::string ConditionalTrigger::toString(bool reversed,int depth){
 	return str;
 }
 
-std::string HiddenTrigger::toString(bool reversed,int depth){
+std::string HiddenTrigger::toString(bool reversed,int depth) const{
 	std::string str("");
 	if(this->subTriggers.empty()) return str;
 	if(this->hidden_current){
 		return str;
 	}
-	preInit(this,str);
+	preInit(depth,str);
 	str.append("(隐藏条件):\n");
 	for(int i = 0;i < this->subTriggers.size();i++){
 		str.append(this->subTriggers[i]->toString(reversed,depth + 1));
@@ -789,7 +808,7 @@ std::string HiddenTrigger::toString(bool reversed,int depth){
 	return str;
 }
 
-std::string CustomTooltipTrigger::toString(bool reversed,int depth){
+std::string CustomTooltipTrigger::toString(bool reversed,int depth) const{
 	std::string str("");
 	if(this->subTriggers.empty()) return str;
 	if(!this->show_origin){
@@ -806,9 +825,26 @@ std::string CustomTooltipTrigger::toString(bool reversed,int depth){
 	return str;
 }
 
+std::string SpecialTrigger::toString(bool reversed,int depth) const{
+	if(this->instance == nullptr && this->prototype->isFixed()) {
+		std::map<std::string,ParadoxBase*> data;
+		if(this->locKey.size() != 0) data["__REVERSED__"] = nullptr;
+		this->instance = this->prototype->createInstance(data);
+	}
+	return this->instance->toString(reversed,depth);
+}
 
+bool SpecialTrigger::hasAnyTrigger(bool(*predicate)(const Trigger*)){
+	if(predicate(this)) return true;
+	if(predicate(this->instance)) return true;
+	return false;
+}
 
-
+bool SpecialTrigger::foreach(std::function<bool(const Trigger*)> action){
+	if(!action(this)) return false;
+	if(!action(this->instance)) return false;
+	return true;
+}
 void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 	for(int i = 0;i < tag->seq.size();i++){
 		std::string item = stripTag(tag->seq[i]);
@@ -885,8 +921,7 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				ParadoxString* tt = subTag->get("tooltip",1)->getAsString();
 				
 				if(tt == nullptr) {
-					std::cout << "#Warning:No tooltip for a custom_tt provided, the content will be ignored.";
-					
+					log_warning(current_location(),"No tooltip provided for a custom_tt,this content will be ignored.");
 					continue;
 				}
 				else{
@@ -936,6 +971,23 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				subTag->remove(cnt_tag,1);
 				trigger->putTrigger(nrt);
 				parseTrigger(subTag,nrt);
+				continue;
+			}
+			if(loadedSTs.find(item) != loadedSTs.end()){
+				ScriptedTrigger* st = loadedSTs[item];
+				if(st->isFixed()) continue;
+				Trigger* ti = st->createInstance(subTag->tags);
+				if(ti != nullptr){
+					SpecialTrigger* spt = new SpecialTrigger(st,ti);
+					trigger->putTrigger(spt);
+				}
+				else {
+					log_error(current_location(),"Cannot make instance of scripted_trigger \"",item,"\".");
+					for(auto [k,v] : subTag->tags){
+						log_error(current_location(),"Parameters:");
+						log_error(current_location(),k,":",v->toString());
+					}
+				}
 				continue;
 			}
 			//then common clause triggers..
@@ -997,8 +1049,27 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			trigger->putTrigger(ct);
 			continue; 
 		}
-		else if(registeredTriggers.find(item) == registeredTriggers.end()) continue;
+		else if(registeredTriggers.find(item) == registeredTriggers.end()) {
 
+			//log_warning(current_location(),"unknown Trigger: ",item);
+			continue;
+		}
+		if(loadedSTs.find(item) != loadedSTs.end()){
+			if(!loadedSTs[item]->isFixed()) continue;
+			else {
+				
+				ParadoxBoolean* pb = base->getAsBoolean(); 
+				if(pb == nullptr) continue;
+				std::map<std::string,ParadoxBase*> args;
+				if(!pb->getValue()){
+					args["__REVERSED__"] = nullptr;
+				} 
+				Trigger* ti = loadedSTs[item]->createInstance(args);
+				SpecialTrigger* st = new SpecialTrigger(loadedSTs[item],ti);
+				if(pb->getValue()) st->locKey.push_back(nullptr);
+				trigger->putTrigger(st);
+			}
+		}
 		//for no overrides..
 		if(simpleTriggers.find(item) != simpleTriggers.end()){
 			
@@ -1081,6 +1152,7 @@ ComplexTrigger* createBaseTrigger(){
 
 bool parseConditionalTrigger(ParadoxTag* tag,ConditionalTrigger* ct){
 	ParadoxTag* lim = tag->get("limit",1)->getAsTag();
+	ct->condition = createBaseTrigger();
 	if(lim->tags.empty()) return false;
 	parseTrigger(lim,ct->condition);
 	parseTrigger(tag,ct); 

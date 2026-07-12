@@ -46,7 +46,7 @@ void loadNationalIdea(){
         }
         nationalIdeas[str] = idea;
         if(idea->trigger != nullptr){
-            idea->trigger->foreach([&idea](Trigger* trigger){
+            idea->trigger->foreach([&idea](const Trigger* trigger){
                 CommonTrigger* commonTrigger = trigger->getAsCommonTrigger();
                 if(commonTrigger == nullptr) return true;
                 //std::cout << commonTrigger->item->name << std::endl;

@@ -221,4 +221,5 @@ LBR: '{' {$$ = 1;}
 
 void yyerror(const char* s) {
     fprintf(stderr, "Error: %s\n", s);
+	ROOT = nullptr;
 }

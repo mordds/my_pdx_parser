@@ -316,10 +316,14 @@ using pdxTypeFromRaw = typename ParadoxTypeMap2<type>::pdxType;
 
 template<typename... types>
 void log_error(const std::source_location location,types... args){
-	(std::cerr << "#[ERROR][" << location.file_name() << ":" << location.line() << " " <<location.function_name() << "]: " << ... << args) << std::endl;
+	(std::cerr << "#[ERROR][" << location.file_name() << ":" << location.line() << "][" <<location.function_name() << "]: " << ... << args) << std::endl;
 }
 template<typename... types>
 void log_warning(const std::source_location location,types... args){
-	(std::cerr << "#[WARNING][" << location.file_name() << ":" << location.line() << " " <<location.function_name() << "]: " << ... << args) << std::endl;
+	(std::cerr << "#[WARNING][" << location.file_name() << ":" << location.line() << "][" <<location.function_name() << "]: " << ... << args) << std::endl;
+}
+template<typename... types>
+void log_info(const std::source_location location,types... args){
+	(std::cerr << "#[INFO][" << location.file_name() << ":" << location.line() << "][" <<location.function_name() << "]: " << ... << args) << std::endl;
 }
 #endif

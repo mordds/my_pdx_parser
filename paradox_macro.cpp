@@ -1,4 +1,4 @@
-#include "paradox_marco.h"
+#include "paradox_macro.h"
 #include "utils/filesystem_util.h"
 #include "utils/string_util.h"
 #include "utils/parser_util.h"
@@ -45,16 +45,21 @@ Trigger* ComplicateScriptedTrigger::createInstance(std::map<std::string,ParadoxB
             pos++;
         }
     }
-    /*
+
     ParadoxTag* root = parseString(result);
     ComplexTrigger* ct = createBaseTrigger();
     parseTrigger(root,ct);    
-    */
-
-    return nullptr;
+    ct->takeOverLifeCycle();
+    return ct;
 
 }
-
+Trigger* FixedScriptedTrigger::createInstance(std::map<std::string,ParadoxBase*> datas){
+    if(this->instance == nullptr) return nullptr;
+    if(datas.find("__REVERSED__") != datas.end()) {
+        return this->instance;
+    }
+    return this->instance->getAsComplexTrigger()->subTriggers[0];
+}
 enum class MarcoToken{
     IDENT,
     BRACKET_OPEN,
@@ -149,6 +154,14 @@ void loadScriptedTrigger(){
         //fout << content << std::endl;
         MarcoTokenizer tokenizer(std::move(content));
         if(!ParseScriptedTrigger(tokenizer,tempString)) std::cout << "Failed in File" << path << std::endl;
+    }
+    for(auto[k,v]:tempString){
+        ParadoxTag* root = parseString(v);
+        ComplexTrigger* ct = createBaseTrigger();
+        LogicTrigger* lt = new LogicTrigger(LogicType::NOT);
+        lt->putTrigger(ct);
+        parseTrigger(root,ct);
+        static_cast<FixedScriptedTrigger*>(loadedSTs[k])->instance = lt;
     }
 }
 bool checkValidName(std::string& str2){
@@ -251,11 +264,13 @@ bool ParseScriptedTrigger(MarcoTokenizer &tokenizer,std::map<std::string,std::st
                             FixedScriptedTrigger* fst = new FixedScriptedTrigger();
                             fixedSTString[name] = content;
                             loadedSTs[name] = fst;
+                            registeredTriggers.insert(name);
                             content.clear();
                         }
                         else {
                             if(!content.empty()) currentHolder->push_back(std::make_unique<StringHolder>(content));
                             loadedSTs[name] = cst;
+                            registeredTriggers.insert(name);
                             content.clear();
                         }
                         depth = 0;

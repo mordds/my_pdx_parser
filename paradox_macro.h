@@ -49,13 +49,13 @@ struct ParameterHolder : MarcoHolder{
 
 struct ScriptedTrigger {
     virtual Trigger* createInstance(std::map<std::string,ParadoxBase*>) = 0;
-    virtual bool isFixed() = 0;
+    virtual bool isFixed() const = 0;
 };
 
 struct FixedScriptedTrigger : ScriptedTrigger {
     Trigger* instance;
-    virtual Trigger* createInstance(std::map<std::string,ParadoxBase*>) { return instance; }
-    virtual bool isFixed() { return true; }
+    virtual Trigger* createInstance(std::map<std::string,ParadoxBase*>);
+    virtual bool isFixed() const{ return true; }
 };
 
 struct ComplicateScriptedTrigger : ScriptedTrigger {
@@ -63,7 +63,7 @@ struct ComplicateScriptedTrigger : ScriptedTrigger {
     std::string pattern;
     std::vector<std::string> parameterName;
     std::vector<std::unique_ptr<MarcoHolder>> marcoHolders;
-    virtual bool isFixed() { return false; }
+    virtual bool isFixed() const { return false; }
 };
 
 void loadScriptedTrigger();
