@@ -7,7 +7,9 @@
 #include <unordered_map>
 #include <filesystem>
 #include <cstdlib> 
+#if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
+#endif
 extern YYSTYPE yylval;
 extern FILE* yyin;
 extern FILE* yyout;
@@ -21,7 +23,9 @@ extern std::map<std::string,ModifierObject> modifierObjects;
 
 int main(){
 	//I HATE GBK ENCODING!!!
+	#if defined(_WIN32) || defined(_WIN64)
 	SetConsoleOutputCP(CP_UTF8);
+	#endif
 	std::cout << "请输入要解析的Modifier文件名称:" << std::endl;
 	std::string name;
 	getline(std::cin,name);
