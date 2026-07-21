@@ -188,7 +188,7 @@ rVal: GT {$$ = $1;}
 	$$ = createString(*$1);
   } 
   | T_BOOLEAN {
-	$$ = getBooleanInstance($1);
+	$$ = getBooleanInstance($1 != 0);
   }
   | T_EVENT_IDENTIFIER {
 	$$ = createString($1);
@@ -220,6 +220,6 @@ LBR: '{' {$$ = 1;}
 
 
 void yyerror(const char* s) {
-    fprintf(stderr, "Error: %s\n", s);
+    fprintf(stderr, "#Error: %s\n", s);
 	ROOT = nullptr;
 }

@@ -7,8 +7,9 @@ SRCS := $(filter-out test.cpp console.cpp b.cpp, $(SRCS))
 SRCHEADERS = $(SRCS:.cpp=.h)
 OBJS = $(SRCS:.cpp=.o)
 TARGET = console.exe
-
+TARGET2 = print_modifier.exe
 all: $(TARGET)
+modifier_out: $(TARGET2)
 
 $(TARGET): $(OBJS) parser.o lexer.o console.cpp
 	$(CXX) $(OBJS) parser.o lexer.o console.cpp -o $@ $(CXXFLAGS) -lstdc++fs
@@ -20,8 +21,8 @@ clean:
 	rm -f *.o
 	rm -f utils/*.o
 
-a.exe: lexer.o test.cpp paradox_type.o modifier.o parser.o utils/string_util.o scope.o localization.o
-	g++ lexer.o parser.o test.cpp modifier.o paradox_type.o utils/string_util.o scope.o localization.o $(CXXFLAGS) -static -lstdc++fs -Werror 
+print_modifier.exe:  $(OBJS) parser.o lexer.o test.cpp
+	g++ $(OBJS) parser.o lexer.o test.cpp $(CXXFLAGS) -static -lstdc++fs -Werror -o print_modifier.exe
 
 b.exe: lexer.o b.cpp paradox_type.o modifier.o parser.o trigger.o scope.o pattern.o utils/string_util.o
 	g++ lexer.o parser.o b.cpp modifier.o paradox_type.o trigger.o scope.o pattern.o utils/string_util.o -o b.exe $(CXXFLAGS) -lstdc++fs -Werror 

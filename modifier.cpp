@@ -51,24 +51,56 @@ void generateValue(int value,char* str){
 		else sprintf(str,"%d ",pValue);
 	}
 	else {
+		int count_0 = 0;
+		if(std::abs(qValue) < 100) count_0++;
+		if(std::abs(qValue) <  10) count_0++;
+
 		while(qValue % 10 == 0) qValue /= 10;
-		if(pValue > 0 || (pValue == 0 && qValue >= 0)) sprintf(str,"+%d.%d ",pValue,qValue);
-		else if(pValue < 0) sprintf(str,"%d.%d ",pValue,-1 * qValue);
-		else sprintf(str,"-%d.%d ",pValue,-1 * qValue);
+		if(pValue > 0 || (pValue == 0 && qValue >= 0)) {
+			if(count_0 == 0) sprintf(str,"+%d.%d ",pValue,qValue);
+			else if(count_0 == 1) sprintf(str,"+%d.0%d ",pValue,qValue);
+			else if(count_0 == 2) sprintf(str,"+%d.00%d ",pValue,qValue);
+		}
+		else if(pValue < 0) {
+			if(count_0 == 0) sprintf(str,"%d.%d ",pValue,-1*qValue);
+			else if(count_0 == 1) sprintf(str,"%d.0%d ",pValue,-1*qValue);
+			else if(count_0 == 2) sprintf(str,"%d.00%d ",pValue,-1*qValue);
+		}
+		else {
+			if(count_0 == 0) sprintf(str,"-%d.%d ",pValue,-1*qValue);
+			else if(count_0 == 1) sprintf(str,"-%d.0%d ",pValue,-1*qValue);
+			else if(count_0 == 2) sprintf(str,"-%d.00%d ",pValue,-1*qValue);			
+		}
 	}
 } 
 void generatePercentage2(int value,char* str){
 	int pValue = value / 1000;
 	int qValue = std::abs(value % 1000);
+	
 	if(qValue == 0){
 		if(pValue >= 0) sprintf(str,"+%d%% ",pValue);
 		else sprintf(str,"%d%% ",pValue);
 	}
 	else {
+		int count_0 = 0;
+		if(qValue < 100) count_0++;
+		if(qValue <  10) count_0++;
 		while(qValue % 10 == 0) qValue /= 10;
-		if(pValue > 0 || (pValue == 0 && qValue >= 0)) sprintf(str,"+%d.%d%% ",pValue,qValue);
-		else if(pValue < 0)  sprintf(str,"%d.%d%% ",pValue,qValue);
-		else sprintf(str,"-%d.%d%% ",pValue,qValue);
+		if(pValue > 0 || (pValue == 0 && value >= 0)) {
+			if(count_0 == 0) sprintf(str,"+%d.%d ",pValue,qValue);
+			else if(count_0 == 1) sprintf(str,"+%d.0%d ",pValue,qValue);
+			else if(count_0 == 2) sprintf(str,"+%d.00%d ",pValue,qValue);
+		}
+		else if(pValue < 0){
+			if(count_0 == 0) sprintf(str,"%d.%d ",pValue,qValue);
+			else if(count_0 == 1) sprintf(str,"%d.0%d ",pValue,qValue);
+			else if(count_0 == 2) sprintf(str,"%d.00%d ",pValue,qValue);
+		}
+		else {
+			if(count_0 == 0) sprintf(str,"-%d.%d ",pValue,qValue);
+			else if(count_0 == 1) sprintf(str,"-%d.0%d ",pValue,qValue);
+			else if(count_0 == 2) sprintf(str,"-%d.00%d ",pValue,qValue);			
+		}
 	}
 } 
 
@@ -245,7 +277,7 @@ void loadInternalModifier(){
 	registerModifier("defensiveness",ModifierType::PERCENTAGE,"防御效率");
 	registerModifier("local_defensiveness",ModifierType::PERCENTAGE,"本地防御效率");
 	registerModifier("global_ship_cost",ModifierType::MINUS_PERCENTAGE,"船只花费");
-	registerModifier("global_ship_repair",ModifierType::MINUS_PERCENTAGE,"全局船只修理");
+	registerModifier("global_ship_repair",ModifierType::PERCENTAGE,"全局船只修理");
 	registerModifier("global_regiment_cost",ModifierType::MINUS_PERCENTAGE,"部队花费");
 	registerModifier("global_tariffs",ModifierType::PERCENTAGE2,"全局关税");
 	registerModifier("diplomatic_reputation",ModifierType::NORMAL,"外交声誉");
@@ -496,7 +528,7 @@ void loadInternalModifier(){
 	registerModifier("war_taxes_cost_modifier",ModifierType::MINUS_PERCENTAGE,"战争税花费");
 	registerModifier("siege_blockade_progress",ModifierType::NORMAL,"封锁对围城的影响");
 	registerModifier("sailor_maintenance_modifer",ModifierType::MINUS_PERCENTAGE,"海员维护费");
-	registerModifier("yearly_army_professionalism",ModifierType::PERCENTAGE2,"每年陆军职业度");
+	registerModifier("yearly_army_professionalism",ModifierType::PERCENTAGE,"每年陆军职业度");
 	registerModifier("general_cost",ModifierType::MINUS_PERCENTAGE,"陆军将领花费");
 	registerModifier("reserves_organisation",ModifierType::PERCENTAGE,"未参战单位士气损失减少");
 	registerModifier("drill_gain_modifier",ModifierType::PERCENTAGE,"陆军操练度获取修正");
@@ -749,7 +781,7 @@ void loadInternalModifier(){
 	registerModifier("mages_mana_regen_mult",ModifierType::PERCENTAGE,"法力回复修正");
 	registerModifier("mages_mana_capacity",ModifierType::NORMAL,"法力容量");
 	registerModifier("max_estate_spell_levels",ModifierType::NORMAL,"最大阶层法术等级");
-	registerModifier("mages_monthly_experience",ModifierType::PERCENTAGE,"每月魔法学习经验");
+	registerModifier("mages_monthly_experience",ModifierType::NORMAL,"每月魔法学习经验");
 	registerModifier("mages_ruler_experience_mod",ModifierType::PERCENTAGE,"统治者魔法学习经验加成");
 	registerModifier("mages_estate_experience_mod",ModifierType::PERCENTAGE,"阶层魔法学习经验加成");
 	registerModifier("abjuration_experience_mod",ModifierType::PERCENTAGE,"防护系魔法学习经验加成");
@@ -804,6 +836,7 @@ std::string Modifier::localize(){
 	
 	localized.append(getLocalization(*this->name));
 	localized.append(":\r\n");
+//
 	for(int i = 0;i < items.size();i++){
 		ModifierObject obj = *items[i].modifierObject;
 		int type_id = (int)obj.type; 
@@ -828,6 +861,7 @@ std::string Modifier::localize(){
 		}
 		else if(type_id == 12){
 			char buffer[16];
+			
 			generatePercentage2(-1 * items[i].value,buffer);
 			
 			localized.append(buffer);

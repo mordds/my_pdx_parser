@@ -40,18 +40,18 @@ struct Trigger{
 	virtual std::string toString(bool reversed,int depth = 1) const = 0;
 	virtual std::string toHtml(bool reversed,int depth = 1) = 0;
 	virtual void takeOverLifeCycle() = 0;
-	virtual bool hasAnyTrigger(bool (*predicate)(const Trigger* trigger)) = 0;
-	virtual bool foreach(std::function<bool(const Trigger*)>) = 0;
-	ComplexTrigger* getAsComplexTrigger() const;
-	LogicTrigger* getAsLogicTrigger() const;
-	CommonTrigger* getAsCommonTrigger() const;
+	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger)) = 0;
+	virtual bool foreach(std::function<bool(Trigger*)>) = 0;
+	ComplexTrigger* getAsComplexTrigger();
+	LogicTrigger* getAsLogicTrigger();
+	CommonTrigger* getAsCommonTrigger();
 	int depth;
 	bool copied;
 };
 struct ComplexTrigger : Trigger{
 	virtual void takeOverLifeCycle();
-	virtual bool hasAnyTrigger(bool (*predicate)(const Trigger* trigger));
-	virtual bool foreach(std::function<bool(const Trigger*)>);
+	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
+	virtual bool foreach(std::function<bool(Trigger*)>);
 	std::vector<Trigger*> subTriggers;
 	bool ignored;
 	bool omitted;
@@ -69,9 +69,9 @@ struct CommonTrigger : Trigger{
 	}
 	virtual std::string toString(bool reversed,int depth = 1) const;
 	virtual std::string toHtml(bool reversed,int depth = 1);
-	virtual bool foreach(std::function<bool(const Trigger*)>);	
+	virtual bool foreach(std::function<bool(Trigger*)>);	
 	virtual void takeOverLifeCycle();
-	virtual bool hasAnyTrigger(bool (*predicate)(const Trigger* trigger));
+	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
 	CommonTrigger(TriggerItem* item);
 	void pushObject(ParadoxBase* base);
 	TriggerItem* item;
@@ -91,13 +91,13 @@ struct SpecialTrigger : Trigger {
 	}
 	ScriptedTrigger * const prototype;
 	mutable Trigger* instance;
-	std::vector<std::string*> locKey;
+	std::map<const std::string*,ParadoxBase*> args;
 
 	virtual std::string toString(bool reversed,int depth = 1) const;
 	virtual std::string toHtml(bool reversed,int depth = 1) { return toString(reversed,depth); }
 	virtual void takeOverLifeCycle() {};
-	virtual bool foreach(std::function<bool(const Trigger*)>);
-	virtual bool hasAnyTrigger(bool (*predicate)(const Trigger* trigger));
+	virtual bool foreach(std::function<bool(Trigger*)>);
+	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
 	SpecialTrigger(ScriptedTrigger* _prototype,Trigger* _instance): prototype(_prototype), instance(_instance){}
 
 	~SpecialTrigger() noexcept;

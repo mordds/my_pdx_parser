@@ -6,6 +6,7 @@
 #include "national_idea.h"
 #include "effect.h"
 #include "paradox_macro.h"
+#include "pattern.h"
 #include <iostream>
 #include <map>
 #include <bitset>
@@ -92,6 +93,8 @@ void runBench(std::vector<std::string> vec){
 }
 int main(){
     using namespace std;
+	auto start = std::chrono::system_clock::now();
+	registerInternalScopes();
     std::thread& th = readLocalizations();
     loadInternalModifier();
     registerGood();
@@ -99,13 +102,18 @@ int main(){
 	registerTriggerItems();
 	log_info(current_location(),"Trigger Loaded!");
 	loadScriptedTrigger();
-	log_info(current_location(),"Scripted Trigger Loaded!");
+	log_info(current_location(),"Scripted Trigger Phase 1 Loaded!");
 	registerEffectItems();
 	log_info(current_location(),"Effect Loaded!");
 	loadNationalIdea();
 	log_info(current_location(),"Ni Loaded!");
 	th.join();
-    std::cout << "#Load Completed!" << std::endl;
+	loadScriptedTrigger_POST();
+	log_info(current_location(),"Scripted Trigger Phase 2 Loaded!");
+	auto end = std::chrono::system_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	log_info(current_location(),"Load Completed! ",duration.count(), " us consumed.");
+	
 	handlers["credits"] = [](std::vector<std::string> vec){
 		std::cout << "Paradox Data Parser \nV0.4.0-20260711\nAuthor: Mordd";
 	};
@@ -118,7 +126,33 @@ int main(){
     handlers["print_modifier"] = printModifier;
 	handlers["print_modifier_html"] = printModifierHtml;
 	handlers["debug_print"] = [](std::vector<std::string> vec){
-		std::cout << shortStringSet.size() << '/' << shortStringSet.max_size() << std::endl;	
+		if(vec.size() != 0){
+			if(vec[0] == "named_pattern_test") {
+				NamedPattern np("Hello,%{name}!");
+				np.fillName("name","mordd");
+				std::cout << np.getOutput() << std::endl;
+				np = NamedPattern("The IQ of Khet is %{IQ}");
+				np.fillName("IQ",40000);
+				std::cout << np.getOutput() << std::endl;
+				np = NamedPattern("Oops,The IQ of Khet is %{IQ:percent} now!");
+				np.fillName("IQ",399);
+				std::cout << np.getOutput() << std::endl;
+				np = NamedPattern("What Khet will do:\n%{KhetAction:effect_literal}");
+				np.fillName("KhetAction","add_treasury = -300");
+				std::cout << np.getOutput();
+				np = NamedPattern("The Trigger of Khet being dumb:\n%{KhetCondition:trigger_literal}");
+				np.fillName("KhetCondition","always = no");
+				std::cout << np.getOutput();
+				np = NamedPattern("Scope Test:%{lorent:scope},%{far_island:scope}");
+				np.fillName("lorent","A01");
+				np.fillName("far_island",1);	
+				std::cout << np.getOutput();
+			}
+		}
+		else {
+			std::cout << shortStringSet.size() << '/' << shortStringSet.max_size() << std::endl;	
+		}
+		
 	};
 
     handlers["print_trigger"] = printTrigger;

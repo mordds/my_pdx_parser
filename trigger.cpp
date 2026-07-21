@@ -445,6 +445,21 @@ void registerTriggerItems(){
 
 	registerSingleArgTrigger("crown_land_share","王室领地比例至少为%p%%","王室领地比例少于%p%%",ParadoxType::INTEGER);
 	registerSingleArgTrigger("crown_land_share","王室领地比例大于%s阶级持有比例","王室领地比例大于%s阶级持有比例",ParadoxType::STRING);
+	registerSingleArgTrigger("culture","省份文化为%s","省份文化不为%s",ParadoxType::STRING);
+	registerSingleArgTrigger("culture","省份文化是%s的主流文化","省份文化不是%s的主流文化",ParadoxType::SCOPE);
+	registerSimpleTrigger("culture_group","属于%s文化组","不属于%s文化组",ParadoxType::SCOPE);
+	registerSimpleTrigger("culture_group_claim","%s拥有与我国主流文化相同文化组的省份","%s没有与我国主流文化相同文化组的省份",ParadoxType::SCOPE);
+	
+	registerSimpleTrigger("current_age","当前时代为%s","当前时代不是%s",ParadoxType::STRING);
+	registerSimpleTrigger("current_bribe","该省份的议会席位想要%s类型的贿赂","该省份的议会席位不想要%s类型的贿赂",ParadoxType::STRING);
+	registerSimpleTrigger("current_debate","当前议会正在辩论%s","当前议会没有辩论%s",ParadoxType::STRING);
+	registerSimpleTrigger("current_icon","当前已激活%s","当前未激活%s",ParadoxType::STRING);
+	registerSimpleTrigger("current_income_balance","上个月的净收入至少为%d","上个月的净收入少于%d",ParadoxType::INTEGER);
+	registerSimpleTrigger("current_institution","当地最早尚未接纳的思潮支持度达到%d%%","当地最早尚未接纳的思潮支持度不足%d%%",ParadoxType::INTEGER);
+	registerSimpleTrigger("current_institution_growth","当地最早尚未接纳的思潮增长达到%d%%","当地最早尚未接纳的思潮增长不足%d%%",ParadoxType::INTEGER);
+	registerSimpleTrigger("current_size_of_parliament","当前议会至少拥有%d个席位","当前议会不足%d个席位",ParadoxType::INTEGER);
+	registerSimpleTrigger("defensive_war_with","当前正在防御战争中对抗%s","当前没有在防御战争中对抗%s",ParadoxType::SCOPE);
+	registerSimpleTrigger("devastation","荒废度低于%d","荒废度达到%d",ParadoxType::INTEGER);
 
 	registerSimpleTrigger("innovativeness","创新度至少为%d","创新度小于%d",ParadoxType::INTEGER);
 	registerSimpleTrigger("treasury","拥有至少%d克朗","拥有少于%d克朗",ParadoxType::INTEGER);
@@ -453,6 +468,7 @@ void registerTriggerItems(){
 	registerSimpleTrigger("monthly_dip","每月外交点数至少为%d","每月外交点数少于%d",ParadoxType::INTEGER);
 	registerSimpleTrigger("monthly_adm","每月行政点数至少为%d","每月行政点数少于%d",ParadoxType::INTEGER);
 	registerSimpleTrigger("monthly_mil","每月军事点数至少为%d","每月军事点数少于%d",ParadoxType::INTEGER);
+	registerSimpleTrigger("was_tag","曾经是%s","以前不是%s",ParadoxType::SCOPE);
 	
 }
 
@@ -462,6 +478,7 @@ std::string TriggerItem::toString(std::vector<ParadoxBase*> base,bool reversed){
 	std::string usePattern = reversed ? this->reversePattern : this->pattern;
 	if(this->usedParameter.size() == 0) return usePattern;
 	Pattern p(usePattern);
+
 	for(int i = 0;i < usedParameter.size();i++){
 		int index = usedParameter[i];
 		if(index == -1){
@@ -551,18 +568,18 @@ void preInit(const int depth,std::string& str){
 		str.append("*");
 	}	
 }
-ComplexTrigger* Trigger::getAsComplexTrigger() const{
+ComplexTrigger* Trigger::getAsComplexTrigger(){
 	if(this->getType() == TriggerType::COMMON) return nullptr;
-	return const_cast<ComplexTrigger*>(static_cast<const ComplexTrigger*>(this));
+	return static_cast<ComplexTrigger*>(this);
 }
 
-LogicTrigger* Trigger::getAsLogicTrigger() const{
+LogicTrigger* Trigger::getAsLogicTrigger(){
 	if(this->getType() != TriggerType::LOGIC) return nullptr;
-	return const_cast<LogicTrigger*>(static_cast<const LogicTrigger*>(this));
+	return static_cast<LogicTrigger*>(this);
 }
-CommonTrigger* Trigger::getAsCommonTrigger() const{
+CommonTrigger* Trigger::getAsCommonTrigger(){
 	if(this->getType() != TriggerType::COMMON) return nullptr;
-	return const_cast<CommonTrigger*>(static_cast<const CommonTrigger*>(this));
+	return static_cast<CommonTrigger*>(this);
 }
 
 void ignoreCurrentDepth(ComplexTrigger* trigger){
@@ -584,7 +601,7 @@ void ComplexTrigger::takeOverLifeCycle(){
 		trigger->takeOverLifeCycle();
 	}
 }
-bool ComplexTrigger::hasAnyTrigger(bool(*predicate)(const Trigger*)){
+bool ComplexTrigger::hasAnyTrigger(bool(*predicate)(Trigger*)){
 	if(predicate(this)) return true;
 	for(Trigger* trigger : this->subTriggers){
 		if(predicate(trigger)) return true;
@@ -592,7 +609,7 @@ bool ComplexTrigger::hasAnyTrigger(bool(*predicate)(const Trigger*)){
 	return false;
 }
 
-bool ComplexTrigger::foreach(std::function<bool(const Trigger*)> action){
+bool ComplexTrigger::foreach(std::function<bool(Trigger*)> action){
 	if(!action(this)) return false;
 	for(Trigger* trigger : this->subTriggers){
 		if(!trigger->foreach(action)) return false;
@@ -641,10 +658,10 @@ void CommonTrigger::takeOverLifeCycle(){
 		this->base[i] = deep_copy(this->base[i]);
 	}
 }
-bool CommonTrigger::hasAnyTrigger(bool(*predicate)(const Trigger*)){
+bool CommonTrigger::hasAnyTrigger(bool(*predicate)(Trigger*)){
 	return predicate(this);
 }
-bool CommonTrigger::foreach(std::function<bool(const Trigger*)> action){
+bool CommonTrigger::foreach(std::function<bool(Trigger*)> action){
 	return action(this);
 }
 std::string ChangeScopeTrigger::toString(bool reversed,int depth) const{
@@ -828,19 +845,32 @@ std::string CustomTooltipTrigger::toString(bool reversed,int depth) const{
 std::string SpecialTrigger::toString(bool reversed,int depth) const{
 	if(this->instance == nullptr && this->prototype->isFixed()) {
 		std::map<std::string,ParadoxBase*> data;
-		if(this->locKey.size() != 0) data["__REVERSED__"] = nullptr;
+		if(this->args.size() != 0) data["__REVERSED__"] = nullptr;
 		this->instance = this->prototype->createInstance(data);
+	}
+	std::string ret("");
+	preInit(depth,ret);
+	std::string loc_pattern = this->prototype->getLocalizationPattern(reversed);
+	if(!loc_pattern.empty()){
+		NamedPattern np(loc_pattern);
+		for(auto[key,value] : this->args){
+			ParadoxType type = value->getType();
+			if(type == ParadoxType::STRING) np.fillName(*key,value->toString()); 
+			else if(type == ParadoxType::INTEGER) np.fillName(*key,value->getAsInteger()->getIntegerContent());
+		}
+		ret.append(np.getOutput());
+		return ret;
 	}
 	return this->instance->toString(reversed,depth);
 }
 
-bool SpecialTrigger::hasAnyTrigger(bool(*predicate)(const Trigger*)){
+bool SpecialTrigger::hasAnyTrigger(bool(*predicate)(Trigger*)){
 	if(predicate(this)) return true;
 	if(predicate(this->instance)) return true;
 	return false;
 }
 
-bool SpecialTrigger::foreach(std::function<bool(const Trigger*)> action){
+bool SpecialTrigger::foreach(std::function<bool(Trigger*)> action){
 	if(!action(this)) return false;
 	if(!action(this->instance)) return false;
 	return true;
@@ -979,6 +1009,9 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				Trigger* ti = st->createInstance(subTag->tags);
 				if(ti != nullptr){
 					SpecialTrigger* spt = new SpecialTrigger(st,ti);
+					for(auto[k,v] : subTag->tags){
+						spt->args[getLocalizationKeyPtr(k)] = v;
+					}
 					trigger->putTrigger(spt);
 				}
 				else {
@@ -1066,7 +1099,7 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				} 
 				Trigger* ti = loadedSTs[item]->createInstance(args);
 				SpecialTrigger* st = new SpecialTrigger(loadedSTs[item],ti);
-				if(pb->getValue()) st->locKey.push_back(nullptr);
+				if(pb->getValue()) st->args[getLocalizationKeyPtr("__REVERSED__")] = nullptr;
 				trigger->putTrigger(st);
 			}
 		}
@@ -1078,9 +1111,15 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			ParadoxBase* base1 = castTo(base,type);
 			if(base1 == nullptr) continue;
 			CommonTrigger* ct = new CommonTrigger(ti);
-			ct->pushObject(base1);
+			if(base1->getType() == ParadoxType::BOOLEAN) {
+				ct->reversed = !base1->getAsBoolean()->getValue();
+			}
+			else {
+				ct->pushObject(base1);
+				
+			}
+
 			trigger->putTrigger(ct); 
-			
 			continue;
 		}
 		ParadoxType type = base->getType();
@@ -1137,7 +1176,7 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			TriggerItem* ti = items[name];
 			CommonTrigger* ct = new CommonTrigger(ti);
 			if(type == ParadoxType::BOOLEAN){
-				ct->reversed = base->getAsBoolean()->getValue();
+				ct->reversed = !base->getAsBoolean()->getValue();
 			}
 			else ct->pushObject(base);
 			trigger->putTrigger(ct); 

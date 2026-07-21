@@ -2,16 +2,39 @@
 #include "utils/filesystem_util.h"
 #include "utils/string_util.h"
 #include "utils/parser_util.h"
+#include "localization.h"
 #include <stack>
 #include <fstream>
 #include <algorithm>
 #include <string_view>
+
+
 
 extern std::set<std::string> simpleTriggers;
 extern std::set<std::string> registeredTriggers;
 extern std::map<std::string,TriggerItem*> items;
 std::set<std::string> fixedSTs;
 std::map<std::string,ScriptedTrigger*> loadedSTs;
+
+std::vector<std::pair<std::string,std::string>> allowedSTSuffix = {
+    {"_yes","_no"},
+    {"_more","_less"},
+    {"_higher","_lower"}
+};
+
+std::string ScriptedTrigger::getLocalizationPattern(bool reversed){
+        std::string u = "";
+        if(suffix_index == -1) return u;
+        u.append(name);
+        if(reversed) {
+            u.append(allowedSTSuffix[suffix_index].second);
+            return getLocalization(u);
+        }
+        else {
+            u.append(allowedSTSuffix[suffix_index].first);
+            return getLocalization(u);
+        }
+}
 
 Trigger* ComplicateScriptedTrigger::createInstance(std::map<std::string,ParadoxBase*> datas){
     std::vector<std::unique_ptr<MarcoHolder>>* current_holder = &this->marcoHolders;
@@ -51,7 +74,6 @@ Trigger* ComplicateScriptedTrigger::createInstance(std::map<std::string,ParadoxB
     parseTrigger(root,ct);    
     ct->takeOverLifeCycle();
     return ct;
-
 }
 Trigger* FixedScriptedTrigger::createInstance(std::map<std::string,ParadoxBase*> datas){
     if(this->instance == nullptr) return nullptr;
@@ -72,8 +94,9 @@ enum class MarcoToken{
 };
 struct TokenStruct {
     MarcoToken token;
-
 };
+
+
 struct MarcoTokenizer{
     std::string str;
     std::string current_info;
@@ -124,11 +147,6 @@ struct MarcoTokenizer{
 
 bool ParseScriptedTrigger(MarcoTokenizer &tokenizer,std::map<std::string,std::string>& fixedSTString);
 
-void printAllScriptedTrigger(){
-    for(auto [key,value] : loadedSTs){
-        //std::cout << key << std::endl;
-    }
-}
 
 void loadScriptedTrigger(){
     std::map<std::string,std::string> tempString;
@@ -161,7 +179,29 @@ void loadScriptedTrigger(){
         LogicTrigger* lt = new LogicTrigger(LogicType::NOT);
         lt->putTrigger(ct);
         parseTrigger(root,ct);
+        ct->takeOverLifeCycle();
         static_cast<FixedScriptedTrigger*>(loadedSTs[k])->instance = lt;
+    }
+}
+
+size_t getSuffixIndex(std::string str){
+    for(size_t i = 0;i < allowedSTSuffix.size();i++){
+        std::string first = str;
+        
+        first.append(allowedSTSuffix[i].first);
+        //if(str == "is_or_was_tag") std::cout << first << std::endl; 
+        if(!hasLocalization(first)) continue;
+        std::string second = str;
+        second.append(allowedSTSuffix[i].second);
+        //if(str == "is_or_was_tag") std::cout << second << std::endl; 
+        if(hasLocalization(second)) return i;
+    }
+    return -1;
+}
+
+void loadScriptedTrigger_POST(){
+    for(auto[name,st]: loadedSTs){
+        st->suffix_index = getSuffixIndex(name);
     }
 }
 bool checkValidName(std::string& str2){
@@ -262,13 +302,19 @@ bool ParseScriptedTrigger(MarcoTokenizer &tokenizer,std::map<std::string,std::st
                         if(simple){
                             delete cst;
                             FixedScriptedTrigger* fst = new FixedScriptedTrigger();
+                            fst->name = name;
+                            
+                            //fst->suffix_index = getSuffixIndex(name);
                             fixedSTString[name] = content;
                             loadedSTs[name] = fst;
+                            
                             registeredTriggers.insert(name);
                             content.clear();
                         }
                         else {
                             if(!content.empty()) currentHolder->push_back(std::make_unique<StringHolder>(content));
+                            cst->name = name;
+                            //cst->suffix_index = getSuffixIndex(name);
                             loadedSTs[name] = cst;
                             registeredTriggers.insert(name);
                             content.clear();

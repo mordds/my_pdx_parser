@@ -81,7 +81,14 @@ void registerEffectItems(){
         orderedPattern<ParadoxType::STRING>("清除全局标签'%s'"s));
     registerSimpleEffect<ParadoxType::STRING>("custom_tooltip"s,ScopeType::ANY,
     [](std::string str){return getLocalization(str);});
-    
+    registerSimpleEffect<ParadoxType::STRING>("save_event_target_as",ScopeType::ANY,
+        orderedPattern<ParadoxType::STRING>("将当前作用域保存为事件目标%s"s));
+    registerSimpleEffect<ParadoxType::STRING>("save_global_event_target_as",ScopeType::ANY,
+        orderedPattern<ParadoxType::STRING>("将当前作用域保存为全局事件目标%s"s));
+    registerSimpleEffect<ParadoxType::STRING>("clear_global_event_target",ScopeType::ANY,
+        orderedPattern<ParadoxType::STRING>("清除全局事件目标%s"s));
+    registerSimpleEffect<ParadoxType::BOOLEAN>("clear_global_event_target",ScopeType::ANY,
+        [](bool b){return "清除所有全局事件目标";});    
 }
 
 //I HATE this function...

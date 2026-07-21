@@ -21,12 +21,14 @@ extern void yyrestart ( FILE *input_file );
 #define T_NUM_CONSTANT 261
 */
 ParadoxTag* parseFile(std::string str){
+    ROOT = nullptr;
     yyrestart(fopen(str.c_str(),"r"));
     yyparse();
     return ROOT;
 }
 //
 ParadoxTag* parseString(std::string str){
+    ROOT = nullptr;
     yy_scan_string(str.c_str());
     yyparse();
     return ROOT;

@@ -12,6 +12,8 @@ const std::string* getLocalizationKeyPtr(std::string key);
 
 const std::string& registerShortString(std::string str);
 
+bool hasLocalization(const std::string& key);
+
 #ifndef PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
 std::string getLocalization(std::string key);
 #else

@@ -15,7 +15,13 @@ struct Pattern{
 	std::string getOutput();
 };
 
-
+struct NamedPattern{
+	std::string patternString;
+	NamedPattern(std::string str);
+	bool fillName(const std::string& name,std::string content,int depth = 0);
+	bool fillName(const std::string&,long long value);
+	std::string getOutput();
+};
 
 
 #endif

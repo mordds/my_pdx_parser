@@ -210,6 +210,5 @@ Scope* createScopeFromString(std::string str){
 
 
 void registerInternalScopes(){
-
-	
+	AnyScope::localizeMap["ROOT"] = "(ROOT)";
 }

@@ -163,6 +163,7 @@ void readFromFiles(std::string path){
         std::pair<std::string,std::string> pair = splitWith(line,":");
         replaceWith(pair.second,"\\n","\n");
         const std::string* r1 = getLocalizationKeyPtr(pair.first);
+        //if(startWith(pair.first,"is_or_was_tag")) std::cout << pair.first << std::endl;
         if(pair.second.length() > 256){
             localizations[r1] = createLongStringItem(pair.second);
         }
@@ -248,6 +249,9 @@ const std::string& registerShortString(const std::string str){
     }
     return (*it2);    
 }
+bool hasLocalization(const std::string& key){
+    return localizations.find(getLocalizationKeyPtr(key)) != localizations.end();
+}
 void _readLocalizations(){
     #ifndef PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
     file_id = 0;
@@ -272,11 +276,17 @@ void _readLocalizations(){
 }
 
 std::thread& readLocalizations(){
-    if(localization_thread != nullptr) delete localization_thread;
+    if(localization_thread != nullptr) {
+        delete localization_thread;
+        localization_thread = nullptr;
+    }
     localization_thread = new std::thread(_readLocalizations);
     return *localization_thread;
 }
 
 void clearThreads(){
-    if(localization_thread != nullptr) delete localization_thread;
+    if(localization_thread != nullptr) {
+        delete localization_thread;
+        localization_thread = nullptr;
+    }
 }

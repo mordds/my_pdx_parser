@@ -6,7 +6,8 @@
 #include <set>
 #include <unordered_map>
 #include <filesystem>
-
+#include <cstdlib> 
+#include <windows.h>
 extern YYSTYPE yylval;
 extern FILE* yyin;
 extern FILE* yyout;
@@ -19,7 +20,9 @@ extern std::map<std::string,ModifierObject> modifierObjects;
 
 
 int main(){
-	std::cout << "请输入要解析的文件名称:" << std::endl;
+	//I HATE GBK ENCODING!!!
+	SetConsoleOutputCP(CP_UTF8);
+	std::cout << "请输入要解析的Modifier文件名称:" << std::endl;
 	std::string name;
 	getline(std::cin,name);
 	yyin = fopen(name.c_str(),"r");
@@ -45,6 +48,8 @@ int main(){
 			delete parsedObject[i];
 		} 
 	}
+	std::cin.get();
+	std::cin.get();
 	return 0;
 } 
 

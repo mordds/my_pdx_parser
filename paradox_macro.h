@@ -6,6 +6,8 @@
 #include <memory>
 
 
+
+
 struct ScriptedTrigger;
 
 struct ScriptedTriggerItem : TriggerItem {
@@ -46,10 +48,13 @@ struct ParameterHolder : MarcoHolder{
 };
 
 
-
+//
 struct ScriptedTrigger {
     virtual Trigger* createInstance(std::map<std::string,ParadoxBase*>) = 0;
     virtual bool isFixed() const = 0;
+    size_t suffix_index = -1;
+    std::string name;
+    std::string getLocalizationPattern(bool reversed);
 };
 
 struct FixedScriptedTrigger : ScriptedTrigger {
@@ -68,6 +73,6 @@ struct ComplicateScriptedTrigger : ScriptedTrigger {
 
 void loadScriptedTrigger();
 void printAllScriptedTrigger();
-
+void loadScriptedTrigger_POST();
 
 #endif
