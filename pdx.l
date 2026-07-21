@@ -15,6 +15,7 @@
 #.*\n {}
 #.* {}
 yes {
+	//
 	yylval.num = 1;
 	return T_BOOLEAN;
 }

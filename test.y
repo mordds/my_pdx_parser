@@ -16,6 +16,7 @@ void yyerror(const char* s);
 std::vector<ParadoxBase*> parsedObject;
 std::vector<ParadoxBase*> tempObject;
 ParadoxTag* ROOT = nullptr;
+//
 ParadoxString* createString(std::string str){
 	ParadoxString* string = new ParadoxString(str);
 	parsedObject.push_back(string);
