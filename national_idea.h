@@ -18,11 +18,11 @@ struct NationalIdea{
     
 };
 
-void loadNationalIdea();
+void loadNationalIdea(std::string rootPath = ".");
 
 const NationalIdea* getTagIdea(std::string tag);
 
 const NationalIdea* getFromName(std::string name);
-void reloadNationalIdeas();
+void reloadNationalIdeas(std::string rootPath = ".");
 
 #endif 

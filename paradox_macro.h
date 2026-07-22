@@ -71,7 +71,7 @@ struct ComplicateScriptedTrigger : ScriptedTrigger {
     virtual bool isFixed() const { return false; }
 };
 
-void loadScriptedTrigger();
+void loadScriptedTrigger(std::string rootPath = ".");
 void printAllScriptedTrigger();
 void loadScriptedTrigger_POST();
 
