@@ -148,10 +148,11 @@ struct MarcoTokenizer{
 bool ParseScriptedTrigger(MarcoTokenizer &tokenizer,std::map<std::string,std::string>& fixedSTString);
 
 
-void loadScriptedTrigger(){
+void loadScriptedTrigger(std::string rootPath){
     std::map<std::string,std::string> tempString;
     std::vector<std::string> paths;
-    getAllFiles("./scripted_triggers",paths);
+    rootPath.append("/scripted_triggers");
+    getAllFiles(rootPath,paths);
     std::ofstream fout("./out.txt");
     for(std::string path : paths){
         std::map<std::string,std::string> simpleMarco;

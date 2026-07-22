@@ -4,7 +4,7 @@
 #include <thread>
 
 
-std::thread& readLocalizations();
+std::thread& readLocalizations(std::string path = ".");
 
 
 

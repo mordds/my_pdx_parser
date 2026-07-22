@@ -48,15 +48,24 @@ char head_buffer[4 * 1024];
 char string_buffer[1024 * 1024];
 uint16_t file_id = 0,file_index = 0;
 size_t current_offset = 0;
+std::string rootPath = ".";
+void setRootPath(std::string root_path){
+    if(root_path.empty()) rootPath = ".";
+    else rootPath = root_path;
+}
+
 void createTempFiles(){
     //defaultly capacity is 256K string.
-    if(!std::filesystem::exists("./temp")){
-        std::filesystem::create_directory("./temp");
+    std::string path1 = rootPath;
+    path1.append("/temp");
+    if(!std::filesystem::exists(path1)){
+        std::filesystem::create_directory(path1);
     }
     char* smallBuffer = new char[1024];
     memset(smallBuffer,0,1);
     for(int i = 0;i < 256;i++){
-        std::string path("./temp/t_");
+        std::string path = path1;
+        path.append("/t_");
         path.append(std::to_string(i));
         path.append(".bin");
         std::ofstream fout(path,std::ios::out | std::ios::binary | std::ios::trunc);
@@ -67,7 +76,8 @@ void createTempFiles(){
 }
 void loadTempFileHead(int index){
     if(activeFileId == index) return;
-    std::string path("./temp/t_");
+    std::string path = rootPath;
+    path.append("/temp/t_");
     path.append(std::to_string(index));
     path.append(".bin");
     std::fstream activeFile;
@@ -78,7 +88,8 @@ void loadTempFileHead(int index){
 void loadTempFileData(int index,int page = 0){
     if(activeFileId == index && activeFilePage == page) return;
     else {
-        std::string path("./temp/t_");
+        std::string path = rootPath;
+        path.append("/temp/t_");
         path.append(std::to_string(index));
         path.append(".bin");
         size_t fileSize = std::filesystem::file_size(path);
@@ -93,7 +104,8 @@ void loadTempFileData(int index,int page = 0){
     }
 }
 void storeTempFileData(int index,int page = 0){
-    std::string path("./temp/t_");
+    std::string path = rootPath;
+    path.append("/temp/t_");
     path.append(std::to_string(index));
     path.append(".bin");
     size_t fileSize = std::filesystem::file_size(path);
@@ -141,6 +153,12 @@ LocalizationItem createLongStringItem(const std::string& str){
 
 std::set<std::string> shortStringSet;
 std::map<const std::string*,std::string*> localizations;
+std::string rootPath = ".";
+
+void setRootPath(std::string root_path){
+    if(root_path.empty()) rootPath = ".";
+    else rootPath = root_path;
+}
 
 #endif
 
@@ -250,9 +268,12 @@ const std::string& registerShortString(const std::string str){
     return (*it2);    
 }
 bool hasLocalization(const std::string& key){
+    if(shortStringSet.find(key) == shortStringSet.end()) return false;
     return localizations.find(getLocalizationKeyPtr(key)) != localizations.end();
 }
-void _readLocalizations(){
+void _readLocalizations(std::string root_path){
+    setRootPath(root_path);
+    root_path.append("/localization");
     #ifndef PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
     file_id = 0;
     file_index = 0;
@@ -262,7 +283,7 @@ void _readLocalizations(){
     #ifndef PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
     createTempFiles();
     #endif
-    getAllFiles("./localization",files);
+    getAllFiles(root_path,files);
     for(std::string str : files){
         readFromFiles(str);
     }
@@ -275,12 +296,12 @@ void _readLocalizations(){
     std::cout << "#locs loaded!" << std::endl;
 }
 
-std::thread& readLocalizations(){
+std::thread& readLocalizations(std::string path){
     if(localization_thread != nullptr) {
         delete localization_thread;
         localization_thread = nullptr;
     }
-    localization_thread = new std::thread(_readLocalizations);
+    localization_thread = new std::thread(_readLocalizations,path);
     return *localization_thread;
 }
 

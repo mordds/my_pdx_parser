@@ -9,8 +9,10 @@ std::map<std::string,const NationalIdea*> nationalIdeas;
 std::map<std::string,const NationalIdea*> tagIdeas;
 
 
-void loadNationalIdea(){
-    ParadoxTag* tag = parseFile("./datas/country_ideas.txt");
+void loadNationalIdea(std::string rootPath){
+    std::string filePath = rootPath;
+    filePath.append("/datas/country_ideas.txt");
+    ParadoxTag* tag = parseFile(filePath);
     for(std::string str : tag->seq){
         ParadoxTag* ideaTag = tag->getAsTag(str);
         if(ideaTag->get("free") == nullptr) continue;
@@ -61,12 +63,12 @@ void loadNationalIdea(){
     clearParserDatas();
 }
 
-void reloadNationalIdeas(){
+void reloadNationalIdeas(std::string rootPath){
     for(std::pair<std::string, const NationalIdea*> p : nationalIdeas){
         delete p.second;
     }
     nationalIdeas.clear();
-    loadNationalIdea();
+    loadNationalIdea(rootPath);
 }
 
 std::string NationalIdea::toString() const{

@@ -22,8 +22,11 @@ void listGoods(std::map<std::string,std::string>& maps){
     }
 }
 
-void registerGood(){
-    ParadoxTag* root = parseFile("./datas/price.txt");
+void registerGood(std::string rootPath){
+    std::string filePath = rootPath;
+    filePath.append("/datas/price.txt");
+
+    ParadoxTag* root = parseFile(filePath);
     for(std::string str : root->seq){
         Good good;
         
