@@ -4,6 +4,7 @@
 !CMakeLists.txt
 build/*
 .vscode/
+/build/*
 resultset/
 scripted_effect/
 datas/*.txt

@@ -3,7 +3,14 @@
 #include <QApplication>
 #include <QLocale>
 #include <QTranslator>
+#include <QtPlugin>
+#include <QWidget>
+#include <QLabel>
 #include "../paradox_type.h"
+
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -18,6 +25,10 @@ int main(int argc, char *argv[])
         }
     }
     MainWindow w;
+    
+    QLabel q(&w);
+    q.setText("<h1>Stupid Khet!</h1>");
+    q.setGeometry(100,100,300,30);
     w.show();
     return QApplication::exec();
 }
