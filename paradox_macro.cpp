@@ -68,7 +68,7 @@ Trigger* ComplicateScriptedTrigger::createInstance(std::map<std::string,ParadoxB
             pos++;
         }
     }
-
+    trim(result);
     ParadoxTag* root = parseString(result);
     ComplexTrigger* ct = createBaseTrigger();
     parseTrigger(root,ct);    
