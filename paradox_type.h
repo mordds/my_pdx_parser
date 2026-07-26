@@ -81,7 +81,7 @@ struct ParadoxInteger : public ParadoxBase{
 	private:
 		long long content;
 	public:
-		virtual std::string toString() const { return std::to_string(content); }
+		virtual std::string toString() const { return std::to_string(content/1000.0); }
 		ParadoxInteger(long long val){
 			content = val;
 		}
