@@ -875,6 +875,12 @@ bool SpecialTrigger::foreach(std::function<bool(Trigger*)> action){
 	if(!action(this->instance)) return false;
 	return true;
 }
+
+void SpecialTrigger::takeOverLifeCycle(){
+	for(auto[k,v] : this->args){
+		v = deep_copy(v);
+	}
+}
 void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 	for(int i = 0;i < tag->seq.size();i++){
 		std::string item = stripTag(tag->seq[i]);

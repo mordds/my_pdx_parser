@@ -271,8 +271,8 @@ bool hasLocalization(const std::string& key){
     if(shortStringSet.find(key) == shortStringSet.end()) return false;
     return localizations.find(getLocalizationKeyPtr(key)) != localizations.end();
 }
-void _readLocalizations(std::string root_path){
-    setRootPath(root_path);
+void _readLocalizations(){
+    std::string root_path = rootPath;
     root_path.append("/localization");
     #ifndef PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
     file_id = 0;
@@ -297,11 +297,12 @@ void _readLocalizations(std::string root_path){
 }
 
 std::thread& readLocalizations(std::string path){
+    setRootPath(path);
     if(localization_thread != nullptr) {
         delete localization_thread;
         localization_thread = nullptr;
     }
-    localization_thread = new std::thread(_readLocalizations,path);
+    localization_thread = new std::thread(_readLocalizations);
     return *localization_thread;
 }
 
