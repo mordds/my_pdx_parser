@@ -179,7 +179,7 @@ bool isCastable(ParadoxBase* base,ParadoxType type){
 	}
 	else if(type == ParadoxType::SCOPE){
 		if(base->getType() == ParadoxType::INTEGER){
-			return base->getAsInteger()->getIntegerContent() <= 8000L;
+			return base->getAsInteger()->getIntegerContent() <= 8000 * 1000L;
 		}
 		if(base->getType() == ParadoxType::STRING){
 			return true;
