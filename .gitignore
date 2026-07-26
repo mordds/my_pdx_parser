@@ -17,3 +17,5 @@ y.tab.cpp
 /temp/*
 scripted_triggers/
 y.output
+out_files/*
+*.json

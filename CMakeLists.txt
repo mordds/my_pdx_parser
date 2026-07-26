@@ -13,7 +13,7 @@ find_library(WINDOWSAPP_LIB windowsapp REQUIRED)
 find_library(RUNTIMEOBJECT_LIB runtimeobject REQUIRED)
 find_library(USER32_LIB user32 REQUIRED)
 set(CMAKE_PREFIX_PATH "D:/static_qt/6.9.1")
-add_compile_options(-Werror -O2)
+add_compile_options(-Werror -O2 -g)
 add_link_options(-static)
 
 
@@ -47,6 +47,10 @@ set(PROJECT_SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/gui/mainwindow.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/gui/mainwindow.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/gui/mainwindow.ui"
+        "${CMAKE_CURRENT_SOURCE_DIR}/gui/visual_mission_tree.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/gui/visual_mission_tree.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/gui/hint.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/gui/hint.cpp"
         ${COMMON_SRC}
         ${BISON_MyParser_OUTPUTS}
         ${FLEX_MyLexer_OUTPUTS}
@@ -97,6 +101,7 @@ target_link_options(pdx_gui PRIVATE
 )
 
 target_include_directories(pdx_gui PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(pdx_gui PRIVATE "D:/cppJson/single_include")
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
