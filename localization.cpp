@@ -93,7 +93,7 @@ void loadTempFileData(int index,int page = 0){
         path.append(std::to_string(index));
         path.append(".bin");
         size_t fileSize = std::filesystem::file_size(path);
-        if(fileSize < 4096 + page * 1048576) return;
+        if(fileSize < (size_t)(4096 + page * 1048576)) return;
         std::fstream activeFile;
         activeFile.open(path,std::ios::out | std::ios::binary | std::ios::in);
         activeFile.seekg(4096 + page * 1048576,std::ios::beg);
@@ -109,7 +109,7 @@ void storeTempFileData(int index,int page = 0){
     path.append(std::to_string(index));
     path.append(".bin");
     size_t fileSize = std::filesystem::file_size(path);
-    while(fileSize < 4096 + page * 1048576) page--;
+    while(fileSize < size_t(4096 + page * 1048576)) page--;
     std::fstream activeFile;
     activeFile.open(path,std::ios::out | std::ios::binary | std::ios::in);
     activeFile.write(head_buffer,4096);

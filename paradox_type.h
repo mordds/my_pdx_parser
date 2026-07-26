@@ -54,6 +54,7 @@ struct ParadoxBase{
 	ParadoxDate* getAsDate();
 	ParadoxBoolean* getAsBoolean();
 	ParadoxScope* getAsScope();
+	virtual ~ParadoxBase() noexcept = default;
 };
 template<typename T>
 concept ParadoxObject = std::convertible_to<T,ParadoxBase*>;
@@ -143,8 +144,8 @@ struct ParadoxArray : public ParadoxBase{
 		else return contents[0]->getType();
 	}
 	ParadoxBase* get(int index) const{
-		if(index < 0 || contents.size() <= index) return nullptr;
-		else return contents[index];
+		if(index < 0 || contents.size() <= (size_t)index) return nullptr;
+		else return contents[(size_t)index];
 	}
 	bool append(ParadoxBase* base){
 		if(contents.empty()){
@@ -163,7 +164,7 @@ struct ParadoxDate : public ParadoxBase{
 	Date date;
 	virtual std::string toString() const { return date.toString(); }
 	ParadoxDate(std::string dateString){
-		sscanf(dateString.c_str(),"%d%*c%d%*c%d",&(date.year),&(date.month),&(date.day));
+		sscanf(dateString.c_str(),"%hd%*c%hhu%*c%hhu",&(date.year),&(date.month),&(date.day));
 	}
 	ParadoxDate(Date date){
 		this->date = date;

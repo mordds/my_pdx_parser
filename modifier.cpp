@@ -799,7 +799,7 @@ void loadInternalModifier(){
 
 
 void ParseModifier(ParadoxTag* tag,std::vector<Modifier>& modifiers){
-	for(int i = 0;i < tag->seq.size();i++){
+	for(size_t i = 0;i < tag->seq.size();i++){
 		ParadoxTag* modifierTag = tag->getAsTag(i);
 		if(modifierTag == nullptr) continue;
  		Modifier modifier;
@@ -812,7 +812,7 @@ void ParseModifier(ParadoxTag* tag,std::vector<Modifier>& modifiers){
 }
 void ParseModifier(ParadoxTag* tag,Modifier& modifier){
 	if(tag == nullptr) return;
-	for(int i = 0;i < tag->seq.size();i++){
+	for(size_t i = 0;i < tag->seq.size();i++){
 		ModifierItem mod_item;
 		std::string item = stripTag(tag->seq[i]);
 		auto it = modifierObjects.find(item);
@@ -837,7 +837,7 @@ std::string Modifier::localize(){
 	localized.append(getLocalization(*this->name));
 	localized.append(":\r\n");
 //
-	for(int i = 0;i < items.size();i++){
+	for(size_t i = 0;i < items.size();i++){
 		ModifierObject obj = *items[i].modifierObject;
 		int type_id = (int)obj.type; 
 		if(type_id >= 6 && type_id <= 8){
@@ -882,7 +882,7 @@ std::string Modifier::localizeHtml(){
 	std::string localized = "<div class=\"effect_title\">";
 	localized.append(getLocalization(*this->name));
 	localized.append(":</div>\r\n");
-	for(int i = 0;i < items.size();i++){
+	for(size_t i = 0;i < items.size();i++){
 		ModifierObject obj = *items[i].modifierObject;
 		localized.append("<div>");
 		int type_id = (int)obj.type; 

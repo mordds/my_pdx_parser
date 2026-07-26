@@ -163,8 +163,9 @@ ProvinceScope* getProvinceScope(int id){
 Scope* createScopeFromString(std::string str){
 	
 	if(isNumber(str)){
-		long long i;
+		long long i = -1;
 		std::from_chars(str.data(),str.data()+str.size(),i);
+		if(i < 0) return nullptr;
 		if(i < 8000){
 			if(provinceScopes[i] == nullptr){
 				provinceScopes[i] = new ProvinceScope(i);

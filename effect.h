@@ -94,7 +94,7 @@ struct _EffectItem<head,tail...> : private _EffectItem<tail...>{
 	int getParameterAmount(){
 		return sizeof...(tail) + 1;
 	}
-	inline ParadoxType getType(int index){
+	inline ParadoxType getType(size_t index){
 		if (index > sizeof...(tail)) { 
 			return ParadoxType::BASE;
 		}
@@ -122,7 +122,7 @@ struct NativeEffectItem : EffectItem{
 		NativeCommonEffect<types...>* _instance = new NativeCommonEffect<types...>();
 		std::unique_ptr<Effect> instance(_instance);
 		_instance->item = this;
-		for(int i = 0;i < sizeof...(types);i++){
+		for(size_t i = 0;i < sizeof...(types);i++){
 			ParadoxBase* arg = base[i];
 			if(base[i] == nullptr) return nullptr;
 			if(content.getType(i) != base[i]->getType()) {
@@ -151,7 +151,7 @@ struct ParameteredNativeEffectItem : NativeEffectItem<types...>{
 		if(base.size() < sizeof...(types)) return nullptr;
 		NativeCommonEffect<types...>* _instance = new NativeCommonEffect<types...>();
 		std::unique_ptr<Effect> instance(_instance);
-		for(int i = 0;i < sizeof...(types);i++){
+		for(size_t i = 0;i < sizeof...(types);i++){
 			//std::cout << "u:" << parameterName[i] << std::endl;
 			if(!base.contains(parameterName[i])) return nullptr;
 			ParadoxBase* arg = base.at(parameterName[i]);
@@ -238,7 +238,7 @@ struct _NativeCommonEffect<head,tails...> : _NativeCommonEffect<tails...>{
 		}
 		getTails().set(i - 1, val);
 	}
-	void unsafe_set(int i, ParadoxBase* val){
+	void unsafe_set(size_t i, ParadoxBase* val){
 		if(val == nullptr) return;
 		if(i > sizeof...(tails)) return;
 		if(i == 0){

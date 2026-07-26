@@ -227,7 +227,7 @@ ParadoxBase* deep_copy(ParadoxBase* base){
 		ParadoxTag* nTag = new ParadoxTag();
 		for(std::string entry : pTag->seq){
 			ParadoxBase* base_copy = deep_copy(pTag->get(entry));
-			nTag->add(entry,base);
+			nTag->add(entry,base_copy);
 		}
 		return nTag;
 	}
@@ -272,7 +272,7 @@ ParadoxBase* deep_copy_safe(ParadoxBase* base){
 		ParadoxTag* nTag = createTag();
 		for(std::string entry : pTag->seq){
 			ParadoxBase* base_copy = deep_copy_safe(pTag->get(entry));
-			nTag->add(entry,base);
+			nTag->add(entry,base_copy);
 		}
 	
 		return nTag;
