@@ -68,8 +68,11 @@ Trigger* ComplicateScriptedTrigger::createInstance(std::map<std::string,ParadoxB
             pos++;
         }
     }
-    trim(result);
+    
     ParadoxTag* root = parseString(result);
+    if(root == nullptr) {
+        return nullptr;
+    }
     ComplexTrigger* ct = createBaseTrigger();
     parseTrigger(root,ct);    
     ct->takeOverLifeCycle();
@@ -90,6 +93,7 @@ enum class MarcoToken{
     DOLLAR,
     SQUARE_OPEN,
     SQUARE_CLOSE,
+    SPACE,
     END
 };
 struct TokenStruct {
@@ -115,7 +119,7 @@ struct MarcoTokenizer{
                 else if(c == ']') return MarcoToken::SQUARE_CLOSE;
                 else if(c == '$') return MarcoToken::DOLLAR;
                 else if(c == '=') return MarcoToken::EQUAL;
-                else if(c == ' ') continue;
+                else if(c == ' ') return MarcoToken::SPACE;
                 else {
                     cache.push_back(c);
                     continue;
@@ -175,10 +179,18 @@ void loadScriptedTrigger(std::string rootPath){
         if(!ParseScriptedTrigger(tokenizer,tempString)) std::cout << "Failed in File" << path << std::endl;
     }
     for(auto[k,v]:tempString){
+        if(v.empty()) {
+            loadedSTs.erase(k);
+        }
         ParadoxTag* root = parseString(v);
         ComplexTrigger* ct = createBaseTrigger();
         LogicTrigger* lt = new LogicTrigger(LogicType::NOT);
         lt->putTrigger(ct);
+        if(root == nullptr) {
+            //log_error(current_location(),"cannot parse st ",k);
+            loadedSTs.erase(k);
+            continue;
+        }
         parseTrigger(root,ct);
 
         ct->takeOverLifeCycle();
@@ -226,10 +238,9 @@ bool ParseScriptedTrigger(MarcoTokenizer &tokenizer,std::map<std::string,std::st
     std::stack<std::vector<std::unique_ptr<MarcoHolder>>*> holders;
     bool simple = true;
     while((nextToken = tokenizer.nextToken()) != MarcoToken::END){
-        //if(state != 5) std::cout << state << ' ' << (int)nextToken << std::endl;
+        if(state != 5 && nextToken == MarcoToken::SPACE) continue;
         switch(state){
             case 0: {
-                
                 if(nextToken != MarcoToken::IDENT) goto error;
                 name = tokenizer.current_info;
                 trim(name);
@@ -273,6 +284,9 @@ bool ParseScriptedTrigger(MarcoTokenizer &tokenizer,std::map<std::string,std::st
                 }
                 else if(nextToken == MarcoToken::EQUAL){
                     content.push_back('=');
+                }
+                else if(nextToken == MarcoToken::SPACE) {
+                    content.push_back(' ');
                 }
                 else if(nextToken == MarcoToken::DOLLAR){
                     simple = false;
