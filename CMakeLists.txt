@@ -6,7 +6,7 @@ project(PDXParser VERSION 0.3.0)
 # 设置 C++ 标准为 C++11，并要求编译器强制使用
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_options(-Werror -O2)
+add_compile_options(-Werror -Wall -Wextra -O2 -Wno-unused-function -Wno-stringop-truncation -Wno-unused-parameter -Wno-sign-compare)
 
 find_package(FLEX REQUIRED)
 find_package(BISON REQUIRED)

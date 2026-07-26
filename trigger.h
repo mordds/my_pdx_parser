@@ -45,17 +45,18 @@ struct Trigger{
 	ComplexTrigger* getAsComplexTrigger();
 	LogicTrigger* getAsLogicTrigger();
 	CommonTrigger* getAsCommonTrigger();
-	int depth;
-	bool copied;
+	int depth = 0;
+	bool copied = false;
+	virtual ~Trigger() noexcept = default;
 };
 struct ComplexTrigger : Trigger{
 	virtual void takeOverLifeCycle();
 	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
 	virtual bool foreach(std::function<bool(Trigger*)>);
 	std::vector<Trigger*> subTriggers;
-	bool ignored;
-	bool omitted;
-	~ComplexTrigger(){
+	bool ignored = false;
+	bool omitted = false;
+	virtual ~ComplexTrigger(){
 		for(Trigger* trigger : subTriggers){
 			delete trigger;
 		}
@@ -77,7 +78,7 @@ struct CommonTrigger : Trigger{
 	TriggerItem* item;
 	bool reversed;
 	std::vector<ParadoxBase*> base;
-	~CommonTrigger(){
+	virtual ~CommonTrigger(){
 		if(this->copied){
 			for(ParadoxBase* base1 : base) delete base1;
 		}
@@ -100,7 +101,7 @@ struct SpecialTrigger : Trigger {
 	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
 	SpecialTrigger(ScriptedTrigger* _prototype,Trigger* _instance): prototype(_prototype), instance(_instance){}
 
-	~SpecialTrigger() noexcept;
+	virtual ~SpecialTrigger() noexcept = default;
 };
 
 struct LogicTrigger : ComplexTrigger {

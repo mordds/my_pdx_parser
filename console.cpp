@@ -49,7 +49,6 @@ void printEffect(std::vector<std::string> vec){
 }
 
 void printTrigger(std::vector<std::string> vec){
-	bool multiTriggers = false; 
     ParadoxTag* root = parseFile(vec[0]);
 	if(root == nullptr) return;
 	ComplexTrigger* ct = createBaseTrigger();

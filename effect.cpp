@@ -94,7 +94,7 @@ void registerEffectItems(){
 //I HATE this function...
 //A fallback when Parser have some problems
 void ignoreCurrentDepth(ComplexEffect* effect){
-	for(int i = 0;i < effect->subEffects.size();i++){
+	for(size_t i = 0;i < effect->subEffects.size();i++){
 		effect->subEffects[i]->depth--;
 		ComplexEffect* effect2 = effect->subEffects[i]->getAsComplexEffect();
 		if(effect2 != nullptr) ignoreCurrentDepth(effect2);

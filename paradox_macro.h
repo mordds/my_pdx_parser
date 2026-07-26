@@ -55,6 +55,7 @@ struct ScriptedTrigger {
     size_t suffix_index = -1;
     std::string name;
     std::string getLocalizationPattern(bool reversed);
+    virtual ~ScriptedTrigger() noexcept = default;
 };
 
 struct FixedScriptedTrigger : ScriptedTrigger {
