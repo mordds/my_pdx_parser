@@ -95,7 +95,7 @@ struct SpecialTrigger : Trigger {
 
 	virtual std::string toString(bool reversed,int depth = 1) const;
 	virtual std::string toHtml(bool reversed,int depth = 1) { return toString(reversed,depth); }
-	virtual void takeOverLifeCycle() {};
+	virtual void takeOverLifeCycle();
 	virtual bool foreach(std::function<bool(Trigger*)>);
 	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
 	SpecialTrigger(ScriptedTrigger* _prototype,Trigger* _instance): prototype(_prototype), instance(_instance){}
