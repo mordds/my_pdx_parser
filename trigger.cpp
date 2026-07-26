@@ -878,6 +878,7 @@ bool SpecialTrigger::foreach(std::function<bool(Trigger*)> action){
 
 void SpecialTrigger::takeOverLifeCycle(){
 	for(auto[k,v] : this->args){
+		if(v == nullptr) continue;
 		v = deep_copy(v);
 	}
 }
