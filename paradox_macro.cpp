@@ -180,6 +180,7 @@ void loadScriptedTrigger(std::string rootPath){
         LogicTrigger* lt = new LogicTrigger(LogicType::NOT);
         lt->putTrigger(ct);
         parseTrigger(root,ct);
+
         ct->takeOverLifeCycle();
         static_cast<FixedScriptedTrigger*>(loadedSTs[k])->instance = lt;
     }
@@ -228,6 +229,7 @@ bool ParseScriptedTrigger(MarcoTokenizer &tokenizer,std::map<std::string,std::st
         //if(state != 5) std::cout << state << ' ' << (int)nextToken << std::endl;
         switch(state){
             case 0: {
+                
                 if(nextToken != MarcoToken::IDENT) goto error;
                 name = tokenizer.current_info;
                 trim(name);
@@ -261,6 +263,7 @@ bool ParseScriptedTrigger(MarcoTokenizer &tokenizer,std::map<std::string,std::st
                 depth++;
                 state = 5;
                 cst = new ComplicateScriptedTrigger();
+                simple = true;
                 currentHolder = &cst->marcoHolders;
                 break;
             }
