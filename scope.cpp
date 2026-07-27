@@ -149,6 +149,35 @@ void initScope(){
 	for(int i = 0;i < 8000;i++) provinceScopes[i] = nullptr;
 }
 
+Scope* findScopeByName(std::string name,ScopeType type){
+	bool exec_country = (type == ScopeType::ANY || type == ScopeType::COUNTRY);
+	bool exec_province = (type == ScopeType::ANY || type == ScopeType::COUNTRY);
+	if(exec_country){
+		//check without createInstance.
+		std::string str = "A00";
+		for(str[0] = 'A';str[0] <= 'Z';str[0]++){
+			for(str[1] = '0';str[1] <= '9';str[1]++){
+				for(str[2] = '0';str[2] <= '9';str[2]++){
+					if(!hasLocalization(str)) continue;
+					if(getLocalization(str) == name){
+						return createScopeFromString(str);
+					}
+				}			
+			}
+		}
+	}
+	if(exec_province){
+		for(int i = 0;i < 8000;i++){
+			std::string str = "PROV";
+			str.append(std::to_string(i));
+			if(!hasLocalization(str)) continue;
+			if(getLocalization(str) == name){
+				return getProvinceScope(i);
+			}
+		}
+	}
+	return nullptr;
+}
 
 ProvinceScope* getProvinceScope(int id){
 	if(id < 8000){
