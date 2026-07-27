@@ -15,8 +15,12 @@ MainWindow::MainWindow(QWidget *parent)
         this->vmt = new VisualMissionTree(this);
         this->vmt->setGeometry(0,0,1200,600);
         this->hint_frame = new HintFrame(this);
-        this->hint_frame->addHintItem("scripted trigger",new ScriptedTriggerHint("scripted trigger",this->hint_frame));
         this->hint_frame->setGeometry(0,600,1200,220);
+        this->hint_frame->hide();
+        this->hint_frame->addHintItem(new ScriptedTriggerHint("scripted trigger",this->hint_frame));
+        
+        this->hint_frame->show();
+        //this->hint_frame->switchHint("scripted trigger");
     }
 
 MainWindow::~MainWindow()

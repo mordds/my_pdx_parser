@@ -7,7 +7,7 @@
 std::thread& readLocalizations(std::string path = ".");
 
 
-
+#define PDX_USE_SIMPLE_LOCALIZATION_SYSTEM
 const std::string* getLocalizationKeyPtr(std::string key);
 
 const std::string& registerShortString(std::string str);

@@ -3,7 +3,7 @@
 extern std::map<std::string,ScriptedTrigger*> loadedSTs;
 
 Hint::Hint(QString _name,QWidget *parent) : name(_name), QFrame(parent) {
-
+    this->linkedButton = nullptr;
 }
 void Hint::linkedButtonSelected(){
     emit this->selected(this->name);
@@ -11,40 +11,42 @@ void Hint::linkedButtonSelected(){
 HintFrame::HintFrame(QWidget* parent) : QFrame(parent) {
     active_hint = nullptr;
     this->select_area = new QScrollArea(this);
-    this->select_layout = new QHBoxLayout();
-    this->select_area->setLayout(this->select_layout);
     this->select_area->setGeometry(0,190,800,30);
 }
-void HintFrame::addHintItem(QString name,Hint* item){
+void HintFrame::addHintItem(Hint* item){
+    if(item == nullptr) return;
     if(item->linkedButton != nullptr) return;
-    if(items.contains(name)) return;
+    if(items.contains(item->name)) return;
     item->setParent(this);
     item->setGeometry(0,0,800,180);
-    item->linkedButton = new QPushButton(this->select_area);
-    item->setFixedSize(100,25);
-    this->select_layout->addWidget(item->linkedButton);
+    item->hide();
+    item->linkedButton = new QPushButton(item->name,this->select_area);
+    item->linkedButton->setGeometry(0 + 110 * items.size(),0,100,25);
+    item->linkedButton->setStyleSheet("background-color: #C0C0C0");
+    item->linkedButton->show();
     connect(item->linkedButton,SIGNAL(clicked()),item,SLOT(linkedButtonSelected()));
-    connect(item,SIGNAL(selected(const QString&)),this,SLOT(switchHint(QString&)));
-    items[name] = item;
+    connect(item,SIGNAL(selected(const QString&)),this,SLOT(switchHint(const QString&)));
+    items[item->name] = item;
 }
 void HintFrame::switchHint(const QString& name){
     if(!items.contains(name)) return;
-    this->active_hint->hide();
+    if(this->active_hint != nullptr) this->active_hint->hide();
     this->active_hint = this->items[name];
     this->active_hint->show();
 }
 
 ScriptedTriggerHint::ScriptedTriggerHint(QString name,QWidget *parent) : Hint(name,parent){
     this->st_list = new QListWidget(this);
-    st_list->setGeometry(0,30,150,150);
+    st_list->setGeometry(0,30,250,150);
     this->search_st = new QLineEdit(this);
-    search_st->setGeometry(0,0,150,25);
+    search_st->setGeometry(0,0,250,25);
     for(auto [name,st] : loadedSTs){
         st_list->addItem(QString::fromStdString(name));
     }
     this->st_description = new QPlainTextEdit(this);
     this->st_description->setReadOnly(true);
-    this->st_description->setGeometry(180,0,150,180);
+    this->st_description->setGeometry(280,0,300,180);
+    
     connect(this->search_st,SIGNAL(textChanged(const QString&)),this,SLOT(do_search()));
     connect(this->st_list,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),this,SLOT(show_st_info()));
 }
@@ -82,5 +84,20 @@ void ScriptedTriggerHint::show_st_info(){
         u.append("}");
         this->st_description->setPlainText(QString::fromStdString(u));
     }
+}
 
+TagHint::TagHint(QString name,QWidget* parent) : Hint(name,parent){
+
+    this->tag_input = new QLineEdit(this);
+    this->tag_input->setGeometry(10,10,200,25);
+    this->name_input = new QLineEdit(this);
+    this->name_input->setGeometry(10,130,200,25);
+    this->to_name = new QPushButton("->",this);
+    this->to_name->setGeometry(220,10,30,25);
+    this->name_output = new QLineEdit(this);
+    this->name_output->setReadOnly(true);
+    this->name_output->setGeometry(260,10,200,25);
+    this->tag_output = new QLineEdit(this);
+    this->tag_output->setReadOnly(true);
+    
 }
