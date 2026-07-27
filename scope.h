@@ -109,4 +109,5 @@ Scope* createScopeFromString(std::string str);
 ProvinceScope* getProvinceScope(int id);
 
 void registerInternalScopes();
+Scope* findScopeByName(std::string name,ScopeType type);
 #endif
