@@ -54,6 +54,8 @@ struct ScriptedTriggerHint : public Hint {
 struct TagHint : public Hint {
     Q_OBJECT;
     public:
+        QLabel * tag_label;
+        QLabel * name_label;
         QLineEdit * tag_input;
         QLineEdit * name_input;
         QLineEdit * tag_output;

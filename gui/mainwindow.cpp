@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
         this->hint_frame->setGeometry(0,600,1200,220);
         this->hint_frame->hide();
         this->hint_frame->addHintItem(new ScriptedTriggerHint("scripted trigger",this->hint_frame));
-        
+        this->hint_frame->addHintItem(new TagHint("tags",this->hint_frame));
         this->hint_frame->show();
         //this->hint_frame->switchHint("scripted trigger");
     }

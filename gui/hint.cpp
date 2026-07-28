@@ -30,8 +30,12 @@ void HintFrame::addHintItem(Hint* item){
 }
 void HintFrame::switchHint(const QString& name){
     if(!items.contains(name)) return;
-    if(this->active_hint != nullptr) this->active_hint->hide();
+    if(this->active_hint != nullptr) {
+        this->active_hint->linkedButton->setStyleSheet("background-color: #C0C0C0");
+        this->active_hint->hide();
+    }
     this->active_hint = this->items[name];
+    this->active_hint->linkedButton->setStyleSheet("background-color: #4040FF");
     this->active_hint->show();
 }
 
@@ -87,17 +91,44 @@ void ScriptedTriggerHint::show_st_info(){
 }
 
 TagHint::TagHint(QString name,QWidget* parent) : Hint(name,parent){
-
+    this->tag_label = new QLabel("tag->name",this);
+    this->tag_label->setGeometry(10,0,200,25);
+    this->name_label = new QLabel("name->tag",this);
+    this->name_label->setGeometry(10,100,200,25);
     this->tag_input = new QLineEdit(this);
-    this->tag_input->setGeometry(10,10,200,25);
+    this->tag_input->setGeometry(10,30,200,25);
     this->name_input = new QLineEdit(this);
     this->name_input->setGeometry(10,130,200,25);
     this->to_name = new QPushButton("->",this);
-    this->to_name->setGeometry(220,10,30,25);
+    this->to_name->setGeometry(220,30,30,25);
     this->name_output = new QLineEdit(this);
     this->name_output->setReadOnly(true);
-    this->name_output->setGeometry(260,10,200,25);
+    this->name_output->setGeometry(260,30,200,25);
     this->tag_output = new QLineEdit(this);
     this->tag_output->setReadOnly(true);
-    
+    this->tag_output->setGeometry(260,130,200,25);
+    this->to_tag = new QPushButton("->",this);
+    this->to_tag->setGeometry(220,130,30,25);
+    connect(to_name,SIGNAL(clicked()),this,SLOT(convert_tag()));
+    connect(to_tag,SIGNAL(clicked()),this,SLOT(convert_name()));
+}
+
+void TagHint::convert_tag(){
+    if(this->tag_input->text().length() != 3) this->name_output->setText("ERROR!");
+    Scope* scope = createScopeFromString(tag_input->text().toStdString());
+    this->name_output->setText(QString::fromStdString(scope->toString()));
+}
+
+void TagHint::convert_name(){
+    Scope* scope = findScopeByName(this->name_input->text().toStdString(),ScopeType::COUNTRY);
+    if(scope == nullptr) {
+        this->tag_output->setText("Not Found!");
+        return;
+    }
+    CountryScope * country = scope->getAsCountryScope();
+    if(country == nullptr) {
+        this->tag_output->setText("Not Found!");
+        return;
+    }
+    else this->tag_output->setText(QString::fromStdString(country->getTag()));
 }
