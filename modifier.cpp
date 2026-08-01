@@ -805,7 +805,7 @@ void ParseModifier(ParadoxTag* tag,std::vector<Modifier>& modifiers){
  		Modifier modifier;
 		std::string item = stripTag(tag->seq[i]);
 				
-		modifier.name = getLocalizationKeyPtr(item);
+		modifier.name = getStringPtr(item);
 		ParseModifier(modifierTag,modifier);
 		modifiers.push_back(modifier);
 	}

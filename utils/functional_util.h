@@ -10,17 +10,16 @@
 #include <iostream>
 
 template<typename... types>
-std::string applyPattern(std::string pattern,types... args){
+std::string& applyPattern(std::string pattern,types... args){
 	Pattern p(pattern);
-
 	return applyPattern(p,args...);
 }
 
 template<typename... types>
-std::string applyPattern(Pattern& pattern, types... args);
+std::string& applyPattern(Pattern& pattern, types... args);
 
 template<typename head,typename... tails>
-std::string applyPattern(Pattern& pattern,head value,tails... args){
+std::string& applyPattern(Pattern& pattern,head value,tails... args){
 	if constexpr (std::is_integral_v<head> && !std::is_same_v<head,bool>){
 		pattern.setNextInteger(value);
 	}

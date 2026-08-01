@@ -11,6 +11,11 @@ extern ParadoxInteger* createInteger(long long);
 extern ParadoxDate* createDate(Date);
 extern ParadoxScope* createScope(Scope*);
 
+std::ofstream fout("./log.txt");
+
+std::ofstream& logStream(){
+	return fout;
+}
 
 ParadoxBoolean* getBooleanInstance(bool value){
 	static ParadoxBoolean BOOLEAN_YES(true);

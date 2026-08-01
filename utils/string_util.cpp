@@ -71,10 +71,12 @@ void eraseFrom(std::string& source,std::string target){
 }
 void trim(std::string& source){
     size_t pos;
+    if(source.empty()) return;
     for(pos = 0;pos < source.length();pos++){
         if(source[pos] != ' ' && source[pos] != '\r' && source[pos] != '\n' && source[pos] != '\t') break;
     }
     source.erase(0,pos);
+    if(source.empty()) return;
     for(pos = source.length() - 1;pos > 0;pos--){
         if(source[pos] != ' ' && source[pos] != '\r' && source[pos] != '\n' && source[pos] != '\t') break; 
     }

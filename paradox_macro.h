@@ -1,18 +1,15 @@
-#ifndef PDX_MARCO
-#define PDX_MARCO
+#ifndef PDX_Macro
+#define PDX_Macro
 
-#include "trigger.h"
+
 #include "paradox_type.h"
 #include <memory>
 
 
 
-
 struct ScriptedTrigger;
-
-struct ScriptedTriggerItem : TriggerItem {
-    ScriptedTrigger* st;
-};
+struct Effect;
+struct Trigger;
 
 enum class HolderType{
     CONDITIONAL,
@@ -20,19 +17,19 @@ enum class HolderType{
     PARAMETER,
 };
 
-struct MarcoHolder {
-    virtual HolderType getType();
+struct MacroHolder {
+    virtual HolderType getType() = 0;
 };
 
-struct ConditionalHolder : MarcoHolder{
+struct ConditionalHolder : MacroHolder{
     virtual HolderType getType(){
         return HolderType::CONDITIONAL;
     }
     int parameterIndex;
-    std::vector<std::unique_ptr<MarcoHolder>> subHolders;
+    std::vector<std::unique_ptr<MacroHolder>> subHolders;
 };
 
-struct StringHolder : MarcoHolder{
+struct StringHolder : MacroHolder{
     virtual HolderType getType(){
         return HolderType::STRING;
     }
@@ -40,7 +37,7 @@ struct StringHolder : MarcoHolder{
     StringHolder(const std::string& _data) : data(_data){}
 };
 
-struct ParameterHolder : MarcoHolder{
+struct ParameterHolder : MacroHolder{
     virtual HolderType getType(){
         return HolderType::PARAMETER;
     }
@@ -62,18 +59,46 @@ struct FixedScriptedTrigger : ScriptedTrigger {
     Trigger* instance;
     virtual Trigger* createInstance(std::map<std::string,ParadoxBase*>);
     virtual bool isFixed() const{ return true; }
+    virtual ~FixedScriptedTrigger();
 };
 
 struct ComplicateScriptedTrigger : ScriptedTrigger {
     virtual Trigger* createInstance(std::map<std::string,ParadoxBase*>);
-    std::string pattern;
     std::vector<std::string> parameterName;
-    std::vector<std::unique_ptr<MarcoHolder>> marcoHolders;
+    std::vector<std::unique_ptr<MacroHolder>> MacroHolders;
     virtual bool isFixed() const { return false; }
 };
 
+struct ScriptedEffect{
+    std::string name;
+    virtual Effect* createInstance(std::map<std::string,ParadoxBase*>) = 0;
+    virtual bool isFixed() const = 0;
+    virtual ~ScriptedEffect() noexcept = default;
+};
+
+struct FixedScriptedEffect : ScriptedEffect{
+    Effect* instance;
+    virtual Effect* createInstance(std::map<std::string,ParadoxBase*>);
+    virtual bool isFixed() const { return true; }
+
+};
+
+struct ComplicateScriptedEffect : ScriptedEffect{
+    std::string pattern;
+    std::vector<std::string> parameterName;
+    std::vector<std::unique_ptr<MacroHolder>> MacroHolders;
+    virtual Effect* createInstance(std::map<std::string,ParadoxBase*>);
+    virtual bool isFixed() const { return false; }
+
+};
+
+
+
 void loadScriptedTrigger(std::string rootPath = ".");
-void printAllScriptedTrigger();
+//void printAllScriptedTrigger();
 void loadScriptedTrigger_POST();
+void loadScriptedEffect(std::string rootPath = ".");
+
+
 
 #endif

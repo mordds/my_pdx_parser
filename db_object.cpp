@@ -36,7 +36,7 @@ void registerGood(std::string rootPath){
         good.defaultPrice = base->getAsInteger()->getIntegerContent();
         std::string localizeKey = "good_";
         localizeKey.append(str);
-        good.localizedNamePtr = getLocalizationKeyPtr(toUpperCase(localizeKey));
+        good.localizedNamePtr = getStringPtr(toUpperCase(localizeKey));
         goodRegistry[str] = good;
     }
     clearParserDatas();
@@ -46,9 +46,9 @@ void registerGood(std::string rootPath){
         goodRegistry[str].globalModifier = std::make_shared<Modifier>();
         goodRegistry[str].provinceModifier = std::make_shared<Modifier>();
         ParseModifier(root->tags[str]->getAsTag()->getAsTag("modifier",1), *(goodRegistry[str].globalModifier.get()));
-        goodRegistry[str].globalModifier->name = getLocalizationKeyPtr("贸易优势奖励");
+        goodRegistry[str].globalModifier->name = getStringPtr("贸易优势奖励");
         ParseModifier(root->tags[str]->getAsTag()->getAsTag("province",1), *(goodRegistry[str].provinceModifier.get()));
-        goodRegistry[str].provinceModifier->name =  getLocalizationKeyPtr("生产该商品的省份效果");
+        goodRegistry[str].provinceModifier->name =  getStringPtr("生产该商品的省份效果");
     }
     clearParserDatas();
 }

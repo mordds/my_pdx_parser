@@ -75,7 +75,7 @@ ParadoxTag* createTag(){
 
 
 %union{
-	char name[64];
+	char name[96];
 	int num;
 	ParadoxBase* base;
 	std::string* str;
@@ -221,6 +221,6 @@ LBR: '{' {$$ = 1;}
 
 
 void yyerror(const char* s) {
-    fprintf(stderr, "#Error: %s\n", s);
+    log_error(current_location(),s);
 	ROOT = nullptr;
 }

@@ -85,7 +85,7 @@ union YYSTYPE
 {
 #line 77 "test.y"
 
-	char name[64];
+	char name[96];
 	int num;
 	ParadoxBase* base;
 	std::string* str;

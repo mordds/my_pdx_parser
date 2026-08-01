@@ -69,6 +69,9 @@ std::string ProvinceScope::toHtml(){
 	ret.append("}}");
 	return ret;
 } 
+int ProvinceScope::getId(){
+	return this->id;
+}
 std::string CountryScope::toString(){
 	return std::string(getLocalization(this->tag));
 }

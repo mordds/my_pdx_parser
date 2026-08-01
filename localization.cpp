@@ -180,7 +180,7 @@ void readFromFiles(std::string path){
         if(line[0] == '#') continue;
         std::pair<std::string,std::string> pair = splitWith(line,":");
         replaceWith(pair.second,"\\n","\n");
-        const std::string* r1 = getLocalizationKeyPtr(pair.first);
+        const std::string* r1 = getStringPtr(pair.first);
         //if(startWith(pair.first,"is_or_was_tag")) std::cout << pair.first << std::endl;
         if(pair.second.length() > 256){
             localizations[r1] = createLongStringItem(pair.second);
@@ -203,8 +203,8 @@ void readFromFiles(std::string path){
         if(line[0] == '#') continue;
         std::pair<std::string,std::string> pair = splitWith(line,":");
         replaceWith(pair.second,"\\n","\n");
-        const std::string* r1 = getLocalizationKeyPtr(pair.first);
-        localizations[r1] = const_cast<std::string*>(getLocalizationKeyPtr(pair.second));
+        const std::string* r1 = getStringPtr(pair.first);
+        localizations[r1] = const_cast<std::string*>(getStringPtr(pair.second));
     }
     fin.close();
 }
@@ -218,7 +218,7 @@ std::string getLocalization(std::string key){
     //std::shared_lock<std::shared_mutex> lock(mtx);
     
     const std::string* ret;
-    const std::string* key2 = getLocalizationKeyPtr(key);
+    const std::string* key2 = getStringPtr(key);
     if(localizations.find(key2) == localizations.end()) ret = key2;
     else {
         LocalizationItem item = localizations[key2];
@@ -249,13 +249,17 @@ std::string getLocalization(std::string key){
 }
 #else
 const std::string& getLocalization(std::string key){
-    const std::string* key2 = getLocalizationKeyPtr(key);
+    const std::string* key2 = getStringPtr(key);
     //std::cout << *key2 << std::endl;
     if(localizations.find(key2) != localizations.end()) return *localizations[key2];
     return *key2;
 }
 #endif
-const std::string* getLocalizationKeyPtr(std::string key){
+void removeString(std::string key){
+    if(shortStringSet.contains(key)) shortStringSet.erase(key);
+}
+
+const std::string* getStringPtr(std::string key){
     auto it2 = shortStringSet.find(key);
     if(it2 == shortStringSet.end())  return &(*shortStringSet.insert(key).first);
     return &(*it2);
@@ -269,7 +273,7 @@ const std::string& registerShortString(const std::string str){
 }
 bool hasLocalization(const std::string& key){
     if(shortStringSet.find(key) == shortStringSet.end()) return false;
-    return localizations.find(getLocalizationKeyPtr(key)) != localizations.end();
+    return localizations.find(getStringPtr(key)) != localizations.end();
 }
 void _readLocalizations(){
     std::string root_path = rootPath;

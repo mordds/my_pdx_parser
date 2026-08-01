@@ -8,6 +8,7 @@
 #include<stdio.h>
 #include<cstdint>
 #include<iostream>
+#include<fstream>
 #include<concepts>
 #include<source_location>
 consteval std::source_location current_location(std::source_location current = std::source_location::current()){
@@ -315,16 +316,18 @@ template<typename type>
 using pdxTypeFromRaw = typename ParadoxTypeMap2<type>::pdxType;
 
 
+std::ofstream& logStream();
+
 template<typename... types>
 void log_error(const std::source_location location,types... args){
-	(std::cerr << "#[ERROR][" << location.file_name() << ":" << location.line() << "][" <<location.function_name() << "]: " << ... << args) << std::endl;
+	(logStream() << "#[ERROR][" << location.file_name() << ":" << location.line() << "][" <<location.function_name() << "]: " << ... << args) << std::endl;
 }
 template<typename... types>
 void log_warning(const std::source_location location,types... args){
-	(std::cerr << "#[WARNING][" << location.file_name() << ":" << location.line() << "][" <<location.function_name() << "]: " << ... << args) << std::endl;
+	(logStream() << "#[WARNING][" << location.file_name() << ":" << location.line() << "][" <<location.function_name() << "]: " << ... << args) << std::endl;
 }
 template<typename... types>
 void log_info(const std::source_location location,types... args){
-	(std::cerr << "#[INFO][" << location.file_name() << ":" << location.line() << "][" <<location.function_name() << "]: " << ... << args) << std::endl;
+	(logStream() << "#[INFO][" << location.file_name() << ":" << location.line() << "][" <<location.function_name() << "]: " << ... << args) << std::endl;
 }
 #endif

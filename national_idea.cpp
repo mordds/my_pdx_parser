@@ -26,11 +26,11 @@ void loadNationalIdea(std::string rootPath){
         int slot = 0;
         for(std::string entry : ideaTag->seq){
             if(entry == "start"){
-                idea->start->name = getLocalizationKeyPtr("传统");
+                idea->start->name = getStringPtr("传统");
                 ParseModifier(ideaTag->getAsTag(entry),*(idea->start.get()));
             }
             else if(entry == "bonus"){
-                idea->bonus->name = getLocalizationKeyPtr("野心");
+                idea->bonus->name = getStringPtr("野心");
                 ParseModifier(ideaTag->getAsTag(entry),*(idea->bonus.get()));
             }
             else if(entry == "free") continue;
@@ -41,7 +41,7 @@ void loadNationalIdea(std::string rootPath){
             }
             else{
                 
-                idea->modifiers[slot]->name = getLocalizationKeyPtr(entry);
+                idea->modifiers[slot]->name = getStringPtr(entry);
                 ParseModifier(ideaTag->getAsTag(entry),*(idea->modifiers[slot]));
                 slot++;
             }

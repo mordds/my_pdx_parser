@@ -28,13 +28,14 @@ struct Scope{
 	AnyScope* getAsAnyScope();
 	UnitScope* getAsUnitScope();
 };
-struct ProvinceScope : Scope{
+struct ProvinceScope : Scope {
 	virtual std::string toString();
 	virtual std::string toHtml();
 	virtual bool isMultiScope() const { return false; }
 	virtual ScopeType getType() const{
 		return ScopeType::PROVINCE;
 	}
+	int getId();
 	ProvinceScope(int id);
 	private:
 	int id;

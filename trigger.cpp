@@ -859,6 +859,7 @@ std::string SpecialTrigger::toString(bool reversed,int depth) const{
 			else if(type == ParadoxType::INTEGER) np.fillName(*key,value->getAsInteger()->getIntegerContent());
 		}
 		ret.append(np.getOutput());
+		ret.push_back('\n');
 		return ret;
 	}
 	return this->instance->toString(reversed,depth);
@@ -1017,7 +1018,7 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				if(ti != nullptr){
 					SpecialTrigger* spt = new SpecialTrigger(st,ti);
 					for(auto[k,v] : subTag->tags){
-						spt->args[getLocalizationKeyPtr(k)] = v;
+						spt->args[getStringPtr(k)] = v;
 					}
 					trigger->putTrigger(spt);
 				}
@@ -1106,7 +1107,7 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				} 
 				Trigger* ti = loadedSTs[item]->createInstance(args);
 				SpecialTrigger* st = new SpecialTrigger(loadedSTs[item],ti);
-				if(pb->getValue()) st->args[getLocalizationKeyPtr("__REVERSED__")] = nullptr;
+				if(pb->getValue()) st->args[getStringPtr("__REVERSED__")] = nullptr;
 				trigger->putTrigger(st);
 			}
 		}

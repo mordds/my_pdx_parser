@@ -19,6 +19,8 @@ typedef void(*CommandHandler)(std::vector<std::string>);
 std::map<std::string,CommandHandler> handlers;
 extern std::set<std::string> shortStringSet;
 extern std::set<std::string> registeredTriggers;
+extern std::map<std::string,ScriptedTrigger*> loadedSTs;
+extern std::map<const std::string*,ScriptedEffect*> loadedSEs;
 void printModifier(std::vector<std::string> vec){
     ParadoxTag* root = parseFile(vec[0]);
 	std::vector<Modifier> modifiers;
@@ -104,6 +106,9 @@ int main(){
 	log_info(current_location(),"Scripted Trigger Phase 1 Loaded!");
 	registerEffectItems();
 	log_info(current_location(),"Effect Loaded!");
+	loadScriptedEffect();
+
+	log_info(current_location(),"Scripted Effect Loaded!");
 	loadNationalIdea();
 	log_info(current_location(),"Ni Loaded!");
 	th.join();
@@ -112,13 +117,13 @@ int main(){
 	auto end = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 	log_info(current_location(),"Load Completed! ",duration.count(), " us consumed.");
-	
+	std::cout << "#load Completed!" << std::endl;
 	handlers["credits"] = [](std::vector<std::string> vec){
-		std::cout << "Paradox Data Parser \nV0.4.0-20260711\nAuthor: Mordd";
+		std::cout << "Paradox Data Parser \nV0.4.1-20260801\nAuthor: Mordd";
 	};
 	handlers["future_plan"] = [](std::vector<std::string> vec){
 		std::cout << "4 / 5 Implement Scripted Trigger" << std::endl;
-		std::cout << registeredTriggers.size() << " / 898 Internal Triggers" << std::endl;
+		std::cout << registeredTriggers.size() - loadedSTs.size() << " / 898 Internal Triggers" << std::endl;
 		std::cout << "TODO Implement Scripted Effect" << std::endl;
 		std::cout << "TODO Event Parser" << std::endl;
 	};
@@ -146,6 +151,9 @@ int main(){
 				np.fillName("lorent","A01");
 				np.fillName("far_island",1);	
 				std::cout << np.getOutput();
+			}
+			else if(vec[0] == "se_test"){
+				std::cout << loadedSEs.size() << std::endl;
 			}
 		}
 		else {

@@ -85,7 +85,7 @@ struct CommonTrigger : Trigger{
 	}
 };
 
-//sizeof(SpecialTrigger) = 56 
+
 struct SpecialTrigger : Trigger {
 	virtual TriggerType getType() const{
 		return TriggerType::SPECIAL;
@@ -174,6 +174,7 @@ struct HiddenTrigger : ComplexTrigger{
 	virtual std::string toString(bool reversed,int depth = 1) const;
 	bool hidden_current;
 };
+
 
 void registerTriggerItems();
 ComplexTrigger* createBaseTrigger(); 

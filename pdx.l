@@ -35,7 +35,7 @@ no {
 
 [A-Za-z]([A-za-z0-9_]+)?\.[0-9]{1,4} {
 	
-	strncpy(yylval.name,yytext,64);	
+	strncpy(yylval.name,yytext,96);	
 	return T_EVENT_IDENTIFIER;
 
 }
@@ -51,17 +51,19 @@ no {
 
 
 (variable:)(From::)?[0-9a-zA-Z@\%^\*_\+\\\./\-?`~']+ {
-	strncpy(yylval.name,yytext,64);	
+	strncpy(yylval.name,yytext,96);	
 	return T_IDENT;
 }
+
+
 [0-9a-zA-Z@\%^\*_\+\\\./\-?`~']+ {
 	//
-	strncpy(yylval.name,yytext,64);	
+	strncpy(yylval.name,yytext,96);	
 	return T_IDENT;
 }
 
 (event_target|modifier|trigger_value|new_variable):[0-9a-zA-Z@\%^\*_\+\\\./\-?`~']+ {
-	strncpy(yylval.name,yytext,64);	
+	strncpy(yylval.name,yytext,96);	
 	return T_IDENT;
 }
 
@@ -76,13 +78,17 @@ no {
 }
 
 \d{1,4}.\d{1,2}.\d{1,2} {
-	strncpy(yylval.name,yytext,64);	
+	strncpy(yylval.name,yytext,96);	
 	return T_DATE;
 }
 
 [\t\040]+   { return ' ';  }
 [\r\n]+     { return ' '; }
-
+[0-9a-zA-Z\%^\*_\+\\\./\-?`~']+@(event_target|modifier|trigger_value|new_variable):[0-9a-zA-Z@\%^\*_\+\\\./\-?`~']+ {
+	//
+	strncpy(yylval.name,yytext,96);	
+	return T_IDENT;
+}
 %%
 
 

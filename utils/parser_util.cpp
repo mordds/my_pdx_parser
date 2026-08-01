@@ -29,7 +29,9 @@ ParadoxTag* parseFile(std::string str){
 //
 ParadoxTag* parseString(std::string str){
     ROOT = nullptr;
+
     yy_scan_string(str.c_str());
+
     yyparse();
     return ROOT;
 }

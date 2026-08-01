@@ -14,9 +14,14 @@ Pattern::Pattern(std::string str){
 	pos = 0;
 	replaceWith(this->patternString,"%%","\x06");
 }
-std::string Pattern::getOutput(){
+std::string& Pattern::getOutput(){
 	replaceWith(this->patternString,"\x06","%");
 	return this->patternString;
+}
+//Pattern Instance no longer avaliable after this call
+std::string&& Pattern::extractOutput(){
+	replaceWith(this->patternString,"\x06","%");
+	return std::move(this->patternString);
 }
 bool Pattern::setNextString(std::string str){
 	size_t index = this->patternString.find('%',pos);
@@ -81,9 +86,13 @@ NamedPattern::NamedPattern(std::string str){
 	replaceWith(this->patternString,"%%","\x06");
 }
 
-std::string NamedPattern::getOutput(){
+std::string& NamedPattern::getOutput(){
 	replaceWith(this->patternString,"\x06","%");
 	return this->patternString;	
+}
+std::string&& NamedPattern::extractOutput(){
+	replaceWith(this->patternString,"\x06","%");
+	return std::move(this->patternString);		
 }
 
 bool NamedPattern::fillName(const std::string& name,std::string content,int depth){
@@ -103,10 +112,10 @@ bool NamedPattern::fillName(const std::string& name,std::string content,int dept
 			ParadoxTag* root = parseString(content);
 			if(root == nullptr) { clearParserDatas(); return false; }
 			if(view.starts_with("effect")){
-				std::unique_ptr<ComplexEffect> ce = createBaseEffect(depth);
+				std::unique_ptr<ComplexEffect> ce = createBaseEffect();
 				parseEffect(root,ce.get());
 				//from there on view have invalidated.
-				this->patternString.replace(index,pIndex - index + 1,ce->toString());
+				this->patternString.replace(index,pIndex - index + 1,ce->toString(depth));
 			}
 			else if(view.starts_with("trigger")){
 				std::unique_ptr<ComplexTrigger> ct = std::unique_ptr<ComplexTrigger>(createBaseTrigger());

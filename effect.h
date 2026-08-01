@@ -15,22 +15,22 @@
 struct Trigger;
 struct Effect;
 struct ComplexEffect;
-
+struct ScriptedEffect;
 enum class EffectType{
-	COMMON,CHANGE_SCOPE,CONDITIONAL,HIDDEN
+	COMMON,CHANGE_SCOPE,CONDITIONAL,HIDDEN,RANDOM,RANDOM_LIST,TOOLTIP,SPECIAL
 };
 
 
 
 struct Effect{
-	virtual std::string toString() = 0;
+	virtual std::string toString(int depth = 1) = 0;
 	virtual EffectType getType() = 0;
-	int depth;
-	uint8_t extra_data[4];
+	uint8_t extra_data[8];
 	ComplexEffect* getAsComplexEffect(){
 		if(this->getType() != EffectType::COMMON) return (ComplexEffect*)this;
 		return nullptr;
 	}
+	virtual ~Effect() noexcept = default;
 };
 template<typename... types>
 struct NativeCommonEffect;
@@ -54,7 +54,7 @@ template<class F,class Tuple, std::size_t... I>
 constexpr decltype(auto)
     apply_effect_impl(F&& f, Tuple&& t, std::index_sequence<I...>);
 
-template< std::size_t I,typename head,typename... tails>
+template<std::size_t I,typename head,typename... tails>
 struct std::tuple_element<I,_NativeCommonEffect<head,tails...>> : std::tuple_element<I - 1,_NativeCommonEffect<tails...>>{
 	
 };
@@ -152,7 +152,6 @@ struct ParameteredNativeEffectItem : NativeEffectItem<types...>{
 		NativeCommonEffect<types...>* _instance = new NativeCommonEffect<types...>();
 		std::unique_ptr<Effect> instance(_instance);
 		for(size_t i = 0;i < sizeof...(types);i++){
-			//std::cout << "u:" << parameterName[i] << std::endl;
 			if(!base.contains(parameterName[i])) return nullptr;
 			ParadoxBase* arg = base.at(parameterName[i]);
 			if(base.at(parameterName[i]) == nullptr) return nullptr;
@@ -177,9 +176,9 @@ struct NativeCommonEffect : Effect
 	NativeEffectItem<tails...>* item;
 	_NativeCommonEffect<tails...> body;
 	
-	virtual std::string toString(){
+	virtual std::string toString(int depth = 1){
 		std::string str("");
-		for(int i = 0;i < this->depth;i++) str.push_back(' ');
+		for(int i = 0;i < depth;i++) str.push_back(' ');
 		str.append(apply_effect(item->localizeFunction,this->body));
 		str.push_back('\n');
 		return str;
@@ -284,16 +283,16 @@ constexpr decltype(auto)
 }
 
 struct ComplexEffect : Effect{
-	virtual std::string toString() = 0;
+	virtual std::string toString(int depth = 1) = 0;
 	std::vector<Effect*> subEffects;
 	void addEffect(Effect* effect){
 		subEffects.push_back(effect);
-		effect->depth = this->depth + 1;
+		//effect->depth = this->depth + 1;
 	}
 };
 
 struct ChangeScopeEffect : ComplexEffect{
-	virtual std::string toString();
+	virtual std::string toString(int depth = 1);
 	Scope* target;
 	Trigger* condition;
 	virtual EffectType getType(){
@@ -302,7 +301,7 @@ struct ChangeScopeEffect : ComplexEffect{
 	ChangeScopeEffect(Scope* _target, Trigger* _condition = nullptr) : target(_target), condition(_condition){}
 };
 struct ConditionalEffect : ComplexEffect{
-	virtual std::string toString();
+	virtual std::string toString(int depth = 1);
 	Trigger* condition;
 	void setElseIfState(){ this->extra_data[0] = 1; };
 	void setElseState() { this->extra_data[0] = 2; }
@@ -318,15 +317,38 @@ struct ConditionalEffect : ComplexEffect{
 	}
 };
 struct HiddenEffect : ComplexEffect{
-	virtual std::string toString();
+	virtual std::string toString(int depth = 1);
 	void setHidden(bool value) { this->extra_data[0] = value; }
 	bool isHidden() { return this->extra_data[0]; }
 	virtual EffectType getType(){
 		return EffectType::HIDDEN;
 	}
 };
+struct RandomEffect : ComplexEffect {
+	virtual std::string toString(int depth = 1);
+	int getChance(){
+		return *(int*)extra_data;
+	}
+	void setChance(int chance){
+		*(int*)extra_data = chance;
+	}
+	virtual EffectType getType(){
+		return EffectType::RANDOM;
+	}
+};
+//sizeof(SpecialEffect) = 72...
+struct SpecialEffect : Effect {
+	virtual std::string toString(int depth = 1);
+	virtual EffectType getType() {
+		return EffectType::SPECIAL;
+	}
+	ScriptedEffect* prototype;
+	Effect* instance;
+	std::map<std::string,ParadoxBase*> items;
+};
+
 
 void parseEffect(ParadoxTag* root,ComplexEffect* from);
-std::unique_ptr<ComplexEffect> createBaseEffect(int depth = -1);
+std::unique_ptr<ComplexEffect> createBaseEffect();
 void registerEffectItems();
 #endif
