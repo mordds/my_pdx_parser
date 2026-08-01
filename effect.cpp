@@ -335,6 +335,8 @@ void parseEffect(ParadoxTag* root,ComplexEffect* from){
                 se->prototype = loadedSEs[ptr];
                 std::map<std::string,ParadoxBase*> placeholder;
                 se->instance = se->prototype->createInstance(placeholder);
+                if(se->instance != nullptr) from->addEffect(se);
+                else delete se;
             }
             else if(simpleEffectItems.contains(ptr)){
                 EffectItem* item = effectItems[ptr];
