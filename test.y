@@ -134,6 +134,8 @@ A: lVal '=' rVal {
 	else if(type == ParadoxType::INTEGER){
 		tag->add(std::to_string($1->getAsInteger()->getIntegerContent() / 1000),$3);
 	}
+	tempObject.pop_back();
+	delete $1;
 	$$ = tag;
 }
   | A lVal '=' rVal {
@@ -148,6 +150,8 @@ A: lVal '=' rVal {
 	else if(type == ParadoxType::INTEGER){
 		tag->add(std::to_string($2->getAsInteger()->getIntegerContent() / 1000),$4);
 	}
+	tempObject.pop_back();
+	delete $2;
 	$$ = tag;
   }
   | A BLANK
