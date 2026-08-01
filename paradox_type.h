@@ -11,6 +11,8 @@
 #include<fstream>
 #include<concepts>
 #include<source_location>
+
+#include "pattern.h"
 consteval std::source_location current_location(std::source_location current = std::source_location::current()){
     return current;
 }
@@ -82,7 +84,14 @@ struct ParadoxInteger : public ParadoxBase{
 	private:
 		long long content;
 	public:
-		virtual std::string toString() const { return std::to_string(content/1000.0); }
+		virtual std::string toString() const { 
+			if(content % 1000 == 0) return std::to_string(content);
+			else {
+				Pattern p("%d");
+				p.setNextInteger(content);
+				return p.getOutput();
+			}
+		}
 		ParadoxInteger(long long val){
 			content = val;
 		}

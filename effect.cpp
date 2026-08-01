@@ -199,6 +199,7 @@ void parseEffect(ParadoxTag* root,ComplexEffect* from){
                     ComplexTrigger* trigger = createBaseTrigger();
                     trigger->depth = 0;
                     parseTrigger(subTag,trigger);
+                    trigger->takeOverLifeCycle();
                     tag->remove("limit",0);
                     effect->condition = trigger;
                     
@@ -221,6 +222,7 @@ void parseEffect(ParadoxTag* root,ComplexEffect* from){
                         parseTrigger(subTag,trigger);
                         tag->remove("limit",0);
                         effect->condition = trigger;
+                        trigger->takeOverLifeCycle();
                         effect->setElseIfState();
                         parseEffect(tag,effect);
                     }
@@ -280,6 +282,7 @@ void parseEffect(ParadoxTag* root,ComplexEffect* from){
                     if(subTag != nullptr){
                         ComplexTrigger* trigger = createBaseTrigger();
                         parseTrigger(subTag,trigger);
+                        trigger->takeOverLifeCycle();
                         effect = new ChangeScopeEffect(scope,trigger);   
                         from->addEffect(effect);
                         tag->remove("limit",0);

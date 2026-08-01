@@ -1,8 +1,6 @@
 #ifndef PDX_PATTERN
 #define PDX_PATTERN
 #include<string>
-struct Scope;
-
 
 
 
