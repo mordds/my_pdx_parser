@@ -345,6 +345,9 @@ struct SpecialEffect : Effect {
 	ScriptedEffect* prototype;
 	Effect* instance;
 	std::map<std::string,ParadoxBase*> items;
+	virtual ~SpecialEffect(){
+		for(auto[u,v]:items) delete v;
+	}
 };
 
 

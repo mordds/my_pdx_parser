@@ -101,7 +101,11 @@ struct SpecialTrigger : Trigger {
 	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
 	SpecialTrigger(ScriptedTrigger* _prototype,Trigger* _instance): prototype(_prototype), instance(_instance){}
 
-	virtual ~SpecialTrigger() noexcept = default;
+	virtual ~SpecialTrigger() noexcept {
+		if(copied){
+			for(auto[u,v] : args) delete v;
+		}
+	}
 };
 
 struct LogicTrigger : ComplexTrigger {
