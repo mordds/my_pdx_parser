@@ -85,7 +85,7 @@ struct ParadoxInteger : public ParadoxBase{
 		long long content;
 	public:
 		virtual std::string toString() const { 
-			if(content % 1000 == 0) return std::to_string(content);
+			if(content % 1000 == 0) return std::to_string(content / 1000);
 			else {
 				Pattern p("%d");
 				p.setNextInteger(content);
