@@ -131,7 +131,7 @@ Effect* ComplicateScriptedEffect::createInstance(std::map<std::string,ParadoxBas
     }
     std::unique_ptr<ComplexEffect> ce = createBaseEffect();
     parseEffect(root,ce.get());    
-    
+
     return ce.release();
 }
 
@@ -254,6 +254,7 @@ void loadScriptedTrigger(std::string rootPath){
         parseTrigger(root,ct);
 
         ct->takeOverLifeCycle();
+        clearParserDatas();
         static_cast<FixedScriptedTrigger*>(loadedSTs[k])->instance = lt;
     }
 }
@@ -302,9 +303,10 @@ void loadScriptedEffect(std::string rootPath){
         }
 
         parseEffect(root,ce.get());
-
+        clearParserDatas();
         static_cast<FixedScriptedEffect*>(loadedSEs[ptr])->instance = ce.release();
     }
+   
 }
 
 
