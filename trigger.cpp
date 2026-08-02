@@ -609,7 +609,6 @@ bool ComplexTrigger::foreach(std::function<bool(Trigger*)> action){
 }
 ChangeScopeTrigger::ChangeScopeTrigger(Scope* scope) : ComplexTrigger(){
 	this->changedScope = scope;
-	this->use_type = false;
 }
 CommonTrigger::CommonTrigger(TriggerItem* item) : Trigger(){
 	this->item = item;
@@ -657,8 +656,8 @@ std::string ChangeScopeTrigger::toString(bool reversed,int depth) const{
 		preInit(depth,str);
 		bool should_add_bracket = this->changedScope->getType() != ScopeType::ANY;
 		if(should_add_bracket) str.append("(");
-		if(use_type){
-			str.append(trigger_type ? "所有" : "任意");
+		if(this->hasType()){
+			str.append(this->isAllType() ? "所有" : "任意");
 		}
 		str.append(this->changedScope->toString());
 		if(should_add_bracket) str.append(")");
@@ -863,6 +862,7 @@ bool SpecialTrigger::foreach(std::function<bool(Trigger*)> action){
 }
 
 void SpecialTrigger::takeOverLifeCycle(){
+	this->extra_data[0] = 1;
 	for(auto[k,v] : this->args){
 		if(v == nullptr) continue;
 		v = deep_copy(v);

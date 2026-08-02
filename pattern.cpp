@@ -114,12 +114,14 @@ bool NamedPattern::fillName(const std::string& name,std::string content,int dept
 			if(view.starts_with("effect")){
 				std::unique_ptr<ComplexEffect> ce = createBaseEffect();
 				parseEffect(root,ce.get());
+				clearParserDatas();
 				//from there on view have invalidated.
 				this->patternString.replace(index,pIndex - index + 1,ce->toString(depth));
 			}
 			else if(view.starts_with("trigger")){
 				std::unique_ptr<ComplexTrigger> ct = std::unique_ptr<ComplexTrigger>(createBaseTrigger());
 				parseTrigger(root,ct.get());
+				clearParserDatas();
 				//from there on view have invalidated.
 				this->patternString.replace(index,pIndex - index + 1,ct->toString(false,depth));				
 			}

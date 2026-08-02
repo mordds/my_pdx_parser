@@ -14,7 +14,6 @@ extern int yylex();
 void yyerror(const char* s);
 
 std::vector<ParadoxBase*> parsedObject;
-std::vector<ParadoxBase*> tempObject;
 ParadoxTag* ROOT = nullptr;
 //
 ParadoxString* createString(std::string str){
@@ -24,12 +23,11 @@ ParadoxString* createString(std::string str){
 }
 ParadoxScope* createScope(Scope* scope){
 	ParadoxScope* pScope = new ParadoxScope(scope);
-	tempObject.push_back(pScope);
+	parsedObject.push_back(pScope);
 	return pScope;
 }
 ParadoxString* createTempString(std::string str){
 	ParadoxString* string = new ParadoxString(str);
-	tempObject.push_back(string);
 	return string;
 }
 
@@ -48,7 +46,6 @@ ParadoxInteger* createInteger(long long val){
 
 ParadoxInteger* createTempInteger(long long val){
 	ParadoxInteger* integer = new ParadoxInteger(val);
-	tempObject.push_back(integer);
 	return integer;
 }
 ParadoxDate* createDate(std::string str){
@@ -63,7 +60,6 @@ ParadoxDate* createDate(Date date1){
 }
 ParadoxDate* createTempDate(std::string str){
 	ParadoxDate* string = new ParadoxDate(str);
-	tempObject.push_back(string);
 	return string;
 }
 ParadoxTag* createTag(){
@@ -134,7 +130,6 @@ A: lVal '=' rVal {
 	else if(type == ParadoxType::INTEGER){
 		tag->add(std::to_string($1->getAsInteger()->getIntegerContent() / 1000),$3);
 	}
-	tempObject.pop_back();
 	delete $1;
 	$$ = tag;
 }
@@ -150,7 +145,6 @@ A: lVal '=' rVal {
 	else if(type == ParadoxType::INTEGER){
 		tag->add(std::to_string($2->getAsInteger()->getIntegerContent() / 1000),$4);
 	}
-	tempObject.pop_back();
 	delete $2;
 	$$ = tag;
   }
@@ -191,6 +185,7 @@ lVal: T_IDENT {$$ = createTempString($1);}
 rVal: GT {$$ = $1;}
   | T_LITERAL {
 	$$ = createString(*$1);
+	delete $1;
   } 
   | T_BOOLEAN {
 	$$ = getBooleanInstance($1 != 0);
@@ -202,17 +197,14 @@ rVal: GT {$$ = $1;}
 	ParadoxType type = $1->getType();
 	if(type == ParadoxType::STRING){
 		$$ = createString($1->getAsString()->getStringContent());
-		tempObject.pop_back();
 		delete $1;
 	}
 	else if(type == ParadoxType::INTEGER){
 		$$ = createInteger($1->getAsInteger()->getIntegerContent());
-		tempObject.pop_back();
 		delete $1;
 	}
 	else if(type == ParadoxType::DATE){
 		$$ = createDate($1->getAsDate()->getDateContent());
-		tempObject.pop_back();
 		delete $1;
 	}
   }

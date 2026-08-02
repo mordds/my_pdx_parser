@@ -17,10 +17,10 @@ void loadNationalIdea(std::string rootPath){
         ParadoxTag* ideaTag = tag->getAsTag(str);
         if(ideaTag->get("free") == nullptr) continue;
         NationalIdea* idea = new NationalIdea();
-        idea->start = std::make_shared<Modifier>();
-        idea->bonus = std::make_shared<Modifier>();
+        idea->start = std::make_unique<Modifier>();
+        idea->bonus = std::make_unique<Modifier>();
         for(int i = 0;i < 7;i++){
-            idea->modifiers[i] = std::make_shared<Modifier>();
+            idea->modifiers[i] = std::make_unique<Modifier>();
         }
         idea->trigger = nullptr;
         int slot = 0;
@@ -35,7 +35,7 @@ void loadNationalIdea(std::string rootPath){
             }
             else if(entry == "free") continue;
             else if(entry == "trigger"){
-                idea->trigger = std::shared_ptr<Trigger>((Trigger*)createBaseTrigger());
+                idea->trigger = std::unique_ptr<Trigger>((Trigger*)createBaseTrigger());
                 parseTrigger(ideaTag->getAsTag(entry),idea->trigger->getAsComplexTrigger());
                 idea->trigger->takeOverLifeCycle();
             }

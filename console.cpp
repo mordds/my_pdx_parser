@@ -47,6 +47,7 @@ void printEffect(std::vector<std::string> vec){
 	ParadoxTag* root = parseFile(vec[0]);
  	std::unique_ptr<ComplexEffect> effect = createBaseEffect();
 	parseEffect(root,effect.get());
+	clearParserDatas();
 	std::cout << effect->toString() << std::endl;
 }
 

@@ -130,8 +130,21 @@ struct ChangeScopeTrigger : ComplexTrigger{
 	ChangeScopeTrigger(Scope* scope);
 	virtual std::string toString(bool reversed,int depth = 1) const;
 	Scope* changedScope;
-	bool trigger_type;
-	bool use_type;
+	bool hasType() const{
+		return this->extra_data[2] != 0;
+	}
+	bool isAnyType() const{
+		return this->extra_data[2] == 1;
+	}
+	bool isAllType() const{
+		return this->extra_data[2] == 2;
+	}
+	void setAnyType(){
+		this->extra_data[2] = 1;
+	}
+	void setAllType(){
+		this->extra_data[2] = 2;
+	}
 };
 struct ConditionalTrigger : ComplexTrigger{
 	virtual TriggerType getType() const{

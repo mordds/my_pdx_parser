@@ -35,6 +35,7 @@ struct StringHolder : MacroHolder{
     }
     std::string data;
     StringHolder(const std::string& _data) : data(_data){}
+    StringHolder(std::string&& _data) : data(_data){}
 };
 
 struct ParameterHolder : MacroHolder{
