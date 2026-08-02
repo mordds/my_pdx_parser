@@ -9,5 +9,5 @@
 ParadoxTag* parseFile(std::string path);
 ParadoxTag* parseString(std::string str);
 void clearParserDatas();
-
+size_t getParserDataSize();
 #endif

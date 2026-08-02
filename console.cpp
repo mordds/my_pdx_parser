@@ -54,7 +54,6 @@ void printTrigger(std::vector<std::string> vec){
     ParadoxTag* root = parseFile(vec[0]);
 	if(root == nullptr) return;
 	ComplexTrigger* ct = createBaseTrigger();
-	ct->depth = 0;
 	parseTrigger(root,ct);
 	std::cout << ct->toString(false) << std::endl;
 	delete ct;
@@ -110,6 +109,7 @@ int main(){
 
 	log_info(current_location(),"Scripted Effect Loaded!");
 	loadNationalIdea();
+	log_info(current_location(),getParserDataSize());
 	log_info(current_location(),"Ni Loaded!");
 	th.join();
 	loadScriptedTrigger_POST();

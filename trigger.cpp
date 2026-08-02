@@ -582,21 +582,12 @@ CommonTrigger* Trigger::getAsCommonTrigger(){
 	return static_cast<CommonTrigger*>(this);
 }
 
-void ignoreCurrentDepth(ComplexTrigger* trigger){
-	for(int i = 0;i < trigger->subTriggers.size();i++){
-		trigger->subTriggers[i]->depth--;
-		ComplexTrigger* trigger2 = trigger->subTriggers[i]->getAsComplexTrigger();
-		if(trigger2 != nullptr) ignoreCurrentDepth(trigger2);
-	}
-}
-
 void ComplexTrigger::putTrigger(Trigger* trigger){
-	trigger->depth = this->depth + 1;
 	this->subTriggers.push_back(trigger);
 }
 void ComplexTrigger::takeOverLifeCycle(){
-	if(this->copied) return;
-	this->copied = true;
+	if(this->extra_data[0] != 0) return;
+	this->extra_data[0] = 1;
 	for(Trigger* trigger : this->subTriggers){
 		trigger->takeOverLifeCycle();
 	}
@@ -616,33 +607,27 @@ bool ComplexTrigger::foreach(std::function<bool(Trigger*)> action){
 	}
 	return true;
 }
-ChangeScopeTrigger::ChangeScopeTrigger(Scope* scope){
+ChangeScopeTrigger::ChangeScopeTrigger(Scope* scope) : ComplexTrigger(){
 	this->changedScope = scope;
-	this->depth = 0;
 	this->use_type = false;
 }
-CommonTrigger::CommonTrigger(TriggerItem* item){
+CommonTrigger::CommonTrigger(TriggerItem* item) : Trigger(){
 	this->item = item;
 	this->reversed = false;
-	this->depth = 0;
 }
 void CommonTrigger::pushObject(ParadoxBase* obj){
 	this->base.push_back(obj);
 }
 
 
-LogicTrigger::LogicTrigger(LogicType logic){
+LogicTrigger::LogicTrigger(LogicType logic) : ComplexTrigger(){
 	this->type = logic;
-	this->depth = 0;
-	this->ignored = false;
-	this->omitted = false;
 }
 
 std::string CommonTrigger::toHtml(bool reversed,int depth){
 	std::string str("");
 	preInit(depth,str);
 	str.append(this->item->toString(this->base,Xor(reversed,this->reversed)));
-	this->depth = 0;
 	return str;
 }
 std::string CommonTrigger::toString(bool reversed,int depth) const{
@@ -652,8 +637,8 @@ std::string CommonTrigger::toString(bool reversed,int depth) const{
 	return str;
 }
 void CommonTrigger::takeOverLifeCycle(){
-	if(this->copied) return;
-	this->copied = true;
+	if(this->extra_data[0] != 0) return;
+	this->extra_data[0] = 1;
 	for(int i = 0;i < this->base.size();i++){
 		this->base[i] = deep_copy(this->base[i]);
 	}
@@ -704,13 +689,13 @@ std::string LogicTrigger::toString(bool reversed,int depth) const{
 				return this->subTriggers[0]->toString(reversed,depth);
 			}
 			else{
-				if(!this->omitted) str.append("下列条件需全部满足:\n");
+				if(!this->extra_data[1] != 0) str.append("下列条件需全部满足:\n");
 				for(int i = 0;i < size;i++){
 					LogicTrigger* subtrigger = this->subTriggers[i]->getAsLogicTrigger();
 					bool shouldOmit = subtrigger != nullptr && subtrigger->type != LogicType::OR;
 					int cDepth = depth + 1;
 					if(shouldOmit){
-						subtrigger->omitted = true;
+						subtrigger->extra_data[1] = 1;
 						//subtrigger->ignored = true; 
 						//ignoreCurrentDepth(subtrigger);
 						cDepth--;
@@ -725,13 +710,13 @@ std::string LogicTrigger::toString(bool reversed,int depth) const{
 				return this->subTriggers[0]->toString(reversed,depth);
 			}
 			else{
-				if(!this->omitted) str.append("下列条件至少满足一个:\n");
+				if(!this->extra_data[1] != 0) str.append("下列条件至少满足一个:\n");
 				for(int i = 0;i < size;i++){
 					LogicTrigger* subtrigger = this->subTriggers[i]->getAsLogicTrigger();
 					bool shouldOmit = subtrigger != nullptr && subtrigger->type == LogicType::OR;
 					int cDepth = depth + 1;
 					if(shouldOmit){
-						subtrigger->omitted = true;
+						subtrigger->extra_data[1] = 1;
 						cDepth--;
 					} 
 					str.append(this->subTriggers[i]->toString(reversed,cDepth));
@@ -744,13 +729,13 @@ std::string LogicTrigger::toString(bool reversed,int depth) const{
 				return this->subTriggers[0]->toString(!reversed,depth).append("\n");
 			}
 			else {
-				if(!this->omitted) str.append("下列条件需全部满足:\n");
+				if(!this->extra_data[1] != 0) str.append("下列条件需全部满足:\n");
 				for(int i = 0;i < size;i++){
 					LogicTrigger* subtrigger = this->subTriggers[i]->getAsLogicTrigger();
 					bool shouldOmit = subtrigger != nullptr && subtrigger->type == LogicType::OR;
 					int cDepth = depth + 1;
 					if(shouldOmit){
-						subtrigger->omitted = true;
+						subtrigger->extra_data[1] = 1;
 						cDepth--;
 					} 
 					str.append(this->subTriggers[i]->toString(!reversed,cDepth));
@@ -766,7 +751,7 @@ std::string NumberRequiredTrigger::toString(bool reversed,int depth) const{
 	std::string str("");
 	if(this->subTriggers.empty()) return str;
 	preInit(depth,str);
-	ParadoxInteger* tmp = new ParadoxInteger(this->amount);
+	ParadoxInteger* tmp = new ParadoxInteger(this->getAmount());
 	std::vector<ParadoxBase*> base;
 	base.push_back(tmp);
 	str.append(this->item->toString(base,reversed));
@@ -783,7 +768,7 @@ std::string ConditionalTrigger::toString(bool reversed,int depth) const{
 	std::string str("");
 	if(this->subTriggers.empty()) return str;
 	if(this->condition->subTriggers.empty()) {
-		if(!this->isElseTrigger) return str;
+		if(!this->isElse()) return str;
 		preInit(depth,str);
 		str.append("否则需满足:\n");
 		for(int i = 0;i < this->subTriggers.size();i++){
@@ -793,7 +778,7 @@ std::string ConditionalTrigger::toString(bool reversed,int depth) const{
 		return str;
 	}
 	preInit(depth,str);
-	if(this->isElseTrigger) str.append("否则");
+	if(this->isElse()) str.append("否则");
 	str.append("当以下条件满足时:\n");
 	for(int i = 0;i < this->condition->subTriggers.size();i++){
 		str.append(this->condition->subTriggers[i]->toString(false,depth + 1));
@@ -813,7 +798,7 @@ std::string ConditionalTrigger::toString(bool reversed,int depth) const{
 std::string HiddenTrigger::toString(bool reversed,int depth) const{
 	std::string str("");
 	if(this->subTriggers.empty()) return str;
-	if(this->hidden_current){
+	if(this->isCurrentHidden()){
 		return str;
 	}
 	preInit(depth,str);
@@ -828,7 +813,7 @@ std::string HiddenTrigger::toString(bool reversed,int depth) const{
 std::string CustomTooltipTrigger::toString(bool reversed,int depth) const{
 	std::string str("");
 	if(this->subTriggers.empty()) return str;
-	if(!this->show_origin){
+	if(!this->isShowOrigin()){
 		preInit(depth,str);
 		str.append(this->tooltip);
 		str.append("\n");
@@ -909,7 +894,7 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			//just forget else_if and else....
 			if(item == "else_if"){
 				ConditionalTrigger* ct = new ConditionalTrigger();
-				ct->isElseTrigger = true;
+				ct->setElseState();
 				if(subTag->get("limit",1) == nullptr || subTag->get("limit",1)->getAsTag() == nullptr) {
 					delete ct;
 					continue;
@@ -924,7 +909,7 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			}
 			if(item == "else"){
 				ConditionalTrigger* ct = new ConditionalTrigger();
-				ct->isElseTrigger = true;
+				ct->setElseState();
 				if(subTag->get("limit",1) != nullptr) {
 					delete ct;
 					continue;
@@ -955,7 +940,6 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			//then custom_tt
 			if(item == "custom_trigger_tooltip"){
 				CustomTooltipTrigger* ctt = new CustomTooltipTrigger();
-				ctt->show_origin = false;
 				ParadoxString* tt = subTag->get("tooltip",1)->getAsString();
 				
 				if(tt == nullptr) {
@@ -973,7 +957,6 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			//then hidden_trigger
 			if(item == "hidden_trigger"){
 				HiddenTrigger* ht = new HiddenTrigger();
-				ht->hidden_current = false;
 				trigger->putTrigger(ht);
 				parseTrigger(subTag,ht);
 				
@@ -991,7 +974,6 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			//first is NumberRequiredTrigger
 			if(numberRequiredItems.find(item) != numberRequiredItems.end()){
 				NumberRequiredTrigger* nrt = new NumberRequiredTrigger();	
-				nrt->amount = 1;
 				std::string cnt_tag = numberRequiredItems[item];
 				TriggerItem* item2 = items[item];
 				nrt->item = item2;
@@ -1005,7 +987,7 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 					delete nrt;
 					continue;
 				}
-				nrt->amount = num->getIntegerContent();
+				nrt->setAmount(num->getIntegerContent());
 				subTag->remove(cnt_tag,1);
 				trigger->putTrigger(nrt);
 				parseTrigger(subTag,nrt);

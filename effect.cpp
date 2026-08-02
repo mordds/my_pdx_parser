@@ -197,7 +197,6 @@ void parseEffect(ParadoxTag* root,ComplexEffect* from){
                     ConditionalEffect* effect = new ConditionalEffect();
                     from->addEffect(effect);
                     ComplexTrigger* trigger = createBaseTrigger();
-                    trigger->depth = 0;
                     parseTrigger(subTag,trigger);
                     trigger->takeOverLifeCycle();
                     tag->remove("limit",0);
@@ -218,7 +217,6 @@ void parseEffect(ParadoxTag* root,ComplexEffect* from){
                         ConditionalEffect* effect = new ConditionalEffect();
                         from->addEffect(effect);
                         ComplexTrigger* trigger = createBaseTrigger();
-                        trigger->depth = 0;
                         parseTrigger(subTag,trigger);
                         tag->remove("limit",0);
                         effect->condition = trigger;

@@ -45,8 +45,10 @@ struct Trigger{
 	ComplexTrigger* getAsComplexTrigger();
 	LogicTrigger* getAsLogicTrigger();
 	CommonTrigger* getAsCommonTrigger();
-	int depth = 0;
-	bool copied = false;
+	Trigger(){
+		*(uint64_t*)extra_data = 0ll;
+	}
+	uint8_t extra_data[8];
 	virtual ~Trigger() noexcept = default;
 };
 struct ComplexTrigger : Trigger{
@@ -54,8 +56,7 @@ struct ComplexTrigger : Trigger{
 	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
 	virtual bool foreach(std::function<bool(Trigger*)>);
 	std::vector<Trigger*> subTriggers;
-	bool ignored = false;
-	bool omitted = false;
+	ComplexTrigger() : Trigger(){};
 	virtual ~ComplexTrigger(){
 		for(Trigger* trigger : subTriggers){
 			delete trigger;
@@ -79,7 +80,7 @@ struct CommonTrigger : Trigger{
 	bool reversed;
 	std::vector<ParadoxBase*> base;
 	virtual ~CommonTrigger(){
-		if(this->copied){
+		if(this->extra_data[0] == 1){
 			for(ParadoxBase* base1 : base) delete base1;
 		}
 	}
@@ -99,10 +100,10 @@ struct SpecialTrigger : Trigger {
 	virtual void takeOverLifeCycle();
 	virtual bool foreach(std::function<bool(Trigger*)>);
 	virtual bool hasAnyTrigger(bool (*predicate)(Trigger* trigger));
-	SpecialTrigger(ScriptedTrigger* _prototype,Trigger* _instance): prototype(_prototype), instance(_instance){}
+	SpecialTrigger(ScriptedTrigger* _prototype,Trigger* _instance) : Trigger(), prototype(_prototype), instance(_instance){}
 
 	virtual ~SpecialTrigger() noexcept {
-		if(copied){
+		if(this->extra_data[0] == 1){
 			for(auto[u,v] : args) delete v;
 		}
 	}
@@ -141,8 +142,14 @@ struct ConditionalTrigger : ComplexTrigger{
 	}
 	virtual std::string toString(bool reversed,int depth = 1) const;
 	ComplexTrigger* condition;
-	bool isElseTrigger;
-	void putCondition(Trigger* trigger);
+	ConditionalTrigger() : ComplexTrigger(){};
+	bool isElse() const {
+		return this->extra_data[3] != 0;
+	}
+	void setElseState(){
+		this->extra_data[3] = 1;
+	}
+
 };
 //for calc_true_if
 struct NumberRequiredTrigger : ComplexTrigger{
@@ -153,7 +160,13 @@ struct NumberRequiredTrigger : ComplexTrigger{
 		return this->toString(reversed,depth);
 	}
 	virtual std::string toString(bool reversed,int depth = 1) const;
-	int amount;
+	void setAmount(int amount){
+		*(int*)(extra_data + 4) = amount;
+	}
+	int getAmount() const{
+		return *(int*)(extra_data + 4); 
+	}
+	NumberRequiredTrigger() : ComplexTrigger(){};
 	TriggerItem* item;
 };
 struct CustomTooltipTrigger : ComplexTrigger{
@@ -164,8 +177,14 @@ struct CustomTooltipTrigger : ComplexTrigger{
 		return this->toString(reversed,depth);
 	}
 	virtual std::string toString(bool reversed,int depth = 1) const;
+	bool isShowOrigin() const{
+		return this->extra_data[3] != 0;
+	}
+	void setShowOrigin(){
+		this->extra_data[3] = 1;
+	}
 	std::string tooltip;
-	bool show_origin;
+	CustomTooltipTrigger() : ComplexTrigger(){};
 };
 
 struct HiddenTrigger : ComplexTrigger{
@@ -176,7 +195,13 @@ struct HiddenTrigger : ComplexTrigger{
 		return this->toString(reversed,depth);
 	}
 	virtual std::string toString(bool reversed,int depth = 1) const;
-	bool hidden_current;
+	void isCurrentHidden(bool hidden){
+		this->extra_data[3] = hidden;
+	}
+	bool isCurrentHidden() const{
+		return this->extra_data[3] != 0;
+	}
+	HiddenTrigger() : ComplexTrigger(){};
 };
 
 

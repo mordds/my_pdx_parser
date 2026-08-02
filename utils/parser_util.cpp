@@ -44,3 +44,6 @@ void clearParserDatas(){
     parsedObject.clear();
     parsedObject.shrink_to_fit();
 }
+size_t getParserDataSize(){
+    return parsedObject.size();
+}
