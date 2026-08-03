@@ -3,11 +3,11 @@
 #include "../paradox_type.h"
 #include "../pattern.h"
 #include "../scope.h"
-#include "../effect.h"
 #include "../localization.h"
 #include <functional>
 #include <tuple>
 #include <iostream>
+#include <bitset>
 
 template<typename... types>
 std::string& applyPattern(std::string pattern,types... args){
@@ -37,7 +37,7 @@ std::string& applyPattern(Pattern& pattern,head value,tails... args){
 
 template<int index,typename... types>
 std::function<std::string(types...)> _signedPattern(std::string positve,std::string negative){
-    static_assert(getParadoxType<typename std::tuple_element<index, _NativeCommonEffect<types...>>::type>() == ParadoxType::INTEGER, "the assigned arg must be INTEGER!");
+    static_assert(getParadoxType<typename std::tuple_element<index, std::tuple<types...>>::type>() == ParadoxType::INTEGER, "the assigned arg must be INTEGER!");
     static_assert(index < sizeof...(types),"the index is overflowed!");
     return [positve,negative](types... args){
         void* arr[]{ &args... };
@@ -51,7 +51,7 @@ std::function<std::string(types...)> _signedPattern(std::string positve,std::str
 
 template<int index,typename... types>
 std::function<std::string(types...)> _signedOrderPattern(std::string positive,std::string negative){
-    static_assert(getParadoxType<typename std::tuple_element<index, _NativeCommonEffect<types...>>::type>() == ParadoxType::INTEGER, "the assigned arg must be INTEGER!");
+    static_assert(getParadoxType<typename std::tuple_element<index, std::tuple<types...>>::type>() == ParadoxType::INTEGER, "the assigned arg must be INTEGER!");
     static_assert(index < sizeof...(types),"the index is overflowed!");
 
     return [positive,negative](types... args){
@@ -91,6 +91,13 @@ using signedOrderPattern = _signedOrderPattern<index,rawType<types>...>;
 template<ParadoxType... types>
 using orderedPattern = _orderedPattern<rawType<types>...>;
 */
+
+template<size_t N> requires requires { N <= 64; }
+std::bitset<N> flipedBitset(){
+    uint64_t from = ~0;
+    if constexpr (N < 64) from &= (1 << N) - 1;
+    return std::bitset<N>(from);
+}
 
 std::function<std::string()> noArgsPattern(std::string pattern);
 

@@ -8,7 +8,7 @@
 #include<bitset>
 #include<memory>
 #include<iostream>
-#include "scope.h"
+#include"scope.h"
 #include<cassert>
 #include<cstdint>
 
@@ -145,18 +145,21 @@ struct NativeEffectItem : EffectItem{
 template<typename... types>
 struct ParameteredNativeEffectItem : NativeEffectItem<types...>{
 	std::array<std::string,sizeof...(types)> parameterName;
-	ParameteredNativeEffectItem(std::string _name,ScopeType _usable_scope,std::function<std::string(types...)> _localizeFunction,std::array<std::string,sizeof...(types)> _parameterName) : NativeEffectItem<types...>(_name,_usable_scope,_localizeFunction), parameterName(_parameterName){
-	};
+	std::bitset<sizeof...(types)> parameterRequired;
+	ParameteredNativeEffectItem(std::string _name,ScopeType _usable_scope,std::function<std::string(types...)> _localizeFunction,std::array<std::string,sizeof...(types)> _parameterName,std::bitset<sizeof...(types)> required = std::bitset<sizeof...(types)>().flip()) : NativeEffectItem<types...>(_name,_usable_scope,_localizeFunction), parameterName(_parameterName), parameterRequired(required) {};
 	virtual std::unique_ptr<Effect> createInstance(const std::map<std::string,ParadoxBase*>& base){
-		if(base.size() < sizeof...(types)) return nullptr;
+		if(base.size() > sizeof...(types)) return nullptr; //Only extra Parameter Not supported.
 		NativeCommonEffect<types...>* _instance = new NativeCommonEffect<types...>();
+		_instance->body.set_default_values();
 		std::unique_ptr<Effect> instance(_instance);
 		for(size_t i = 0;i < sizeof...(types);i++){
-			if(!base.contains(parameterName[i])) return nullptr;
+			if(!base.contains(parameterName[i])){
+				if(parameterRequired[i]) return nullptr;
+				else continue;
+			}
 			ParadoxBase* arg = base.at(parameterName[i]);
-			if(base.at(parameterName[i]) == nullptr) return nullptr;
-			if(base.at(parameterName[i])->getType() != this->content.getType(i)) {
-				
+			if(arg == nullptr) return nullptr;
+			if(arg->getType() != this->content.getType(i)) {
 				if(isCastable(base.at(parameterName[i]),this->content.getType(i))){
 					arg = castTo(base.at(parameterName[i]),this->content.getType(i));
 					if(arg == nullptr) return nullptr;
@@ -195,6 +198,7 @@ struct _NativeCommonEffect<>{
 	}
 	void set(int i, ParadoxBase* val){}
 	void unsafe_set(int i, ParadoxBase* val){}
+	void set_default_values(){}
 };
 template<typename head,typename... tails>
 struct _NativeCommonEffect<head,tails...> : _NativeCommonEffect<tails...>{
@@ -236,6 +240,24 @@ struct _NativeCommonEffect<head,tails...> : _NativeCommonEffect<tails...>{
 			return;			
 		}
 		getTails().set(i - 1, val);
+	}
+	void set_default_values(){
+			if constexpr (std::is_same_v<rawType<ParadoxType::INTEGER>,head>) {
+				value = 0;
+			}
+			if constexpr (std::is_same_v<rawType<ParadoxType::STRING>,head>) {
+				value = "";
+			}
+			if constexpr (std::is_same_v<rawType<ParadoxType::SCOPE>,head>) {
+				value = nullptr;
+			}
+			if constexpr (std::is_same_v<rawType<ParadoxType::BOOLEAN>,head>) {
+				value = false;
+			}
+			if constexpr (std::is_same_v<rawType<ParadoxType::DATE>,head>) {
+				value = Date();
+			}		
+		getTails().set_default_values();
 	}
 	void unsafe_set(size_t i, ParadoxBase* val){
 		if(val == nullptr) return;

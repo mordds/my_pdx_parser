@@ -46,10 +46,10 @@ void registerSimpleEffect(std::string name,ScopeType usable_scope, std::function
 }
 
 template<ParadoxType...types>
-void regiserSimpleClausedEffect(std::string name,ScopeType usable_scope,std::function<std::string(rawType<types>...)> localize,std::array<std::string,sizeof...(types)> names){
+void registerSimpleClausedEffect(std::string name,ScopeType usable_scope,std::function<std::string(rawType<types>...)> localize,std::array<std::string,sizeof...(types)> names,std::bitset<sizeof...(types)> required = flipedBitset<sizeof...(types)>()){
     const std::string* name_ptr = getStringPtr(name);
     if(!localize) log_error(current_location(),"An empty localize function was provided for effect ",name);
-    EffectItem* u = new ParameteredNativeEffectItem<rawType<types>...>(*name_ptr,usable_scope,localize,names);
+    EffectItem* u = new ParameteredNativeEffectItem<rawType<types>...>(*name_ptr,usable_scope,localize,names,required);
     simpleEffectItems.insert(name_ptr);
     effectItems[name_ptr] = u;
 }
@@ -64,9 +64,9 @@ void regiserArrayEffect(std::string name,ScopeType usable_scope,std::function<st
 }
 
 template<ParadoxType...types>
-void regiserClausedEffect(std::string name,ScopeType usable_scope,std::function<std::string(rawType<types>...)> localize,std::array<std::string,sizeof...(types)> names,OverrideHandler handler){
+void registerClausedEffect(std::string name,ScopeType usable_scope,std::function<std::string(rawType<types>...)> localize,std::array<std::string,sizeof...(types)> names,std::bitset<sizeof...(types)> required,OverrideHandler handler){
     const std::string* name_ptr = getStringPtr(name);
-    const EffectItem* u = new ParameteredNativeEffectItem<rawType<types>...>(*name_ptr,usable_scope,localize,names);
+    const EffectItem* u = new ParameteredNativeEffectItem<rawType<types>...>(*name_ptr,usable_scope,localize,names,required);
     simpleEffectItems.insert(name_ptr);
     effectItems[name_ptr] = u;    
     effectHandlers[u] = handler;
@@ -74,24 +74,47 @@ void regiserClausedEffect(std::string name,ScopeType usable_scope,std::function<
 
 void registerEffectItems(){
     using namespace std::literals;
-    registerSimpleEffect<ParadoxType::INTEGER>("add_treasury"s,ScopeType::COUNTRY,
-        signedPattern<0,ParadoxType::INTEGER>("获得%d克朗"s,"失去-%d克朗"s));
-    regiserSimpleClausedEffect<ParadoxType::SCOPE,ParadoxType::INTEGER>("add_trust"s,ScopeType::COUNTRY,
-        signedOrderPattern<1,ParadoxType::SCOPE,ParadoxType::INTEGER>("对%s的信任提高了%d"s,"对%s的信任降低了-%d"s),{"who","value"});
-    registerSimpleEffect<ParadoxType::STRING>("set_global_flag"s,ScopeType::ANY,
-        orderedPattern<ParadoxType::STRING>("设置全局标签'%s'"s));
-    registerSimpleEffect<ParadoxType::STRING>("clr_global_flag"s,ScopeType::ANY,
-        orderedPattern<ParadoxType::STRING>("清除全局标签'%s'"s));
-    registerSimpleEffect<ParadoxType::STRING>("custom_tooltip"s,ScopeType::ANY,
+    static const ParadoxType pInt = ParadoxType::INTEGER;
+    static const ParadoxType pStr = ParadoxType::STRING;
+    static const ParadoxType pBool = ParadoxType::BOOLEAN;
+    static const ParadoxType pScope = ParadoxType::SCOPE;
+
+    registerSimpleEffect<pInt>("add_treasury"s,ScopeType::COUNTRY,
+        signedPattern<0,pInt>("获得%d克朗"s,"失去-%d克朗"s));
+    registerSimpleClausedEffect<pScope,pInt>("add_trust"s,ScopeType::COUNTRY,
+        signedOrderPattern<1,pScope,pInt>("对%s的信任提高了%d"s,"对%s的信任降低了-%d"s),{"who","value"});
+    registerSimpleEffect<pStr>("set_global_flag"s,ScopeType::ANY,
+        orderedPattern<pStr>("设置全局标签'%s'"s));
+    registerSimpleEffect<pStr>("clr_global_flag"s,ScopeType::ANY,
+        orderedPattern<pStr>("清除全局标签'%s'"s));
+    registerSimpleEffect<pStr>("custom_tooltip"s,ScopeType::ANY,
     [](std::string str){return getLocalization(str);});
-    registerSimpleEffect<ParadoxType::STRING>("save_event_target_as",ScopeType::ANY,
-        orderedPattern<ParadoxType::STRING>("将当前作用域保存为事件目标%s"s));
-    registerSimpleEffect<ParadoxType::STRING>("save_global_event_target_as",ScopeType::ANY,
-        orderedPattern<ParadoxType::STRING>("将当前作用域保存为全局事件目标%s"s));
-    registerSimpleEffect<ParadoxType::STRING>("clear_global_event_target",ScopeType::ANY,
-        orderedPattern<ParadoxType::STRING>("清除全局事件目标%s"s));
-    registerSimpleEffect<ParadoxType::BOOLEAN>("clear_global_event_target",ScopeType::ANY,
-        [](bool b){return "清除所有全局事件目标";});    
+    registerSimpleEffect<pStr>("save_event_target_as",ScopeType::ANY,
+        orderedPattern<pStr>("将当前作用域保存为事件目标%s"s));
+    registerSimpleEffect<pStr>("save_global_event_target_as",ScopeType::ANY,
+        orderedPattern<pStr>("将当前作用域保存为全局事件目标%s"s));
+    registerSimpleEffect<pStr>("clear_global_event_target",ScopeType::ANY,
+        orderedPattern<pStr>("清除全局事件目标%s"s));
+    registerSimpleEffect<pBool>("clear_global_event_target",ScopeType::ANY,
+        [](bool b){return "清除所有全局事件目标";});
+    registerSimpleEffect<pInt>("add_years_of_income",ScopeType::COUNTRY,
+        signedPattern<0,pInt>("获得与%d年年收入数量的克朗","失去%d年年收入数量的克朗"));
+    registerSimpleEffect<pInt>("add_treasury",ScopeType::COUNTRY,
+        signedPattern<0,pInt>("获得%d克朗","失去%d克朗"));
+    registerSimpleClausedEffect<pStr,pInt,pInt,pStr>("country_event",ScopeType::COUNTRY,
+        [](std::string id,long long days,long long random,std::string tt){
+            if(days == 0) {
+                return applyPattern("触发事件%s",id);
+            }
+            else if(random == 0){
+                return applyPattern("事件%s将在%d天后发生",id,days);
+            }
+            else return applyPattern("事件%s将在%d天到%d天内发生",id,days,days+random);
+        },
+        {"id","days","random","tooltip"},
+        std::bitset<4>(0b0001)
+    );
+
 }
 
 std::string ChangeScopeEffect::toString(int depth){
