@@ -9,6 +9,7 @@
 #include<cstdint>
 #include<iostream>
 #include<fstream>
+#include<functional>
 #include<concepts>
 #include<source_location>
 
@@ -50,6 +51,7 @@ struct ParadoxBase{
 	virtual void* getContent() = 0;
 	virtual ParadoxType getType() const = 0;
 	virtual std::string toString() const = 0;
+	virtual void traverse(std::function<void(ParadoxBase*)> visitor) = 0;
 	ParadoxString* getAsString();
 	ParadoxInteger* getAsInteger();
 	ParadoxTag* getAsTag();
@@ -74,6 +76,9 @@ struct ParadoxString : public ParadoxBase{
 	}
 	virtual ParadoxType getType() const{
 		return ParadoxType::STRING;
+	}
+	virtual void traverse(std::function<void(ParadoxBase*)> visitor) override{
+		visitor(this);
 	}
 	std::string getStringContent(){
 		
@@ -101,6 +106,9 @@ struct ParadoxInteger : public ParadoxBase{
 		virtual ParadoxType getType() const{
 			return ParadoxType::INTEGER;
 		}
+		virtual void traverse(std::function<void(ParadoxBase*)> visitor) override{
+			visitor(this);
+		}
 		long long getIntegerContent(){
 			return content;
 		}
@@ -108,36 +116,32 @@ struct ParadoxInteger : public ParadoxBase{
 
 struct ParadoxTag : public ParadoxBase{
 	public:
-		std::map<std::string,ParadoxBase*> tags;
-		std::map<std::string,int> multiKeyCount;
-		std::vector<std::string> seq;
-		std::string assembleTagName(std::string name,int index){
-			if(index <= 1) return name;
-			else {
-				name.append("@");
-				name.append(std::to_string(index));
-				return name;
-				 
-			}
-		}
+		std::vector<std::pair<std::string,ParadoxBase*>> contents;
 		
 	public:
 		virtual std::string toString() const { return "[TAG]"; }
 		virtual void* getContent(){
-			return (void*)&tags;
+			return (void*)&contents;
 		}
 		virtual ParadoxType getType() const {
 			return ParadoxType::TAG;
 		}
-		ParadoxBase* get(std::string name);
-		ParadoxBase* get(std::string name,int index);
+		ParadoxBase* get(std::string name,int index = 1);
 		ParadoxBase* get(int index);
+		std::pair<std::string,ParadoxBase*> getEntry(int i);
+		std::pair<std::string,ParadoxBase*> operator[](int i);
 		ParadoxTag* getAsTag(std::string name);
 		ParadoxTag* getAsTag(std::string name,int index);
 		ParadoxTag* getAsTag(int index);
 		int size();
 		void add(std::string name,ParadoxBase* base);
 		void remove(std::string name,int index);
+		virtual void traverse(std::function<void(ParadoxBase*)> visitor) override{
+			visitor(this);
+			for(auto& [key, child] : contents){
+				if(child) child->traverse(visitor);
+			}
+		}
 };
 
 struct ParadoxArray : public ParadoxBase{
@@ -168,6 +172,12 @@ struct ParadoxArray : public ParadoxBase{
 		}
 		return false;
 	}
+	virtual void traverse(std::function<void(ParadoxBase*)> visitor) override{
+		visitor(this);
+		for(ParadoxBase* child : contents){
+			if(child) child->traverse(visitor);
+		}
+	}
 };
 
 struct ParadoxDate : public ParadoxBase{
@@ -181,6 +191,9 @@ struct ParadoxDate : public ParadoxBase{
 	}
 	virtual ParadoxType getType() const{
 		return ParadoxType::DATE;
+	}
+	virtual void traverse(std::function<void(ParadoxBase*)> visitor) override{
+		visitor(this);
 	}
 	virtual void* getContent(){
 		return (void*)&date;
@@ -205,6 +218,9 @@ struct ParadoxBoolean : public ParadoxBase {
 		virtual ParadoxType getType() const{
 			return ParadoxType::BOOLEAN;
 		}
+		virtual void traverse(std::function<void(ParadoxBase*)> visitor) override{
+			visitor(this);
+		}
 };
 struct ParadoxScope : public ParadoxBase {
 	private:
@@ -221,9 +237,11 @@ struct ParadoxScope : public ParadoxBase {
 		virtual ParadoxType getType() const {
 			return ParadoxType::SCOPE;
 		}
+		virtual void traverse(std::function<void(ParadoxBase*)> visitor) override{
+			visitor(this);
+		}
 };
 ParadoxBoolean* getBooleanInstance(bool value);
-std::string stripTag(std::string original);
 bool isCastable(ParadoxBase* base,ParadoxType type);
 template<ParadoxObject From>
 ParadoxBase* castTo(From base,ParadoxType type);

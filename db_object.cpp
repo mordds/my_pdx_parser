@@ -27,28 +27,30 @@ void registerGood(std::string rootPath){
     filePath.append("/datas/price.txt");
 
     ParadoxTag* root = parseFile(filePath);
-    for(std::string str : root->seq){
+    for(int i = 0;i < root->size();i++){
+        auto[key, childNode] = (*root)[i];
         Good good;
         
-        ParadoxTag* tag = root->tags[str]->getAsTag();
+        ParadoxTag* tag = childNode->getAsTag();
         ParadoxBase* base = tag->get("base_price",1);
         if(base == nullptr) continue;
         good.defaultPrice = base->getAsInteger()->getIntegerContent();
         std::string localizeKey = "good_";
-        localizeKey.append(str);
+        localizeKey.append(key);
         good.localizedNamePtr = getStringPtr(toUpperCase(localizeKey));
-        goodRegistry[str] = good;
+        goodRegistry[key] = good;
     }
     clearParserDatas();
     root = parseFile("./datas/trade_good.txt");
-    for(std::string str : root->seq){
-        if(goodRegistry.find(str) == goodRegistry.end()) continue;
-        goodRegistry[str].globalModifier = std::make_shared<Modifier>();
-        goodRegistry[str].provinceModifier = std::make_shared<Modifier>();
-        ParseModifier(root->tags[str]->getAsTag()->getAsTag("modifier",1), *(goodRegistry[str].globalModifier.get()));
-        goodRegistry[str].globalModifier->name = getStringPtr("贸易优势奖励");
-        ParseModifier(root->tags[str]->getAsTag()->getAsTag("province",1), *(goodRegistry[str].provinceModifier.get()));
-        goodRegistry[str].provinceModifier->name =  getStringPtr("生产该商品的省份效果");
+    for(int i = 0;i < root->size();i++){
+        auto[key, childNode] = (*root)[i];
+        if(goodRegistry.find(key) == goodRegistry.end()) continue;
+        goodRegistry[key].globalModifier = std::make_shared<Modifier>();
+        goodRegistry[key].provinceModifier = std::make_shared<Modifier>();
+        ParseModifier(childNode->getAsTag()->getAsTag("modifier",1), *(goodRegistry[key].globalModifier.get()));
+        goodRegistry[key].globalModifier->name = getStringPtr("贸易优势奖励");
+        ParseModifier(childNode->getAsTag()->getAsTag("province",1), *(goodRegistry[key].provinceModifier.get()));
+        goodRegistry[key].provinceModifier->name =  getStringPtr("生产该商品的省份效果");
     }
     clearParserDatas();
 }

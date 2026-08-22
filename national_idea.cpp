@@ -13,18 +13,20 @@ void loadNationalIdea(std::string rootPath){
     std::string filePath = rootPath;
     filePath.append("/datas/country_ideas.txt");
     ParadoxTag* tag = parseFile(filePath);
-    for(std::string str : tag->seq){
-        ParadoxTag* ideaTag = tag->getAsTag(str);
-        if(ideaTag->get("free") == nullptr) continue;
+    for(int i = 0;i < tag->size();i++){
+        auto[key, childNode] = (*tag)[i];
+        ParadoxTag* ideaTag = childNode->getAsTag();
+        if(ideaTag->get("free",1) == nullptr) continue;
         NationalIdea* idea = new NationalIdea();
         idea->start = std::make_unique<Modifier>();
         idea->bonus = std::make_unique<Modifier>();
-        for(int i = 0;i < 7;i++){
-            idea->modifiers[i] = std::make_unique<Modifier>();
+        for(int k = 0;k < 7;k++){
+            idea->modifiers[k] = std::make_unique<Modifier>();
         }
         idea->trigger = nullptr;
         int slot = 0;
-        for(std::string entry : ideaTag->seq){
+        for(int j = 0;j < ideaTag->size();j++){
+            auto[entry, entryNode] = (*ideaTag)[j];
             if(entry == "start"){
                 idea->start->name = getStringPtr("传统");
                 ParseModifier(ideaTag->getAsTag(entry),*(idea->start.get()));
@@ -46,7 +48,7 @@ void loadNationalIdea(std::string rootPath){
                 slot++;
             }
         }
-        nationalIdeas[str] = idea;
+        nationalIdeas[key] = idea;
         if(idea->trigger != nullptr){
             idea->trigger->foreach([&idea](Trigger* trigger){
                 CommonTrigger* commonTrigger = trigger->getAsCommonTrigger();

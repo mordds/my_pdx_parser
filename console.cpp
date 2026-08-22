@@ -7,12 +7,16 @@
 #include "effect.h"
 #include "paradox_macro.h"
 #include "pattern.h"
+#include "map_data.h"
 #include <iostream>
 #include <map>
 #include <bitset>
 #include <sstream>
 #include <chrono>
 #include <memory>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 //
 typedef void(*CommandHandler)(std::vector<std::string>);
 
@@ -21,6 +25,9 @@ extern std::set<std::string> shortStringSet;
 extern std::set<std::string> registeredTriggers;
 extern std::map<std::string,ScriptedTrigger*> loadedSTs;
 extern std::map<const std::string*,ScriptedEffect*> loadedSEs;
+extern std::map<const std::string*,ProvinceGroup> provinceGroups;
+
+std::vector<ProvinceGroup> tempGroups;
 void printModifier(std::vector<std::string> vec){
     ParadoxTag* root = parseFile(vec[0]);
 	std::vector<Modifier> modifiers;
@@ -107,11 +114,11 @@ int main(){
 	registerEffectItems();
 	log_info(current_location(),"Effect Loaded!");
 	loadScriptedEffect();
-
 	log_info(current_location(),"Scripted Effect Loaded!");
 	loadNationalIdea();
-	log_info(current_location(),getParserDataSize());
 	log_info(current_location(),"Ni Loaded!");
+	loadMapDatas();
+	log_info(current_location(),"Map Data Loaded!");
 	th.join();
 	loadScriptedTrigger_POST();
 	log_info(current_location(),"Scripted Trigger Phase 2 Loaded!");
@@ -120,14 +127,13 @@ int main(){
 	log_info(current_location(),"Load Completed! ",duration.count(), " us consumed.");
 	std::cout << "#load Completed!" << std::endl;
 	handlers["credits"] = [](std::vector<std::string> vec){
-		std::cout << "Paradox Data Parser \nV0.4.1-20260801\nAuthor: Mordd";
+		std::cout << "Paradox Data Parser \nV0.4.2-20260805\nAuthor: Mordd";
 	};
 	handlers["future_plan"] = [](std::vector<std::string> vec){
-		std::cout << "4 / 5 Implement Scripted Trigger" << std::endl;
 		std::cout << registeredTriggers.size() - loadedSTs.size() << " / 898 Internal Triggers" << std::endl;
-		std::cout << "TODO Implement Scripted Effect" << std::endl;
 		std::cout << "TODO Event Parser" << std::endl;
 	};
+	
     handlers["print_modifier"] = printModifier;
 	handlers["print_modifier_html"] = printModifierHtml;
 	handlers["debug_print"] = [](std::vector<std::string> vec){
@@ -158,7 +164,7 @@ int main(){
 			}
 		}
 		else {
-			std::cout << shortStringSet.size() << '/' << shortStringSet.max_size() << std::endl;	
+			std::cout << "please enter debug option" << std::endl;
 		}
 		
 	};
@@ -182,6 +188,62 @@ int main(){
         std::cout << good->globalModifier->localize(); 
         std::cout << good->provinceModifier->localize();
     };
+	handlers["export_group_with_color"] = [](std::vector<std::string> vec){
+		if(vec.size() < 2) return;
+		std::string path = "./";
+		path.append(vec[0]);
+		replaceWith(path,"/../","/./");
+		std::cout << "Input Start X Y:";
+		int x,y;
+		std::cin >> x >> y;
+		std::cout << "Input Width Height";
+		int w,h;
+		std::cin >> w >> h;
+		json j;
+		j["x"] = x;
+		j["y"] = y;
+		j["w"] = w;
+		j["h"] = h;
+		int num = 0;
+		std::from_chars(vec[1].data(),vec[1].data()+vec[1].size(),num);
+		for(int i = 0;i < num;i++){
+			std::string group_name;
+			std::string shaded;
+			std::string colorString;
+			uint32_t color = 0;
+			std::cin >> group_name >> colorString >> shaded;
+			auto ptr = getStringPtr(group_name);
+			auto it = provinceGroups.find(ptr);
+ 			ProvinceGroup g;
+			if(it == provinceGroups.end()) {
+				auto it2 = std::find_if(tempGroups.begin(),tempGroups.end(),[ptr](ProvinceGroup g){return g.localize_key == ptr;});
+				if(it2 == tempGroups.end()) return;
+				g = *it2;
+			}
+			else g = it->second;
+			std::from_chars(colorString.data(),colorString.data()+colorString.size(),color,16);
+			bool shade = shaded == "y";
+			j[group_name]["color"] = color;
+			j[group_name]["shaded"] = shade;
+			j[group_name]["provinces"] = g.provinces;
+ 		}
+		std::ofstream fout(path);
+		fout << j;
+	};
+
+	handlers["create_temp_group"] = [](std::vector<std::string> vec){
+		if(vec.size() != 1) return;
+		auto ptr = getStringPtr(vec[0]);
+		ProvinceGroup g;
+		g.localize_key = ptr;
+		int id;
+		std::cin >> id;
+		while(id != -1){
+			g.provinces.push_back(id);
+			std::cin >> id;
+		}
+		tempGroups.push_back(std::move(g));
+	};
 	handlers["goods_list"] = [](std::vector<std::string> vec){
 		std::map<std::string,std::string> map1;
 		listGoods(map1);
@@ -239,12 +301,14 @@ int main(){
 			return;
 		}
 		ParadoxTag* root = parseFile(vec[0]);
-		for(std::string str : root->seq){
-			ParadoxTag* tag = root->getAsTag(str);
+		for(int i = 0;i < root->size();i++){
+			auto[key, childNode] = (*root)[i];
+			ParadoxTag* tag = childNode->getAsTag();
 			if(tag == nullptr) continue;
-			for(std::string str1: tag->seq){
-				if(tag->get(str1)->getType() != ParadoxType::TAG) continue;
-				std::cout << str1 << std::endl;
+			for(int j = 0;j < tag->size();j++){
+				auto[key1, childNode1] = (*tag)[j];
+				if(childNode1->getType() != ParadoxType::TAG) continue;
+				std::cout << key1 << std::endl;
 			}
 		}
 	};
@@ -255,11 +319,26 @@ int main(){
 			return;
 		}
 		ParadoxTag* root = parseFile(vec[0]);
-		for(std::string str : root->seq){
-			std::cout << str << std::endl;
+		for(int i = 0;i < root->size();i++){
+			std::cout << (*root)[i].first << std::endl;
 		}
 	};
-	
+	handlers["get_province_id"] = [](std::vector<std::string> vec){
+		if(vec.size() == 0) return;
+		for(auto str : vec){
+			Scope* scope = findScopeByName(str,ScopeType::PROVINCE);
+			if(scope == nullptr) {
+				std::cout << "NOT FOUND!" << ' ';
+				continue;
+			}
+			ProvinceScope* p = scope->getAsProvinceScope();
+			if(p == nullptr){
+				std::cout << "NOT FOUND!" << ' ';
+				continue;
+			} 
+			std::cout << p->getId() << ' ';
+		}
+	};
 	/*
 	handlers["freespace"] = [](std::vector<std::string> vec){
 		std::bitset<2600> tag1;

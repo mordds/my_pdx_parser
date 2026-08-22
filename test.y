@@ -21,6 +21,7 @@ ParadoxString* createString(std::string str){
 	parsedObject.push_back(string);
 	return string;
 }
+
 ParadoxScope* createScope(Scope* scope){
 	ParadoxScope* pScope = new ParadoxScope(scope);
 	parsedObject.push_back(pScope);
@@ -108,12 +109,13 @@ ParadoxTag* createTag(){
 
 input: GT {ROOT = $1->getAsTag();}
 	| A {ROOT = $1->getAsTag();}
+	| Ar { ROOT = createTag(); ROOT->add("__UNNAMED__",$1); }
 	| BLANK A {ROOT = $2->getAsTag();}
 	| BLANK GT {ROOT = $2->getAsTag();}
+	| BLANK Ar { ROOT = createTag(); ROOT->add("__UNNAMED__", $2); }
 	| /*empty*/
 
 GT: T {$$ = $1;}
-  | Ar {$$ = $1;}
   | LBR '}' {$$ = createTag();}
 T: LBR A '}' {$$ = $2;}
 Ar: LBR B '}' {$$ = $2;}
@@ -182,7 +184,8 @@ lVal: T_IDENT {$$ = createTempString($1);}
   | T_DATE {$$ = createTempDate($1);}
   | T_NUM_CONSTANT {$$ = createTempInteger($1);}
   
-rVal: GT {$$ = $1;}
+rVal: Ar {$$ = $1;} 
+  | GT {$$ = $1;}
   | T_LITERAL {
 	$$ = createString(*$1);
 	delete $1;

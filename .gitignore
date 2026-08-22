@@ -19,3 +19,5 @@ scripted_effects/
 y.output
 out_files/*
 *.json
+/map/*
+!/map/required_file.txt

@@ -41,7 +41,7 @@ std::string ScriptedTrigger::getLocalizationPattern(bool reversed){
         }
 }
 
-Trigger* ComplicateScriptedTrigger::createInstance(std::map<std::string,ParadoxBase*> datas){
+Trigger* ComplicateScriptedTrigger::createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>& datas){
     std::vector<std::unique_ptr<MacroHolder>>* current_holder = &this->MacroHolders;
     int pos = 0;
     std::stack<int> sPos;
@@ -52,12 +52,14 @@ Trigger* ComplicateScriptedTrigger::createInstance(std::map<std::string,ParadoxB
         if(holder->getType() == HolderType::STRING) result.append(static_cast<StringHolder*>(holder)->data);
         else if(holder->getType() == HolderType::PARAMETER) {
             std::string& name = this->parameterName[static_cast<ParameterHolder*>(holder)->parameterIndex];
-            if(datas.find(name) == datas.end()) return nullptr;
-            result.append(datas[name]->toString());
+            auto it = std::find_if(datas.begin(), datas.end(), [&name](const auto& p){ return p.first == name; });
+            if(it == datas.end()) return nullptr;
+            result.append(it->second->toString());
         }
         else{
             std::string& name = this->parameterName[static_cast<ConditionalHolder*>(holder)->parameterIndex];
-            if(datas.find(name) != datas.end()){
+            auto it = std::find_if(datas.begin(), datas.end(), [&name](const auto& p){ return p.first == name; });
+            if(it != datas.end()){
                 sPos.push(pos);
                 pos = -1;
                 holders.push(current_holder);
@@ -83,9 +85,10 @@ Trigger* ComplicateScriptedTrigger::createInstance(std::map<std::string,ParadoxB
     ct->takeOverLifeCycle();
     return ct;
 }
-Trigger* FixedScriptedTrigger::createInstance(std::map<std::string,ParadoxBase*> datas){
+Trigger* FixedScriptedTrigger::createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>& datas){
     if(this->instance == nullptr) return nullptr;
-    if(datas.find("__REVERSED__") != datas.end()) {
+    auto it = std::find_if(datas.begin(), datas.end(), [](const auto& p){ return p.first == "__REVERSED__"; });
+    if(it != datas.end()) {
         return this->instance;
     }
     return this->instance->getAsComplexTrigger()->subTriggers[0];
@@ -93,7 +96,7 @@ Trigger* FixedScriptedTrigger::createInstance(std::map<std::string,ParadoxBase*>
 FixedScriptedTrigger::~FixedScriptedTrigger(){
     delete this->instance;
 }
-Effect* ComplicateScriptedEffect::createInstance(std::map<std::string,ParadoxBase*> datas){
+Effect* ComplicateScriptedEffect::createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>& datas){
     std::vector<std::unique_ptr<MacroHolder>>* current_holder = &this->MacroHolders;
     int pos = 0;
     std::stack<int> sPos;
@@ -104,12 +107,14 @@ Effect* ComplicateScriptedEffect::createInstance(std::map<std::string,ParadoxBas
         if(holder->getType() == HolderType::STRING) result.append(static_cast<StringHolder*>(holder)->data);
         else if(holder->getType() == HolderType::PARAMETER) {
             std::string& name = this->parameterName[static_cast<ParameterHolder*>(holder)->parameterIndex];
-            if(datas.find(name) == datas.end()) return nullptr;
-            result.append(datas[name]->toString());
+            auto it = std::find_if(datas.begin(), datas.end(), [&](const auto& p){ return p.first == name; });
+            if(it == datas.end()) return nullptr;
+            result.append(it->second->toString());
         }
         else{
             std::string& name = this->parameterName[static_cast<ConditionalHolder*>(holder)->parameterIndex];
-            if(datas.find(name) != datas.end()){
+            auto it = std::find_if(datas.begin(), datas.end(), [&](const auto& p){ return p.first == name; });
+            if(it != datas.end()){
                 sPos.push(pos);
                 pos = -1;
                 holders.push(current_holder);
@@ -135,7 +140,7 @@ Effect* ComplicateScriptedEffect::createInstance(std::map<std::string,ParadoxBas
     return ce.release();
 }
 
-Effect* FixedScriptedEffect::createInstance(std::map<std::string,ParadoxBase*> datas){
+Effect* FixedScriptedEffect::createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>& datas){
     if(this->instance == nullptr) return nullptr;
     return this->instance;
 }

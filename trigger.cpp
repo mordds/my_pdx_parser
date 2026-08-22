@@ -9,7 +9,7 @@
 #include<iostream>
 #include<set>
 
-using OverrideHandler = bool(*)(std::map<std::string,ParadoxBase*>&);
+using OverrideHandler = bool(*)(std::vector<std::pair<std::string,ParadoxBase*>>&);
 
 std::map<std::string,std::string> numberRequiredItems;
 std::set<std::string> simpleTriggers;
@@ -361,50 +361,52 @@ void registerTriggerItems(){
 		{ParadoxType::STRING,ParadoxType::STRING},
 		{0,1}
 	),
-	[](std::map<std::string,ParadoxBase*>& map)-> bool {
+	[](std::vector<std::pair<std::string,ParadoxBase*>>& map)-> bool {
 		std::string src_string = "";
 		std::string tar_string = "";
 		if(map.size() != 1){
-			src_string = map["which"]->getAsString()->getStringContent();
-			if(map.find("value") != map.end()){
-				tar_string = std::to_string(map["value"]->getAsInteger()->getIntegerContent() / 1000);
+
+			if(map[0].first != "which") return false;
+			auto fromPtr = map[0].second;
+
+			auto [key2,value] = map[1];
+			if(key2 == "value"){
+				tar_string = std::to_string(value->getAsInteger()->getIntegerContent() / 1000);
 			}
-			else if(map.find("which@2") != map.end()){
-				if(isCastable(map["which@2"],ParadoxType::SCOPE)){
+			else if(key2 == "which"){
+				if(isCastable(value,ParadoxType::SCOPE)){
 					std::string tar1 = "";
-					if(map["which@2"]->getType() == ParadoxType::INTEGER) {
-						tar1 = std::to_string(map["which@2"]->getAsInteger()->getIntegerContent() / 1000);
+					if(value->getType() == ParadoxType::INTEGER) {
+						tar1 = std::to_string(value->getAsInteger()->getIntegerContent() / 1000);
 					}
-					else tar1 = map["which@2"]->getAsString()->getStringContent();
+					else tar1 = value->getAsString()->getStringContent();
 					Scope* scope = createScopeFromString(tar1);
 					if(scope == nullptr) return false;
 					else tar_string = scope->toString();
 				}
-				else tar_string = map["which@2"]->getAsString()->getStringContent();
+				else tar_string = map[1].second->getAsString()->getStringContent();
 			}
 			else return false;
 			map.clear();
-			map["src"] = createString(src_string);
-			map["tar"] = createString(tar_string);
+			map.push_back({"src", fromPtr});
+			map.push_back({"tar", createString(tar_string)});
 		}
 		else {
-			auto [k,v] = *map.begin();
-			
+			auto [k,v] = map[0];	
 			map.clear();
-			map["src"] = createString(k);
+			map.push_back({"src", createString(k)});
 			ParadoxString* str = v->getAsString();
 			if(str != nullptr){
 				if(Scope *scope = createScopeFromString(str->getStringContent());scope != nullptr){
-					map["tar"] = createString(scope->toString());
+					map.push_back({"tar", createString(scope->toString())});
 				}
-				else map["tar"] = str;
+				else map.push_back({"tar", str});
 			}
 			else if(ParadoxInteger* pi = v->getAsInteger();pi != nullptr){
-				map["tar"] = createString(std::to_string(pi->getIntegerContent() / 1000));
+				map.push_back({"tar", createString(std::to_string(pi->getIntegerContent() / 1000))});
 			}
 			else return false;
 		}
-
 		return true;
 	}
 	);
@@ -828,8 +830,8 @@ std::string CustomTooltipTrigger::toString(bool reversed,int depth) const{
 
 std::string SpecialTrigger::toString(bool reversed,int depth) const{
 	if(this->instance == nullptr && this->prototype->isFixed()) {
-		std::map<std::string,ParadoxBase*> data;
-		if(this->args.size() != 0) data["__REVERSED__"] = nullptr;
+		std::vector<std::pair<std::string,ParadoxBase*>> data;
+		if(this->args.size() != 0) data.push_back({"__REVERSED__", nullptr});
 		this->instance = this->prototype->createInstance(data);
 	}
 	std::string ret("");
@@ -869,9 +871,10 @@ void SpecialTrigger::takeOverLifeCycle(){
 	}
 }
 void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
-	for(int i = 0;i < tag->seq.size();i++){
-		std::string item = stripTag(tag->seq[i]);
-		ParadoxBase* base = tag->get(i);
+	for(int i = 0;i < tag->size();i++){
+		auto[key, childNode] = (*tag)[i];
+		std::string item = key;
+		ParadoxBase* base = childNode;
 		ParadoxTag* subTag = base->getAsTag();
 		//if it is complicate....
 		if(subTag != nullptr){
@@ -996,17 +999,19 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			if(loadedSTs.find(item) != loadedSTs.end()){
 				ScriptedTrigger* st = loadedSTs[item];
 				if(st->isFixed()) continue;
-				Trigger* ti = st->createInstance(subTag->tags);
+				Trigger* ti = st->createInstance(subTag->contents);
 				if(ti != nullptr){
 					SpecialTrigger* spt = new SpecialTrigger(st,ti);
-					for(auto[k,v] : subTag->tags){
+					for(int j = 0;j < subTag->size();j++){
+						auto[k, v] = (*subTag)[j];
 						spt->args[getStringPtr(k)] = v;
 					}
 					trigger->putTrigger(spt);
 				}
 				else {
 					log_error(current_location(),"Cannot make instance of scripted_trigger \"",item,"\".");
-					for(auto [k,v] : subTag->tags){
+					for(int j = 0;j < subTag->size();j++){
+						auto[k, v] = (*subTag)[j];
 						log_error(current_location(),"Parameters:");
 						log_error(current_location(),k,":",v->toString());
 					}
@@ -1020,11 +1025,12 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				bool error = false;
 				CommonTrigger* ct = new CommonTrigger(ti);
 				ct->base.reserve(ti->parameterType.size());
-				for(auto it = subTag->tags.begin();it != subTag->tags.end();it++){
+				for(int j = 0;j < subTag->size();j++){
+					auto[key1, childNode1] = (*subTag)[j];
 					//to be honest I do not want to handle sth like typo...
 					//however,if the programme crash just because type 'value' to 'valve'
 					//that would be annoyed...
-					std::string trigger_name = stripTag(it->first);
+					std::string trigger_name = key1;
 					if(ti->parameterName.find(trigger_name) == ti->parameterName.end()) {
 						//ignore this tag..
 						error = true;
@@ -1033,12 +1039,12 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 					}
 					int index = ti->parameterName[trigger_name];
 					//parameter type mismatch..
-					if(!isCastable(it->second,ti->parameterType[index])){
+					if(!isCastable(childNode1,ti->parameterType[index])){
 						error = true;
 						delete ct;
 						break; 
 					}
-					ct->base[index] = it->second;
+					ct->base[index] = childNode1;
 				}
 				if(!error){
 					trigger->putTrigger(ct);
@@ -1058,16 +1064,14 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 			//the original tag will never be used again so we just move directly~
 			//besides the pointer it contains is well managed by another file
 			//so we can modify it freely~ 
-			std::map<std::string,ParadoxBase*> parameters = std::move(subTag->tags);
-			bool success = handler(parameters);
+			bool success = handler(subTag->contents);
 			if(!success){
 				delete ct;
 				continue; 
 			} 
-			for(auto it = parameters.begin();it != parameters.end();it++){
-
-				int index = ti->parameterName[it->first];
-				ct->base[index] = it->second;
+			for(auto& [k, v] : subTag->contents){
+				int index = ti->parameterName[k];
+				ct->base[index] = v;
 			} 
 			trigger->putTrigger(ct);
 			continue; 
@@ -1083,9 +1087,9 @@ void parseTrigger(ParadoxTag* tag,ComplexTrigger* trigger){
 				
 				ParadoxBoolean* pb = base->getAsBoolean(); 
 				if(pb == nullptr) continue;
-				std::map<std::string,ParadoxBase*> args;
+				std::vector<std::pair<std::string,ParadoxBase*>> args;
 				if(!pb->getValue()){
-					args["__REVERSED__"] = nullptr;
+					args.push_back({"__REVERSED__", nullptr});
 				} 
 				Trigger* ti = loadedSTs[item]->createInstance(args);
 				SpecialTrigger* st = new SpecialTrigger(loadedSTs[item],ti);
@@ -1182,7 +1186,7 @@ ComplexTrigger* createBaseTrigger(){
 bool parseConditionalTrigger(ParadoxTag* tag,ConditionalTrigger* ct){
 	ParadoxTag* lim = tag->get("limit",1)->getAsTag();
 	ct->condition = createBaseTrigger();
-	if(lim->tags.empty()) return false;
+	if(lim->size() == 0) return false;
 	parseTrigger(lim,ct->condition);
 	parseTrigger(tag,ct); 
 	return true;

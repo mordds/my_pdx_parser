@@ -10,6 +10,7 @@ enum class DataBaseObjType{
     BUILDING,
     RELIGION,
     SUBJECT_TYPE,
+    IDEA_GROUP
 };
 
 struct ParadoxDataBaseObj{
@@ -34,7 +35,11 @@ struct SubjectType : ParadoxDataBaseObj {
         return DataBaseObjType::SUBJECT_TYPE;
     }
 };
-
+struct IdeaGroup : ParadoxDataBaseObj {
+    virtual DataBaseObjType getType() {
+        return DataBaseObjType::IDEA_GROUP;
+    }
+};
 struct Building : ParadoxDataBaseObj {
     virtual DataBaseObjType getType(){
         return DataBaseObjType::BUILDING;
@@ -50,7 +55,6 @@ struct Institution : ParadoxDataBaseObj{
         return DataBaseObjType::INSTITUTION;
     }
 };
-
 void registerGood(std::string rootPath = ".");
 Good* getGood(std::string str);
 void listGoods(std::map<std::string,std::string>& maps);

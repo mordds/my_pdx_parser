@@ -799,11 +799,12 @@ void loadInternalModifier(){
 
 
 void ParseModifier(ParadoxTag* tag,std::vector<Modifier>& modifiers){
-	for(size_t i = 0;i < tag->seq.size();i++){
-		ParadoxTag* modifierTag = tag->getAsTag(i);
+	for(int i = 0;i < tag->size();i++){
+		auto[key, childNode] = (*tag)[i];
+		ParadoxTag* modifierTag = childNode->getAsTag();
 		if(modifierTag == nullptr) continue;
  		Modifier modifier;
-		std::string item = stripTag(tag->seq[i]);
+		std::string item = key;
 				
 		modifier.name = getStringPtr(item);
 		ParseModifier(modifierTag,modifier);
@@ -812,14 +813,15 @@ void ParseModifier(ParadoxTag* tag,std::vector<Modifier>& modifiers){
 }
 void ParseModifier(ParadoxTag* tag,Modifier& modifier){
 	if(tag == nullptr) return;
-	for(size_t i = 0;i < tag->seq.size();i++){
+	for(int i = 0;i < tag->size();i++){
+		auto[key, childNode] = (*tag)[i];
 		ModifierItem mod_item;
-		std::string item = stripTag(tag->seq[i]);
+		std::string item = key;
 		auto it = modifierObjects.find(item);
 		if(it == modifierObjects.end()) continue;
 		ModifierObject obj = it->second;
 		bool isMark = obj.type == ModifierType::MARK || obj.type == ModifierType::MINUS_MARK;
-		ParadoxBase* base = tag->get(i);
+		ParadoxBase* base = childNode;
 		mod_item.modifierObject = &modifierObjects[item];
 		if(base->getType() == ParadoxType::INTEGER && !isMark){
 			mod_item.value = base->getAsInteger()->getIntegerContent();

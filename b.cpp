@@ -34,7 +34,7 @@ int main(int argc,char** argv){
 			} 
 		}
 		else{
-			for(int i = 0;i < ROOT->seq.size();i++){
+			for(int i = 0;i < ROOT->size();i++){
 				if(ROOT->get(i)->getType() != ParadoxType::TAG){
 					multiTriggers = false;
 					break; 
@@ -43,17 +43,18 @@ int main(int argc,char** argv){
 		}
 		if(multiTriggers){
 	
-			for(auto it = ROOT->tags.begin();it != ROOT->tags.end();it++){
+			for(int i = 0;i < ROOT->size();i++){
+				auto[key, childNode] = (*ROOT)[i];
 				ComplexTrigger* ct = createBaseTrigger();
-				parseTrigger(it->second->getAsTag(),ct);
-				std::cout << it->first << std::endl;
+				parseTrigger(childNode->getAsTag(),ct);
+				std::cout << key << std::endl;
 				std::cout << ct->toString(false) << std::endl;
 				delete ct;
 			}
 		}
 		else{
 			ComplexTrigger* ct = createBaseTrigger();
-			ct->depth = 0;
+
 			parseTrigger(ROOT,ct);
 			std::cout << ct->toString(false) << std::endl;
 			delete ct;

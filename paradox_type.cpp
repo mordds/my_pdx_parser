@@ -28,7 +28,7 @@ ParadoxString* ParadoxBase::getAsString(){
 	return static_cast<ParadoxString*>(this); 
 }
 int ParadoxTag::size(){
-	return seq.size();
+	return contents.size();
 }
 ParadoxInteger* ParadoxBase::getAsInteger(){
 	if(getType() != ParadoxType::INTEGER) return nullptr;
@@ -55,20 +55,26 @@ ParadoxScope* ParadoxBase::getAsScope(){
 	return static_cast<ParadoxScope*>(this);
 }
 
-ParadoxBase* ParadoxTag::get(std::string name){
-	if(tags.find(name) == tags.end()) return nullptr;
-	return tags[name];
-}
-
 ParadoxBase* ParadoxTag::get(std::string name,int index){
-	std::string aName = assembleTagName(name,index);
-	if(tags.find(aName) == tags.end()) return nullptr;
-	return tags[aName];
+	if(index < 1) index = 1;
+	int count = 0;
+	for(auto& [key, child] : contents){
+		if(key == name){
+			if(++count == index) return child;
+		}
+	}
+	return nullptr;
 }
 ParadoxBase* ParadoxTag::get(int index){
-	if(index >= this->seq.size()) return nullptr; 
-	std::string key = this->seq[index];
-	return tags[key];
+	if(index < 0 || index >= (int)contents.size()) return nullptr;
+	return contents[index].second;
+}
+std::pair<std::string,ParadoxBase*> ParadoxTag::getEntry(int i){
+	if(i < 0 || i >= (int)contents.size()) return {"",nullptr};
+	return contents[i];
+}
+std::pair<std::string,ParadoxBase*> ParadoxTag::operator[](int i){
+	return contents[i];
 }
 ParadoxTag* ParadoxTag::getAsTag(std::string name,int index){
 	ParadoxBase* tag = get(name,index);
@@ -79,80 +85,21 @@ ParadoxTag* ParadoxTag::getAsTag(int index){
 	return tag == nullptr ? nullptr : tag->getAsTag();
 }
 ParadoxTag* ParadoxTag::getAsTag(std::string name){
-	ParadoxBase* tag = get(name);
+	ParadoxBase* tag = get(name,1);
 	return tag == nullptr ? nullptr : tag->getAsTag();
 }
 void ParadoxTag::add(std::string name,ParadoxBase* base){
-	if(tags.find(name) == tags.end()){
-		tags[name] = base;
-		seq.push_back(name);
-	}
-	else if(multiKeyCount.find(name) == multiKeyCount.end()){
-		multiKeyCount[name] = 2;
-		std::string key1 = assembleTagName(name,2);	
-		tags[key1] = base; 	
-		seq.push_back(key1);
-	}
-	else {
-		multiKeyCount[name]++;
-		std::string key1 = assembleTagName(name,multiKeyCount[name]);	
-		tags[key1] = base;	
-		seq.push_back(key1);
-	}
+	contents.push_back({name,base});
 }
 void ParadoxTag::remove(std::string name,int index){
-	if(tags.find(name) == tags.end()) return;
-	if(multiKeyCount.find(name) == multiKeyCount.end()){
-		if(index >= 2) return;
-		tags.erase(name);
-		auto it = std::find(seq.begin(),seq.end(),name);
-		if(it != seq.end()) seq.erase(it);
-	}
-	else{
-		int cnt = multiKeyCount[name];
-		if(index > cnt) return;
-		if(index <= 1){
-			std::string from = name;
-			from.append("@2");
-			tags[name] = tags[from];
-			index++;
-		}
-		for(int i = index;i < cnt;i++){
-			std::string from = name;
-			from.append("@");
-			from.append(std::to_string(i));
-			std::string to = name;
-			from.append("@");
-			from.append(std::to_string(i + 1));
-			tags[from] = tags[to];
-		}
-		int r1 = 2;
-		std::string target = assembleTagName(name,r1);
-		auto it2 = std::find(seq.begin(),seq.end(),name);
-		auto to_remove = seq.begin();
-		if(index == 1) to_remove = it2;
-		while(r1 < cnt){
-			if(*it2 == target){
-				r1++;
-				target = assembleTagName(name,r1);
-				if(r1 == index + 1){
-					to_remove = it2;
-				}
-				else if(r1 > index + 1){
-					*it2 = assembleTagName(name,r1 - 2);
-				}
+	if(index < 1) index = 1;
+	for(auto it = contents.begin();it != contents.end();it++){
+		if(it->first == name){
+			if(--index == 0){
+				contents.erase(it);
+				return;
 			}
-			it2++;
 		}
-		seq.erase(to_remove);
-		std::string rem = name;
-		rem.append("@");
-		rem.append(std::to_string(cnt));
-		tags.erase(rem);
-		auto it = std::find(seq.begin(),seq.end(),rem);
-		if(it != seq.end()) seq.erase(it);
-		multiKeyCount[name]--;
-		if(multiKeyCount[name] == 1) multiKeyCount.erase(name);
 	}
 }
 std::string Date::toString() const {
@@ -167,13 +114,6 @@ std::string Date::toString() const {
 
 std::string ParadoxScope::toString() const { return scope->toString(); }
 
-std::string stripTag(std::string original){
-	size_t pos = original.find_last_of('@');
-	if(pos != std::string::npos){
-		original.erase(pos);
-	}
-	return original;
-}
 bool Xor(bool a,bool b){
 	return (a || b) && !(a && b);
 } 
@@ -230,9 +170,10 @@ ParadoxBase* deep_copy(ParadoxBase* base){
 	else {
 		ParadoxTag* pTag = base->getAsTag();
 		ParadoxTag* nTag = new ParadoxTag();
-		for(std::string entry : pTag->seq){
-			ParadoxBase* base_copy = deep_copy(pTag->get(entry));
-			nTag->add(entry,base_copy);
+		for(int i = 0;i < pTag->size();i++){
+			auto[key, childNode] = (*pTag)[i];
+			ParadoxBase* base_copy = deep_copy(childNode);
+			nTag->add(key,base_copy);
 		}
 		return nTag;
 	}
@@ -275,9 +216,10 @@ ParadoxBase* deep_copy_safe(ParadoxBase* base){
 	else {
 		ParadoxTag* pTag = base->getAsTag();
 		ParadoxTag* nTag = createTag();
-		for(std::string entry : pTag->seq){
-			ParadoxBase* base_copy = deep_copy_safe(pTag->get(entry));
-			nTag->add(entry,base_copy);
+		for(int i = 0;i < pTag->size();i++){
+			auto[key, childNode] = (*pTag)[i];
+			ParadoxBase* base_copy = deep_copy_safe(childNode);
+			nTag->add(key,base_copy);
 		}
 	
 		return nTag;
@@ -295,13 +237,14 @@ ParadoxBase* castTo(T base,ParadoxType type){
 template<>
 ParadoxBase* castTo(ParadoxBase* base,ParadoxType type){
 	if(base == nullptr) return nullptr;
-	if(base->getType() == ParadoxType::INTEGER){
+	ParadoxType baseType = base->getType();
+	if(baseType == ParadoxType::INTEGER){
 		return castTo(static_cast<ParadoxInteger*>(base),type);
 	}
-	if(base->getType() == ParadoxType::STRING){
+	if(baseType == ParadoxType::STRING){
 		return castTo(static_cast<ParadoxString*>(base),type);
 	}
-	if(base->getType() == type) return base;
+	if(baseType == type) return base;
 	else return nullptr;
 }
 

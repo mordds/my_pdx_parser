@@ -48,7 +48,7 @@ struct ParameterHolder : MacroHolder{
 
 //
 struct ScriptedTrigger {
-    virtual Trigger* createInstance(std::map<std::string,ParadoxBase*>) = 0;
+    virtual Trigger* createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>&) = 0;
     virtual bool isFixed() const = 0;
     size_t suffix_index = -1;
     std::string name;
@@ -58,13 +58,13 @@ struct ScriptedTrigger {
 
 struct FixedScriptedTrigger : ScriptedTrigger {
     Trigger* instance;
-    virtual Trigger* createInstance(std::map<std::string,ParadoxBase*>);
+    virtual Trigger* createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>&);
     virtual bool isFixed() const{ return true; }
     virtual ~FixedScriptedTrigger();
 };
 
 struct ComplicateScriptedTrigger : ScriptedTrigger {
-    virtual Trigger* createInstance(std::map<std::string,ParadoxBase*>);
+    virtual Trigger* createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>&);
     std::vector<std::string> parameterName;
     std::vector<std::unique_ptr<MacroHolder>> MacroHolders;
     virtual bool isFixed() const { return false; }
@@ -72,14 +72,14 @@ struct ComplicateScriptedTrigger : ScriptedTrigger {
 
 struct ScriptedEffect{
     std::string name;
-    virtual Effect* createInstance(std::map<std::string,ParadoxBase*>) = 0;
+    virtual Effect* createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>&) = 0;
     virtual bool isFixed() const = 0;
     virtual ~ScriptedEffect() noexcept = default;
 };
 
 struct FixedScriptedEffect : ScriptedEffect{
     Effect* instance;
-    virtual Effect* createInstance(std::map<std::string,ParadoxBase*>);
+    virtual Effect* createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>&);
     virtual bool isFixed() const { return true; }
 
 };
@@ -88,7 +88,7 @@ struct ComplicateScriptedEffect : ScriptedEffect{
     std::string pattern;
     std::vector<std::string> parameterName;
     std::vector<std::unique_ptr<MacroHolder>> MacroHolders;
-    virtual Effect* createInstance(std::map<std::string,ParadoxBase*>);
+    virtual Effect* createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>&);
     virtual bool isFixed() const { return false; }
 
 };

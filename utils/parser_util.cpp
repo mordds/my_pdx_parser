@@ -15,15 +15,11 @@ extern int yylex();
 extern ParadoxTag* ROOT;
 extern std::vector<ParadoxBase*> parsedObject;
 extern void yyrestart ( FILE *input_file );
-extern 
-/*
-#define T_IDENT 258
-#define T_LITERAL 259
-#define T_DATE 260
-#define T_NUM_CONSTANT 261
-*/
+
+
 ParadoxTag* parseFile(std::string str){
     ROOT = nullptr;
+    log_info(current_location(),str);
     yyrestart(fopen(str.c_str(),"r"));
     yyparse();
     return ROOT;

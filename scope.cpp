@@ -154,7 +154,7 @@ void initScope(){
 
 Scope* findScopeByName(std::string name,ScopeType type){
 	bool exec_country = (type == ScopeType::ANY || type == ScopeType::COUNTRY);
-	bool exec_province = (type == ScopeType::ANY || type == ScopeType::COUNTRY);
+	bool exec_province = (type == ScopeType::ANY || type == ScopeType::PROVINCE);
 	if(exec_country){
 		//check without createInstance.
 		std::string str = "A00";

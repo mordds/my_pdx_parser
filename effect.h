@@ -75,7 +75,7 @@ struct EffectItem{
 	virtual int getParameterAmount() = 0;
 	EffectItem(std::string _name,ScopeType _usable_scope) : name(_name), usable_scope(_usable_scope){} 
 	virtual std::unique_ptr<Effect> createInstance(const std::vector<ParadoxBase*>& base) = 0;
-	virtual std::unique_ptr<Effect> createInstance(const std::map<std::string,ParadoxBase*>& base) = 0;
+	virtual std::unique_ptr<Effect> createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>& base) = 0;
 };
 
 
@@ -137,7 +137,7 @@ struct NativeEffectItem : EffectItem{
 		}
 		return instance;
 	};
-	virtual std::unique_ptr<Effect> createInstance(const std::map<std::string,ParadoxBase*>& base){
+	virtual std::unique_ptr<Effect> createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>& base){
 		return nullptr;
 	}
 };
@@ -146,29 +146,43 @@ template<typename... types>
 struct ParameteredNativeEffectItem : NativeEffectItem<types...>{
 	std::array<std::string,sizeof...(types)> parameterName;
 	std::bitset<sizeof...(types)> parameterRequired;
-	ParameteredNativeEffectItem(std::string _name,ScopeType _usable_scope,std::function<std::string(types...)> _localizeFunction,std::array<std::string,sizeof...(types)> _parameterName,std::bitset<sizeof...(types)> required = std::bitset<sizeof...(types)>().flip()) : NativeEffectItem<types...>(_name,_usable_scope,_localizeFunction), parameterName(_parameterName), parameterRequired(required) {};
-	virtual std::unique_ptr<Effect> createInstance(const std::map<std::string,ParadoxBase*>& base){
+	ParameteredNativeEffectItem(std::string _name,
+								ScopeType _usable_scope,
+								std::function<std::string(types...)> _localizeFunction,
+								std::array<std::string,sizeof...(types)> _parameterName,
+								std::bitset<sizeof...(types)> required = std::bitset<sizeof...(types)>().flip())
+								:
+								NativeEffectItem<types...>(_name,_usable_scope,_localizeFunction),
+								parameterName(_parameterName), parameterRequired(required) {};
+	virtual std::unique_ptr<Effect> createInstance(const std::vector<std::pair<std::string,ParadoxBase*>>& base){
 		if(base.size() > sizeof...(types)) return nullptr; //Only extra Parameter Not supported.
 		NativeCommonEffect<types...>* _instance = new NativeCommonEffect<types...>();
 		_instance->body.set_default_values();
+		_instance->item = this;
 		std::unique_ptr<Effect> instance(_instance);
-		for(size_t i = 0;i < sizeof...(types);i++){
-			if(!base.contains(parameterName[i])){
-				if(parameterRequired[i]) return nullptr;
-				else continue;
+		std::bitset<sizeof...(types)> required = parameterRequired; // 追踪必要参数是否均已提供
+		std::bitset<sizeof...(types)> provided;                    // 追踪已提供的参数,重复提供时忽略后提供的
+		for(const auto& [key, value] : base){
+			size_t idx = 0;
+			for(;idx < sizeof...(types);idx++){
+				if(parameterName[idx] == key) break;
 			}
-			ParadoxBase* arg = base.at(parameterName[i]);
+			if(idx == sizeof...(types)) continue; // 未知参数,忽略
+			if(provided[idx]) continue;           // 重复参数,忽略后续提供的
+			provided[idx] = true;
+			required[idx] = false;
+			ParadoxBase* arg = value;
 			if(arg == nullptr) return nullptr;
-			if(arg->getType() != this->content.getType(i)) {
-				if(isCastable(base.at(parameterName[i]),this->content.getType(i))){
-					arg = castTo(base.at(parameterName[i]),this->content.getType(i));
+			if(arg->getType() != this->content.getType(idx)) {
+				if(isCastable(arg,this->content.getType(idx))){
+					arg = castTo(arg,this->content.getType(idx));
 					if(arg == nullptr) return nullptr;
 				}
 				else return nullptr;				
 			}
-			_instance->item = this;
-			_instance->body.unsafe_set(i,arg);
+			_instance->body.unsafe_set(idx,arg);
 		}
+		if(required.any()) return nullptr; // 存在未提供的必要参数
 		return instance;
 	}
 };

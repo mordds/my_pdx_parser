@@ -11,10 +11,10 @@
 #include <source_location>
 
 
-using OverrideHandler = bool(*)(std::map<std::string,ParadoxBase*>&);
+using OverrideHandler = bool(*)(std::vector<std::pair<std::string,ParadoxBase*>>&);
 
 extern std::map<const std::string*,ScriptedEffect*> loadedSEs;
-
+extern ParadoxString* createString(std::string);
 std::map<const std::string*,EffectItem*> effectItems;
 std::set<const std::string*> simpleEffectItems;
 std::map<const EffectItem*,OverrideHandler> effectHandlers;
@@ -66,7 +66,7 @@ void regiserArrayEffect(std::string name,ScopeType usable_scope,std::function<st
 template<ParadoxType...types>
 void registerClausedEffect(std::string name,ScopeType usable_scope,std::function<std::string(rawType<types>...)> localize,std::array<std::string,sizeof...(types)> names,std::bitset<sizeof...(types)> required,OverrideHandler handler){
     const std::string* name_ptr = getStringPtr(name);
-    const EffectItem* u = new ParameteredNativeEffectItem<rawType<types>...>(*name_ptr,usable_scope,localize,names,required);
+    EffectItem* u = new ParameteredNativeEffectItem<rawType<types>...>(*name_ptr,usable_scope,localize,names,required);
     simpleEffectItems.insert(name_ptr);
     effectItems[name_ptr] = u;    
     effectHandlers[u] = handler;
@@ -112,8 +112,84 @@ void registerEffectItems(){
             else return applyPattern("事件%s将在%d天到%d天内发生",id,days,days+random);
         },
         {"id","days","random","tooltip"},
-        std::bitset<4>(0b0001)
+        fromArray<4>(
+            {'T','F','F','F'}
+        )
     );
+    auto variable_handler = [](std::vector<std::pair<std::string,ParadoxBase*>>& map)-> bool {
+		std::string src_string = "";
+		std::string tar_string = "";
+		if(map.size() != 1){
+			// 2 参数:第一个必须为 which
+			if(map[0].first != "which") return false;
+			src_string = map[0].second->getAsString()->getStringContent();
+			ParadoxBase* mv_src = map[0].second;
+			// 第二个参数适用于 value 或 which(原 which@2 以 which 代替)
+			if(map[1].first == "value"){
+				tar_string = std::to_string(map[1].second->getAsInteger()->getIntegerContent() / 1000);
+			}
+			else if(map[1].first == "which"){
+				if(isCastable(map[1].second,ParadoxType::SCOPE)){
+					std::string tar1 = "";
+					if(map[1].second->getType() == ParadoxType::INTEGER) {
+						tar1 = std::to_string(map[1].second->getAsInteger()->getIntegerContent() / 1000);
+					}
+					else tar1 = map[1].second->getAsString()->getStringContent();
+					Scope* scope = createScopeFromString(tar1);
+					if(scope == nullptr) return false;
+					else tar_string = scope->toString();
+				}
+				else tar_string = map[1].second->getAsString()->getStringContent();
+			}
+			else return false;
+			map.clear();
+			map.push_back({"src", mv_src});
+			map.push_back({"tar", createString(tar_string)});
+		}
+		else {
+			auto [k,v] = map[0];
+			map.clear();
+			map.push_back({"src", createString(k)});
+			ParadoxString* str = v->getAsString();
+			if(str != nullptr){
+				if(Scope *scope = createScopeFromString(str->getStringContent());scope != nullptr){
+					map.push_back({"tar", createString(scope->toString())});
+				}
+				else map.push_back({"tar", str});
+			}
+			else if(ParadoxInteger* pi = v->getAsInteger();pi != nullptr){
+				map.push_back({"tar", createString(std::to_string(pi->getIntegerContent() / 1000))});
+			}
+			else return false;
+		}
+        return true;
+    };
+    registerClausedEffect<pStr,pStr>("set_variable",ScopeType::ANY,
+        orderedPattern<pStr,pStr>("将变量%s的值设置为%s"),
+        {"src","tar"},
+        flipedBitset<2>(),
+        variable_handler
+    );
+    registerClausedEffect<pStr,pStr>("change_variable",ScopeType::ANY,
+        orderedPattern<pStr,pStr>("将变量%s的值增加%s"),
+        {"src","tar"},
+        flipedBitset<2>(),
+        variable_handler
+    );
+    registerClausedEffect<pStr,pStr>("subtract_variable",ScopeType::ANY,
+        orderedPattern<pStr,pStr>("将变量%s的值减少%s"),
+        {"src","tar"},
+        flipedBitset<2>(),
+        variable_handler
+    );
+    registerClausedEffect<pStr,pStr>("multiply_variable",ScopeType::ANY,
+        orderedPattern<pStr,pStr>("将变量%s的值乘以%s"),
+        {"src","tar"},
+        flipedBitset<2>(),
+        variable_handler
+    );
+
+
 
 }
 
@@ -197,7 +273,7 @@ std::string RandomEffect::toString(int depth){
 
 std::string SpecialEffect::toString(int depth){
     if(this->instance == nullptr && this->prototype->isFixed()){
- 		std::map<std::string,ParadoxBase*> data;
+ 		std::vector<std::pair<std::string,ParadoxBase*>> data;
 		this->instance = this->prototype->createInstance(data);       
     }
     return this->instance->toString(depth);
@@ -210,8 +286,9 @@ std::unique_ptr<ComplexEffect> createBaseEffect(){
 //Final Part of the Paradox Parser Base!
 void parseEffect(ParadoxTag* root,ComplexEffect* from){
     for(int i = 0;i < root->size();i++){
-        std::string name = stripTag(root->seq[i]);
-        ParadoxBase* base = root->get(i);
+        auto[key, childNode] = (*root)[i];
+        std::string name = key;
+        ParadoxBase* base = childNode;
         ParadoxTag* tag = base->getAsTag();
         
         if(tag != nullptr){
@@ -265,8 +342,8 @@ void parseEffect(ParadoxTag* root,ComplexEffect* from){
                     auto location = current_location();
                     log_error(current_location(),"cannot create \"else\" block before a \"if\" block.");
                     log_error(location,"Context:");
-                    for(auto k : tag->seq){
-                        auto v = tag->tags[k];
+                    for(int j = 0;j < tag->size();j++){
+                        auto[k, v] = (*tag)[j];
                         log_error(location,k,":",v->toString());
                     }
                     log_error(location,"effects:");
@@ -281,7 +358,7 @@ void parseEffect(ParadoxTag* root,ComplexEffect* from){
                 parseEffect(tag,effect);
             }
             else if(name == "random"){
-                ParadoxBase* base = tag->get("chance");
+                ParadoxBase* base = tag->get("chance",1);
                 if(base == nullptr) log_error(current_location(),"cannot create \"random\" block without \"chance\"");
                 if(ParadoxInteger* chance = base->getAsInteger();chance != nullptr){
                     RandomEffect* effect = new RandomEffect();
@@ -321,12 +398,13 @@ void parseEffect(ParadoxTag* root,ComplexEffect* from){
                 if(loadedSEs.contains(ptr)){
                     SpecialEffect* se = new SpecialEffect();
                     se->prototype = loadedSEs[ptr];
-                    se->instance = se->prototype->createInstance(tag->tags);       
+                    se->instance = se->prototype->createInstance(tag->contents);       
                     if(se->instance == nullptr){
                         delete se;
                         continue;
                     }
-                    for(auto[k,v] : tag->tags){
+                    for(int j = 0;j < tag->size();j++){
+                        auto[k, v] = (*tag)[j];
                         se->items[k] = deep_copy(v);
                     }
                     from->addEffect(se);
@@ -334,11 +412,12 @@ void parseEffect(ParadoxTag* root,ComplexEffect* from){
                 else {
                     EffectItem* item = effectItems[ptr];
                     if(item == nullptr) continue;
+                    std::vector<std::pair<std::string,ParadoxBase*>> parameters = tag->contents; // 拷贝,因 handler 会修改
                     if(effectHandlers.contains(item)){
-                        bool success = effectHandlers[item](tag->tags);
+                        bool success = effectHandlers[item](parameters);
                         if(!success) continue;
                     }
-                    Effect* effect = item->createInstance(tag->tags).release();
+                    Effect* effect = item->createInstance(parameters).release();
                     if(effect != nullptr) from->addEffect(effect);
                 }
 
@@ -357,7 +436,7 @@ void parseEffect(ParadoxTag* root,ComplexEffect* from){
             if(loadedSEs.contains(ptr)){
                 SpecialEffect* se = new SpecialEffect();
                 se->prototype = loadedSEs[ptr];
-                std::map<std::string,ParadoxBase*> placeholder;
+                std::vector<std::pair<std::string,ParadoxBase*>> placeholder;
                 se->instance = se->prototype->createInstance(placeholder);
                 if(se->instance != nullptr) from->addEffect(se);
                 else delete se;

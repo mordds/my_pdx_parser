@@ -93,7 +93,7 @@ using orderedPattern = _orderedPattern<rawType<types>...>;
 */
 
 template<size_t N> requires requires { N <= 64; }
-std::bitset<N> flipedBitset(){
+constexpr std::bitset<N> flipedBitset(){
     uint64_t from = ~0;
     if constexpr (N < 64) from &= (1 << N) - 1;
     return std::bitset<N>(from);
@@ -101,6 +101,13 @@ std::bitset<N> flipedBitset(){
 
 std::function<std::string()> noArgsPattern(std::string pattern);
 
+template<size_t N> requires requires { N <= 64; }
+constexpr std::bitset<N> fromArray(std::array<char,N> arr, char positive = 'T'){
+    uint64_t from = 0;
 
-
+    for(int i = 0;i < N;i++){
+        if(arr[i] == positive) from |= (1 << i);
+    }
+    return std::bitset<N>(from);
+}
 #endif

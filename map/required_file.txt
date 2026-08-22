@@ -1,0 +1,6 @@
+#Required Files
+/map/area.txt
+/map/region.txt
+/map/superregion.txt
+/map/continent.txt
+/map/provincegroup.txt
